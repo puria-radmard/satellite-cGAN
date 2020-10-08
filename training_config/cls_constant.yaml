@@ -1,0 +1,48 @@
+channels: 
+  ["NDVI", "NDBI", "NDWI"]
+
+classes: 
+  ["UHI"]
+
+comparison_loss_fn:
+  "ternaus_loss"
+
+loss_parameters:
+  beta: 1.2
+  l: 0.5
+
+test_metric:
+  "dice_coefficient"
+
+test_parameters:
+  null
+
+lr:
+  0.0001
+
+data_dir:
+  "/content/drive/My Drive/LONDON_DATASET"
+
+test_size:
+  0.2
+
+train_size:
+  null
+
+batch_size:
+  5
+
+dis_dropout:
+  0.4
+
+gen_dropout:
+  0.4
+
+save_rate:
+  1
+
+random_state:
+  null
+
+num_epochs:
+  20

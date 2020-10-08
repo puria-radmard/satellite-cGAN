@@ -1,0 +1,14 @@
+program: train_cGAN.py
+method: bayes
+
+metric:
+  name: step_loss
+  goal: minimize
+
+parameters:
+  task:
+    distribution: constant
+    value: cls
+  
+
+# TODO

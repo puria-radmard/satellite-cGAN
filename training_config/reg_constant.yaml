@@ -1,0 +1,47 @@
+channels: 
+  ["NDVI", "NDBI", "NDWI"]
+
+classes: 
+  ["LSTN"]
+
+comparison_loss_fn:
+  "mse_loss"
+
+loss_parameters:
+  null
+
+test_metric:
+  "mse_loss"
+
+test_parameters:
+  null
+
+lr:
+  0.0001
+
+data_dir:
+  "/content/drive/My Drive/LONDON_DATASET"
+
+test_size:
+  0.2
+
+train_size:
+  null
+
+batch_size:
+  5
+
+dis_dropout:
+  0.4
+
+gen_dropout:
+  0.4
+
+save_rate:
+  1
+
+random_state:
+  null
+
+num_epochs:
+  20
