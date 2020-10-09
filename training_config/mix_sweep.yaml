@@ -2,7 +2,7 @@ program: train_cGAN.py
 method: bayes
 
 metric:
-  name: step_loss
+  name: iteration_loss
   goal: minimize
 
 parameters:

@@ -1,6 +1,8 @@
-#@title cGAN.py
+from pipelines.utils import *
+from imports import *
+from unet import *
 
-from typing import List
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class LambdaLayer(nn.Module):
 
@@ -272,7 +274,8 @@ def train_cGAN_epoch(
     comparison_loss_fn,
     adversarial_loss_fn,
     num_steps,
-    comparison_loss_factor
+    comparison_loss_factor,
+    wandb
     ):
 
     # Might need to fix this
@@ -339,7 +342,7 @@ def train_cGAN_epoch(
 
         optimizer_D.step()
 
-        losses = [comparison_loss, adversarial_loss_real, adversarial_loss_gene]
+        losses = [comparison_loss, adversarial_loss]
         loading_bar_string, epoch_loss_tot = write_loading_bar_string(
             losses, step, epoch_loss_tot, num_steps, start_time, epoch, training = True
         )
@@ -347,11 +350,8 @@ def train_cGAN_epoch(
         sys.stdout.write("\r" + loading_bar_string)
         time.sleep(0.1)
 
-        # Needs converting
-        try:
-          wandb.log({"iteration_loss": loss.mean()})
-        except NameError:
-          pass
+        if config.wandb
+          wandb.log({"iteration_loss": comparison_loss.mean() + adversarial_loss.mean()})
 
         if step == num_steps:
             break
@@ -409,10 +409,9 @@ def train_cGAN(config):
     test_metric = metric_dict[config.test_metric](**config.test_parameters)
     adversarial_loss_fn = nn.BCELoss()
 
-    # try:
-    #   wandb.watch(cGAN)
-    # except NameError:
-    #   pass
+    if config.wandb,
+      wandb.watch(cGAN)
+
 
     optimizer_G = torch.optim.Adam(cGAN.generator.parameters(), lr=config.lr)
     optimizer_D = torch.optim.Adam(cGAN.discriminator.parameters(), lr=config.lr)
@@ -458,6 +457,7 @@ def train_cGAN(config):
             adversarial_loss_fn=adversarial_loss_fn,
             num_steps=train_num_steps,
             comparison_loss_factor=comparison_loss_factor,
+            wandb=config.wandb
         )
         print(f"Training epoch {epoch} done")
         epoch_score = test_cGAN_epoch(
@@ -470,10 +470,17 @@ def train_cGAN(config):
 
         epoch_metrics = {f"epoch_loss": epoch_loss, f"epoch_score": epoch_score}
 
-        # try:
-        #   wandb.log(epoch_metrics)
-        # except NameError:
-        #   pass
+        if config.wandb:
+          wandb.log(epoch_metrics)
 
         if (epoch + 1) % config.save_rate == 0:
-            print("Would be saving now")
+            # print("Would be saving now")
+            state = {
+                "config": config,
+                "epoch": epoch,
+                "state": cGAN.state_dict()
+            }
+            torch.save(
+                state,
+                os.path.join(dir_path, f"{config.}_model.epoch{epoch}.t7")
+            )

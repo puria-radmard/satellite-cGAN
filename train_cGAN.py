@@ -21,6 +21,8 @@ def generate_config(args):
             train_size = 1 - args.test_size
 
         config_dict = {
+            "wandb": args.wandb,
+            "task": args.task,
             "save_rate": args.save_rate,
             "random_state": args.random_state,
             "num_epochs": args.num_epochs,
@@ -50,6 +52,8 @@ def generate_config(args):
     else: # i.e. constant run, no sweep
         with open(args.arg_source, 'r') as stream:
             config_dict = yaml.safe_load(stream)
+            config_dict["task"] = args.task
+            config_dict["wandb"] = args.wandb
         
         if args.wandb:
             wandb.init(project="satellite-cGAN", config=config_dict)
