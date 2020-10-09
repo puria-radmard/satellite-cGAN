@@ -8,10 +8,10 @@ comparison_loss_fn:
   "targetted_ternaus_and_MSE"
 
 loss_parameters:
-  cls_layer: 1 # needed for set up
-  reg_layer: 0 # needed for set up
+  cls_layer: 1 # needed for set up - do not change!
+  reg_layer: 0 # needed for set up - do not change!
   cls_lambda: 1
-  reg_lambda: 1
+  reg_lambda: 1.2
   l: 0.5
 
 test_metric:

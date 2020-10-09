@@ -1,7 +1,7 @@
 import wandb
 import argparse
 import yaml
-from config import req_args_dict
+from config import req_args_dict, TASK_CHANNELS
 from cGAN import train_cGAN
 
 from imports import *
@@ -41,6 +41,8 @@ def generate_config(args):
 
         config_dict["test_parameters"] = test_parameters
         config_dict["loss_parameters"] = loss_parameters
+        config_dict["channels"] = TASK_CHANNELS["channels"]
+        config_dict["classes"] = TASK_CHANNELS["classes"]
 
         wandb.init(project="satellite-cGAN", config=config_dict)
         return wandb.config
