@@ -1,5 +1,6 @@
-from imports import *
-from unet import *
+#@title cGAN.py
+
+from typing import List
 
 class LambdaLayer(nn.Module):
 
@@ -51,7 +52,7 @@ class Discriminator(nn.Module):
     try:
       assert torch.min(X) >= -1 and torch.max(X) <= 1
     except:
-      import pdb; pdb.set_trace()
+      logging.warning("Exceeding standard range")
     if len(np.shape(X)) == 3:
         X = X[np.newaxis, :]
     if reorder:
@@ -123,6 +124,11 @@ class LandsatDataset(Dataset):
           image = 2*(image/np.nanmax(image)) - 1
           image = np.expand_dims(image, -1)
           image = slice_middle(image)
+          if isinstance(image, type(None)):
+            return {
+                "image": [None],
+                "label": [None],
+            }
           input_images.append(image)
           
         for label_channel in self.classes:
@@ -167,10 +173,15 @@ class DummyDataset(Dataset):
         return sample
 
 
-def slice_middle(image, size=256):
+def slice_middle(image, size=256, remove_nan=True):
   mix, miy = [int(m/2) for m in image.shape[:2]]
   s = int(size/2)
-  return image[mix-s:mix+s,miy-s:miy+s]
+  sliced_image = image[mix-s:mix+s,miy-s:miy+s]
+  if remove_nan:
+    sliced_image[sliced_image != sliced_image] = 0.0
+  if sliced_image.shape != (size, size, 1):
+    return None
+  return sliced_image
 
 
 def write_loading_bar_string(metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training = True):
@@ -238,13 +249,17 @@ def landsat_train_test_dataset(
 
     return train_dataset, test_dataset
 
-def reshape_for_discriminator(a):
+def reshape_preds_for_discriminator(a):
   # Changes shape from [N, C, H, W] to [NxC, 1, H, W]
   return a.view(a.shape[0]*a.shape[1], 1, a.shape[2], a.shape[3])
 
+def reshape_labels_for_discriminator(a):
+  # Changes shape from [N, H, W, C] to [NxC, 1, H, W]
+  new = a.view(a.shape[0]*a.shape[3], 1, a.shape[1], a.shape[2])
+  return new
 
 def skip_tris(batch):
-    batch = list(filter(lambda x:x["image"].size is not (256, 256), batch))
+    batch = list(filter(lambda x:x["image"][0] is not None, batch))
     return default_collate(batch)
 
 
@@ -276,26 +291,25 @@ def train_cGAN_epoch(
 
         preds = cGAN.generator.forward(images)
 
-
-
         # Train generator
-        comparison_loss = comparison_loss_factor * comparison_loss_fn(
-            preds,
-            labels,
-        )
-        comparison_loss.backward()
+        
+        cGAN.float()
 
+        comparison_loss = comparison_loss_factor * comparison_loss_fn(
+            preds.float(),
+            labels.float()
+        )
+        comparison_loss.backward(retain_graph = True)
         dis_probs_gene = cGAN.discriminator.forward(
-            reshape_for_discriminator(preds),
+            reshape_preds_for_discriminator(preds),
             reorder=False
         )
         adversarial_loss_gene = adversarial_loss_fn(
             dis_probs_gene,
             torch.zeros(dis_probs_gene.shape)
         )
-        adversarial_loss_gene.backward(retain_graph = True)
+        adversarial_loss_gene.backward()
 
-        cGAN.float()
         optimizer_G.step()
 
         # Train discriminator
@@ -305,11 +319,11 @@ def train_cGAN_epoch(
         )
         labels = torch.tensor(labels).type_as(preds)
         dis_probs_real = cGAN.discriminator.forward(
-            reshape_for_discriminator(labels),
+            reshape_labels_for_discriminator(labels),
             reorder=False
         )
         dis_probs_gene = cGAN.discriminator.forward(
-            reshape_for_discriminator(preds).detach(),
+            reshape_preds_for_discriminator(preds).detach(),
             reorder=False
         )
         adversarial_loss_gene = adversarial_loss_fn(
@@ -443,7 +457,7 @@ def train_cGAN(config):
             comparison_loss_fn=comparison_loss_fn,
             adversarial_loss_fn=adversarial_loss_fn,
             num_steps=train_num_steps,
-            comparison_loss_factor = config.comparison_loss_factor
+            comparison_loss_factor=comparison_loss_factor,
         )
         print(f"Training epoch {epoch} done")
         epoch_score = test_cGAN_epoch(
