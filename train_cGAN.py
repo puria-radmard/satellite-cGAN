@@ -99,4 +99,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config = generate_config(args)
     print(config)
-    #train_cGAN(config)
+    train_cGAN(config)
