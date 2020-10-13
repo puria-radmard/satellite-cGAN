@@ -1,14 +1,14 @@
 tqdm==4.42.1
 torch==1.5.1
 numpy==1.19.0
-skimage==0.16.2
+scikit-image==0.16.2
 matplotlib==3.3.1
-cv2==4.1.2
+opencv-python==4.4.0.44
 wandb==0.9.3
 pandas==1.0.5
 shapely==1.7.0
 tifffile==2020.10.1
-sklearn==0.22
+scikit-learn==0.23.2
 seaborn==0.10.0
 scipy==1.4.1
 rasterio==1.1.7
