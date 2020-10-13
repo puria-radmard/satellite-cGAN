@@ -1,5 +1,4 @@
-from root_classes import *
-from imports import *
+from .imports import *
 
 def group_bands(root: str, bands: List[str]) -> List[Dict[str, str]] :
   """
@@ -51,7 +50,7 @@ def group_bands(root: str, bands: List[str]) -> List[Dict[str, str]] :
   return groups
 
 
-def group_cities_by_time(root: str, band: str) -> Dict[Dict[str, str]] :
+def group_cities_by_time(root: str, band: str) -> Dict[str, Dict[str, str]] :
   """
   This is similar to group_bands, except returns a mapping of images taken at the same time in the root
   """

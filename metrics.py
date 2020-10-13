@@ -86,7 +86,7 @@ class TernausLossFunc(nn.Module):
         self.HWs = kwargs.get("HWs")
         self.JWs = kwargs.get("JWs")
 
-    def forward(self, preds: torch.Tensor, labels: torch.Tensor, reorder = True) -> torch.Tensor:
+    def forward(self, preds: torch.Tensor, labels: torch.Tensor, reorder = False) -> torch.Tensor:
         if reorder:
           labels = labels.permute(0, 3, 1, 2)
         return ternausLossfunc(preds, labels, self.l, self.beta, self.HWs, self.JWs)

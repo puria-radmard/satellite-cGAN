@@ -1,6 +1,4 @@
-from utils import *
-from root_classes import *
-
+from .utils import *
 
 class Operation:
 

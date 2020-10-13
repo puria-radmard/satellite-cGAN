@@ -1,6 +1,7 @@
 from pipelines.utils import *
 from imports import *
 from unet import *
+from config import metric_dict
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -12,6 +13,26 @@ class LambdaLayer(nn.Module):
 
     def forward(self, X):
         return self.lambd(X)
+
+
+class PrintLayer(nn.Module):
+  def __init__(self):
+    super(PrintLayer, self).__init__()
+
+  def forward(self, X):
+    print(X.shape)
+    return X
+
+
+def construct_debug_model(layers, debug = False):
+    modules = []
+    for layer in layers:
+        modules.append(layer)
+        if debug:
+            modules.append(PrintLayer())
+    model = nn.Sequential(*modules)
+    return model
+
 
 class Discriminator(nn.Module):
 
@@ -29,8 +50,8 @@ class Discriminator(nn.Module):
     convchan3 = 256
     convchan4 = 512
     convchan5 = 1024
-
-    self.model = torch.nn.Sequential(
+    
+    layers = [
       # For now we assume all images have 1 channel
       UNetDownBlock(1, convchan1, dropout, max_before=False),
       UNetDownBlock(convchan1, convchan2, dropout),
@@ -45,7 +66,10 @@ class Discriminator(nn.Module):
       # Fully connected -> real probability for each type
       nn.Linear(convchan5, self.num_classes),
       nn.Sigmoid()
-    )
+    ]
+
+    self.model = construct_debug_model(layers)
+
 
   def forward(self, X, reorder = True):
     """
@@ -251,14 +275,9 @@ def landsat_train_test_dataset(
 
     return train_dataset, test_dataset
 
-def reshape_preds_for_discriminator(a):
-  # Changes shape from [N, C, H, W] to [NxC, 1, H, W]
+def reshape_for_discriminator(a):
+  # Change shape from [N, C, H, W] to [NxC, 1, H, W]
   return a.view(a.shape[0]*a.shape[1], 1, a.shape[2], a.shape[3])
-
-def reshape_labels_for_discriminator(a):
-  # Changes shape from [N, H, W, C] to [NxC, 1, H, W]
-  new = a.view(a.shape[0]*a.shape[3], 1, a.shape[1], a.shape[2])
-  return new
 
 def skip_tris(batch):
     batch = list(filter(lambda x:x["image"][0] is not None, batch))
@@ -292,19 +311,23 @@ def train_cGAN_epoch(
         optimizer_G.zero_grad()
         optimizer_D.zero_grad()
 
+        # print("generating images")
         preds = cGAN.generator.forward(images)
 
         # Train generator
         
         cGAN.float()
-
+       
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
             preds.float(),
             labels.float()
         )
         comparison_loss.backward(retain_graph = True)
+        
+        print("discriminating preds for generator with input size", reshape_for_discriminator(preds).shape)
         dis_probs_gene = cGAN.discriminator.forward(
-            reshape_preds_for_discriminator(preds),
+            #reshape_for_discriminator(preds),
+            preds,
             reorder=False
         )
         adversarial_loss_gene = adversarial_loss_fn(
@@ -321,12 +344,15 @@ def train_cGAN_epoch(
             [torch.eye(len(cGAN.classes)) for _ in preds],
         )
         labels = torch.tensor(labels).type_as(preds)
+        # print("discriminating real labels for discriminator with input size", reshape_for_discriminator(labels).shape)
+        # print("original shape labels are shape", labels.shape)
         dis_probs_real = cGAN.discriminator.forward(
-            reshape_labels_for_discriminator(labels),
+            reshape_for_discriminator(labels),
             reorder=False
         )
+        # print("discriminating preds for discriminator")
         dis_probs_gene = cGAN.discriminator.forward(
-            reshape_preds_for_discriminator(preds).detach(),
+            reshape_for_discriminator(preds).detach(),
             reorder=False
         )
         adversarial_loss_gene = adversarial_loss_fn(
@@ -350,7 +376,7 @@ def train_cGAN_epoch(
         sys.stdout.write("\r" + loading_bar_string)
         time.sleep(0.1)
 
-        if config.wandb
+        if wandb:
           wandb.log({"iteration_loss": comparison_loss.mean() + adversarial_loss.mean()})
 
         if step == num_steps:
@@ -405,13 +431,18 @@ def train_cGAN(config):
         torch.set_default_tensor_type("torch.cuda.FloatTensor")
         cGAN.cuda()
 
-    comparison_loss_fn = metric_dict[config.comparison_loss_fn](**config.loss_parameters)
-    test_metric = metric_dict[config.test_metric](**config.test_parameters)
+    if config.loss_parameters:
+        comparison_loss_fn = metric_dict[config.comparison_loss_fn](**config.loss_parameters)
+    else:
+        comparison_loss_fn = metric_dict[config.comparison_loss_fn]()
+    if config.test_parameters:
+        test_metric = metric_dict[config.test_metric](**config.test_parameters)
+    else:
+        test_metric = metric_dict[config.test_metric]()
     adversarial_loss_fn = nn.BCELoss()
 
-    if config.wandb,
+    if config.wandb:
       wandb.watch(cGAN)
-
 
     optimizer_G = torch.optim.Adam(cGAN.generator.parameters(), lr=config.lr)
     optimizer_D = torch.optim.Adam(cGAN.discriminator.parameters(), lr=config.lr)
@@ -427,8 +458,8 @@ def train_cGAN(config):
       )
     else:
       # Debug case
-      train_dataset = DummyDataset(channels=channels, classes=classes)
-      test_dataset = DummyDataset(channels=channels, classes=classes)
+      train_dataset = DummyDataset(channels=config.channels, classes=config.classes)
+      test_dataset = DummyDataset(channels=config.channels, classes=config.classes)
 
     train_dataloader = DataLoader(train_dataset,
                                   batch_size=config.batch_size,
@@ -456,7 +487,7 @@ def train_cGAN(config):
             comparison_loss_fn=comparison_loss_fn,
             adversarial_loss_fn=adversarial_loss_fn,
             num_steps=train_num_steps,
-            comparison_loss_factor=comparison_loss_factor,
+            comparison_loss_factor=config.comparison_loss_factor,
             wandb=config.wandb
         )
         print(f"Training epoch {epoch} done")
@@ -482,5 +513,5 @@ def train_cGAN(config):
             }
             torch.save(
                 state,
-                os.path.join(dir_path, f"{config.}_model.epoch{epoch}.t7")
+                os.path.join(dir_path, f"saves/{config.task}_model.epoch{epoch}.t7")
             )

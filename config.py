@@ -1,4 +1,5 @@
 from imports import *
+from metrics import *
 
 metric_dict = {
     "bce_loss": nn.BCELoss,

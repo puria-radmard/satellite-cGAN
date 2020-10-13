@@ -47,5 +47,5 @@ random_state:
 num_epochs:
   20
 
-comparison_loss_fn:
+comparison_loss_factor:
   1.2

@@ -28,7 +28,7 @@ lr:
   0.0001
 
 data_dir:
-  "/content/drive/My Drive/LONDON_DATASET"
+  null # "/content/drive/My Drive/LONDON_DATASET"
 
 test_size:
   0.2
@@ -54,5 +54,5 @@ random_state:
 num_epochs:
   20
 
-comparison_loss_fn:
+comparison_loss_factor:
   1.2

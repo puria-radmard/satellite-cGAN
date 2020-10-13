@@ -1,16 +1,22 @@
 import wandb
 import argparse
 import yaml
+
 from config import req_args_dict, TASK_CHANNELS
 from cGAN import train_cGAN
 
 from imports import *
 from cGAN import *
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+DATA_DIR = os.path.join(dir_path, "..", "data_source", "LONDON_DATASET")
 
 class Config:
   def __init__(self, config):
     self.__dict__.update(config)
+
+  def __repr__(self):
+    return str(self.__dict__)
 
 
 def generate_config(args):
@@ -69,7 +75,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("--task", type=str) # reg, cls, mix
-    parser.add_argument("--arg_source", type=int, default=0) # args yaml path, None for sweeps
+    parser.add_argument("--arg_source", type=str, default=None) # args yaml path, None for sweeps
     parser.add_argument("--wandb", type=int, default=1) # 1 to include wandb
 
     # If you provide an arg_source, none of this is needed. However, if you are calling via a
@@ -102,5 +108,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     config = generate_config(args)
+    config.data_dir = DATA_DIR
     print(config)
     train_cGAN(config)

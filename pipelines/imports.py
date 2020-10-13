@@ -23,7 +23,7 @@ import pandas as pd
 import pygeohash
 import collections
 import typing
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import pandas as pd
 import copy
 from sklearn.linear_model import LinearRegression, LogisticRegression
