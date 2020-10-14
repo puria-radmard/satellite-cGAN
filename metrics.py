@@ -43,7 +43,7 @@ def multiply_by_class_weights(class_weights, class_losses):
 
 def cross_entropy(output, target, beta):
    
-    #TODO: Fix bug below due to inplace operation    
+    #TODO: Fix bug below due to inplace operation, implemeting weighting
     weights = [beta, 1]
     weights = torch.tensor(weights).float()
     weights /= torch.norm(weights, dim=0) 
