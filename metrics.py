@@ -27,6 +27,8 @@ class DiceCoefficient(nn.Module):
 
 
 def multiply_by_class_weights(class_weights, class_losses):
+    ## TODO: remove this and parameters related to it - they are not needed
+
     if type(class_weights) == type(None):
         class_weights = torch.Tensor([1 for _ in range(len(class_losses))])
     else:
@@ -42,15 +44,17 @@ def multiply_by_class_weights(class_weights, class_losses):
 
 
 def cross_entropy(output, target, beta):
-   
-    #TODO: Fix bug below due to inplace operation, implemeting weighting
+
+    # TODO: Fix bug below due to inplace operation, implemeting weighting
     weights = [beta, 1]
     weights = torch.tensor(weights).float()
-    weights /= torch.norm(weights, dim=0) 
-                            
-    loss = weights[1] * (target * torch.log(output)) + \
-           weights[0] * ((1 - target) * torch.log(1 - output))
-   
+    weights = weights / torch.norm(weights, dim=0)
+
+    loss = weights[1] * (target * torch.log(output)) + weights[0] * (
+        (1 - target) * torch.log(1 - output)
+    )
+    print("cross_entropy", loss.shape)
+
     return loss
 
 
@@ -62,23 +66,23 @@ def perPixelCrossEntropy(preds, labels, class_weights, beta):
         cross_entropy(preds, labels, beta),
         dim=(-2, -1),
     )
+    print("class_losses", class_losses.shape)
     return multiply_by_class_weights(class_weights, class_losses)
 
 
 def jaccardIndex(preds, labels, class_weights=None):
     size = torch.prod(torch.tensor(labels.shape)).float()
     assert preds.shape == labels.shape
-    if True:
-        preds -= preds.min().item()
-        preds /= preds.max().item()
-        labels -= labels.min().item()
-        labels /= labels.max().item()
-        class_indices = (1 / size) * torch.sum(
-            preds * labels / (preds + labels - labels * preds + 1e-10), dim=(-2, -1)
-        )
-        jaccard = multiply_by_class_weights(class_weights, class_indices)
-        print(jaccard)
-        return jaccard
+
+    preds -= preds.min().item()
+    preds /= preds.max().item()
+    labels -= labels.min().item()
+    labels /= labels.max().item()
+    class_indices = (1 / size) * torch.sum(
+        preds * labels / (preds + labels - labels * preds + 1e-10), dim=(-2, -1)
+    )
+    jaccard = multiply_by_class_weights(class_weights, class_indices)
+    return jaccard
 
 
 def ternausLossfunc(preds, labels, l=1, beta=1, HWs=None, JWs=None):
@@ -126,17 +130,13 @@ class TargettedRegressionClassification(nn.Module):
         self.reg_lambda = kwargs["reg_lambda"]
 
     def forward(self, preds, labels):
-        reg_preds = preds[self.reg_layer]
-        try:
-            cls_preds = preds[self.cls_layer]
-        except:
-            import pdb
-
-            pdb.set_trace()
+        reg_preds = preds[:,self.reg_layer]
+        cls_preds = preds[:,self.cls_layer]
         mul_preds = cls_preds * reg_preds
 
-        reg_labels = labels[self.reg_layer]
-        cls_labels = labels[self.cls_layer]
+        reg_labels = labels[:,:,:,self.reg_layer]
+        cls_labels = labels[:,:,:,self.cls_layer]
+        import pdb; pdb.set_trace() # check that cls_layer is binary
 
         reg_loss = self.reg_loss_func(mul_preds, reg_labels)
         cls_loss = self.cls_loss_func(cls_preds, cls_labels)

@@ -161,6 +161,7 @@ class LandsatDataset(Dataset):
             "image": np.dstack(input_images),
             "label": np.dstack(label_images),
         }
+        import pdb; pdb.set_trace()
 
         return sample
 
@@ -316,16 +317,23 @@ def train_cGAN_epoch(
         # Train generator
         cGAN.float()
 
+        # print("doing comparison loss between")
+        # print("preds:", preds.shape)
+        # print("labels:", labels.shape)
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
-            preds.float(), labels.float().reshape(preds.shape)
+            preds.float(), labels.float()
         )
-        print(comparison_loss)
-        comparison_loss.backward()#retain_graph=True)
+        comparison_loss.backward(retain_graph=True)
 
-        # print("discriminating preds for generator with input size", reshape_for_discriminator(preds).shape)
+        # print(
+        #    "discriminating preds for generator with input size",
+        #    reshape_for_discriminator(preds, len(cGAN.classes)).shape
+        # )
         dis_probs_gene = cGAN.discriminator.forward(
             reshape_for_discriminator(preds, len(cGAN.classes)), reorder=False
         )
+
+        # print("dis_probs_gene", dis_probs_gene.shape)
         adversarial_loss_gene = adversarial_loss_fn(
             dis_probs_gene, torch.zeros(dis_probs_gene.shape)
         )
@@ -338,12 +346,17 @@ def train_cGAN_epoch(
         dis_targets_real = torch.cat(
             [torch.eye(len(cGAN.classes)) for _ in preds],
         )
+        # print("dis_targets_real", dis_targets_real)
         labels = labels.type_as(preds)
 
-        # print("discriminating real labels for discriminator with input size", reshape_for_discriminator2(labels).shape)
+        # print(
+        #     "discriminating real labels for discriminator with input size",
+        #     reshape_for_discriminator2(labels, len(cGAN.classes)).shape
+        # )
         dis_probs_real = cGAN.discriminator.forward(
             reshape_for_discriminator2(labels, len(cGAN.classes)), reorder=False
         )
+        # print("dis_probs_real", dis_probs_real)
         # print("discriminating preds for discriminator")
         dis_probs_gene = cGAN.discriminator.forward(
             reshape_for_discriminator(preds.detach(), len(cGAN.classes)), reorder=False
