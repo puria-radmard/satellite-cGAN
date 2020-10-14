@@ -5,8 +5,8 @@ from config import metric_dict
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-class LambdaLayer(nn.Module):
 
+class LambdaLayer(nn.Module):
     def __init__(self, lambd):
         super(LambdaLayer, self).__init__()
         self.lambd = lambd
@@ -16,15 +16,15 @@ class LambdaLayer(nn.Module):
 
 
 class PrintLayer(nn.Module):
-  def __init__(self):
-    super(PrintLayer, self).__init__()
+    def __init__(self):
+        super(PrintLayer, self).__init__()
 
-  def forward(self, X):
-    print(X.shape)
-    return X
+    def forward(self, X):
+        print(X.shape)
+        return X
 
 
-def construct_debug_model(layers, debug = False):
+def construct_debug_model(layers, debug=False):
     modules = []
     for layer in layers:
         modules.append(layer)
@@ -35,80 +35,74 @@ def construct_debug_model(layers, debug = False):
 
 
 class Discriminator(nn.Module):
+    def __init__(self, num_classes, dropout=0.4):
+        """
+        TODO: parameterise architecture?
+        """
+        super(Discriminator, self).__init__()
 
-  def __init__(self, num_classes, dropout = 0.4):
-    """
-    TODO: parameterise architecture?
-    """
-    super(Discriminator, self).__init__()
+        self.num_classes = num_classes
+        self.dropout = dropout
 
-    self.num_classes = num_classes
-    self.dropout = dropout
+        convchan1 = 64
+        convchan2 = 128
+        convchan3 = 256
+        convchan4 = 512
+        convchan5 = 1024
 
-    convchan1 = 64
-    convchan2 = 128
-    convchan3 = 256
-    convchan4 = 512
-    convchan5 = 1024
-    
-    layers = [
-      # For now we assume all images have 1 channel
-      UNetDownBlock(1, convchan1, dropout, max_before=False),
-      UNetDownBlock(convchan1, convchan2, dropout),
-      UNetDownBlock(convchan2, convchan3, dropout),
-      UNetDownBlock(convchan3, convchan4, dropout),
-      # TODO: Should I change ReLU for this last one? Don't think so right?
-      UNetDownBlock(convchan4, convchan5, dropout),
-      # The final size here is [N x 1024 x 16 x 16] as per UNet specifications
-      # I have added a mean over the last two dimensions here, but it's not
-      # that pretty, there must be a better way
-      LambdaLayer(lambd = lambda X: X.mean(-1).mean(-1)),
-      # Fully connected -> real probability for each type
-      nn.Linear(convchan5, self.num_classes),
-      nn.Sigmoid()
-    ]
+        layers = [
+            # For now we assume all images have 1 channel
+            UNetDownBlock(1, convchan1, dropout, max_before=False),
+            UNetDownBlock(convchan1, convchan2, dropout),
+            UNetDownBlock(convchan2, convchan3, dropout),
+            UNetDownBlock(convchan3, convchan4, dropout),
+            # TODO: Should I change ReLU for this last one? Don't think so right?
+            UNetDownBlock(convchan4, convchan5, dropout),
+            # The final size here is [N x 1024 x 16 x 16] as per UNet specifications
+            # I have added a mean over the last two dimensions here, but it's not
+            # that pretty, there must be a better way
+            LambdaLayer(lambd=lambda X: X.mean(-1).mean(-1)),
+            # Fully connected -> real probability for each type
+            nn.Linear(convchan5, self.num_classes),
+            nn.Sigmoid(),
+        ]
 
-    self.model = construct_debug_model(layers)
+        self.model = construct_debug_model(layers, False)
 
+    def forward(self, X, reorder=True):
+        """
+        X comes in as [N, H, W, C]
+        """
+        try:
+            assert torch.min(X) >= -1 and torch.max(X) <= 1
+        except:
+            logging.warning("Exceeding standard range")
+        if len(np.shape(X)) == 3:
+            X = X[np.newaxis, :]
+        if reorder:
+            X = X.permute(0, 3, 1, 2)
+        if np.shape(X)[1] == 4:
+            X = X[:, :3, :, :]
 
-  def forward(self, X, reorder = True):
-    """
-    X comes in as [N, H, W, C] 
-    """
-    try:
-      assert torch.min(X) >= -1 and torch.max(X) <= 1
-    except:
-      logging.warning("Exceeding standard range")
-    if len(np.shape(X)) == 3:
-        X = X[np.newaxis, :]
-    if reorder:
-        X = X.permute(0, 3, 1, 2)
-    if np.shape(X)[1] == 4:
-        X = X[:, :3, :, :]
-
-    logits = self.model(X)
-    return logits
+        logits = self.model(X)
+        return logits
 
 
 class ConditionalGAN(nn.Module):
-
     def __init__(self, classes, channels, dis_dropout, gen_dropout):
-      
-      # Is this needed?
-      super(ConditionalGAN, self).__init__()
-      self.classes = classes
-      self.channels = channels
 
-      self.discriminator = Discriminator(
-          num_classes = len(classes),
-          dropout = dis_dropout
-      )
+        # Is this needed?
+        super(ConditionalGAN, self).__init__()
+        self.classes = classes
+        self.channels = channels
 
-      self.generator = UNet(
-          dropout=gen_dropout,
-          n_channels=len(channels),
-          n_classes=len(classes)
-      )
+        self.discriminator = Discriminator(
+            num_classes=len(classes), dropout=dis_dropout
+        )
+
+        self.generator = UNet(
+            dropout=gen_dropout, n_channels=len(channels), n_classes=len(classes)
+        )
 
 
 class LandsatDataset(Dataset):
@@ -137,35 +131,31 @@ class LandsatDataset(Dataset):
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        
+
         group = self.groups[idx]
         input_images = []
         label_images = []
 
         for input_channel in self.channels:
-          image = read_raster(
-              group[input_channel]
-          )[0]
-          image -= np.nanmin(image)
-          image = 2*(image/np.nanmax(image)) - 1
-          image = np.expand_dims(image, -1)
-          image = slice_middle(image)
-          if isinstance(image, type(None)):
-            return {
-                "image": [None],
-                "label": [None],
-            }
-          input_images.append(image)
-          
+            image = read_raster(group[input_channel])[0]
+            image -= np.nanmin(image)
+            image = 2 * (image / np.nanmax(image)) - 1
+            image = np.expand_dims(image, -1)
+            image = slice_middle(image)
+            if isinstance(image, type(None)):
+                return {
+                    "image": [None],
+                    "label": [None],
+                }
+            input_images.append(image)
+
         for label_channel in self.classes:
-          image = read_raster(
-              group[label_channel]
-          )[0]
-          image -= np.nanmin(image)
-          image = 2*(image/np.nanmax(image)) - 1
-          image = np.expand_dims(image, -1)
-          image = slice_middle(image)
-          label_images.append(image)
+            image = read_raster(group[label_channel])[0]
+            image -= np.nanmin(image)
+            image = 2 * (image / np.nanmax(image)) - 1
+            image = np.expand_dims(image, -1)
+            image = slice_middle(image)
+            label_images.append(image)
 
         sample = {
             "image": np.dstack(input_images),
@@ -176,9 +166,8 @@ class LandsatDataset(Dataset):
 
 
 class DummyDataset(Dataset):
-
     def __init__(self, channels, classes):
-        self.channels = channels 
+        self.channels = channels
         self.classes = classes
         self.groups = [1 for a in range(60)]
 
@@ -200,24 +189,28 @@ class DummyDataset(Dataset):
 
 
 def slice_middle(image, size=256, remove_nan=True):
-  mix, miy = [int(m/2) for m in image.shape[:2]]
-  s = int(size/2)
-  sliced_image = image[mix-s:mix+s,miy-s:miy+s]
-  if remove_nan:
-    sliced_image[sliced_image != sliced_image] = 0.0
-  if sliced_image.shape != (size, size, 1):
-    return None
-  return sliced_image
+    mix, miy = [int(m / 2) for m in image.shape[:2]]
+    s = int(size / 2)
+    sliced_image = image[mix - s : mix + s, miy - s : miy + s]
+    if remove_nan:
+        sliced_image[sliced_image != sliced_image] = 0.0
+    if sliced_image.shape != (size, size, 1):
+        return None
+    return sliced_image
 
 
-def write_loading_bar_string(metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training = True):
+def write_loading_bar_string(
+    metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training=True
+):
 
-    if training: 
-      metric_name = "Loss"; title = "E"
+    if training:
+        metric_name = "Loss"
+        title = "E"
     else:
-      metric_name = "Score"; title = "Evaluating e"
+        metric_name = "Score"
+        title = "Evaluating e"
 
-    metric = sum([metric.mean() for metric in metrics])
+    metric = sum(metrics)
     epoch_metric_tot += metric
     epoch_metric = epoch_metric_tot / ((step + 1))
     steps_left = num_steps - step
@@ -246,12 +239,9 @@ def landsat_train_test_dataset(
     try:
         assert test_size + train_size <= 1.0
     except AssertionError:
-      raise AssertionError("test_size + train_size > 1, which is not allowed")
+        raise AssertionError("test_size + train_size > 1, which is not allowed")
 
-    groups = group_bands(
-        data_dir,
-        channels + classes
-    )
+    groups = group_bands(data_dir, channels + classes)
 
     train_groups, test_groups = train_test_split(
         groups,
@@ -260,7 +250,9 @@ def landsat_train_test_dataset(
         random_state=random_state,
     )
 
-    print(f"{len(train_groups)} training instances, {len(test_groups)} testing instances")
+    print(
+        f"{len(train_groups)} training instances, {len(test_groups)} testing instances"
+    )
 
     train_dataset = LandsatDataset(
         groups=train_groups,
@@ -275,12 +267,19 @@ def landsat_train_test_dataset(
 
     return train_dataset, test_dataset
 
-def reshape_for_discriminator(a):
-  # Change shape from [N, C, H, W] to [NxC, 1, H, W]
-  return a.view(a.shape[0]*a.shape[1], 1, a.shape[2], a.shape[3])
+
+def reshape_for_discriminator(a, num_classes):
+    # Change shape from [N, C, H, W] to [NxC, 1, H, W]
+    return a.view(a.shape[0] * num_classes, 1, a.shape[2], a.shape[3])
+
+
+def reshape_for_discriminator2(a, num_classes):
+    # Change shape from [N, C, H, W] to [NxC, 1, H, W]
+    return a.view(a.shape[0] * num_classes, 1, a.shape[1], a.shape[2])
+
 
 def skip_tris(batch):
-    batch = list(filter(lambda x:x["image"][0] is not None, batch))
+    batch = list(filter(lambda x: x["image"][0] is not None, batch))
     return default_collate(batch)
 
 
@@ -294,8 +293,8 @@ def train_cGAN_epoch(
     adversarial_loss_fn,
     num_steps,
     comparison_loss_factor,
-    wandb
-    ):
+    wandb,
+):
 
     # Might need to fix this
     cGAN.train()
@@ -315,24 +314,20 @@ def train_cGAN_epoch(
         preds = cGAN.generator.forward(images)
 
         # Train generator
-        
         cGAN.float()
-       
+
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
-            preds.float(),
-            labels.float()
+            preds.float(), labels.float().reshape(preds.shape)
         )
-        comparison_loss.backward(retain_graph = True)
-        
-        print("discriminating preds for generator with input size", reshape_for_discriminator(preds).shape)
+        print(comparison_loss)
+        comparison_loss.backward()#retain_graph=True)
+
+        # print("discriminating preds for generator with input size", reshape_for_discriminator(preds).shape)
         dis_probs_gene = cGAN.discriminator.forward(
-            #reshape_for_discriminator(preds),
-            preds,
-            reorder=False
+            reshape_for_discriminator(preds, len(cGAN.classes)), reorder=False
         )
         adversarial_loss_gene = adversarial_loss_fn(
-            dis_probs_gene,
-            torch.zeros(dis_probs_gene.shape)
+            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
         )
         adversarial_loss_gene.backward()
 
@@ -343,46 +338,50 @@ def train_cGAN_epoch(
         dis_targets_real = torch.cat(
             [torch.eye(len(cGAN.classes)) for _ in preds],
         )
-        labels = torch.tensor(labels).type_as(preds)
-        # print("discriminating real labels for discriminator with input size", reshape_for_discriminator(labels).shape)
-        # print("original shape labels are shape", labels.shape)
+        labels = labels.type_as(preds)
+
+        # print("discriminating real labels for discriminator with input size", reshape_for_discriminator2(labels).shape)
         dis_probs_real = cGAN.discriminator.forward(
-            reshape_for_discriminator(labels),
-            reorder=False
+            reshape_for_discriminator2(labels, len(cGAN.classes)), reorder=False
         )
         # print("discriminating preds for discriminator")
         dis_probs_gene = cGAN.discriminator.forward(
-            reshape_for_discriminator(preds).detach(),
-            reorder=False
+            reshape_for_discriminator(preds.detach(), len(cGAN.classes)), reorder=False
         )
         adversarial_loss_gene = adversarial_loss_fn(
-            dis_probs_gene,
-            torch.zeros(dis_probs_gene.shape)
+            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
         )
-        adversarial_loss_real = adversarial_loss_fn(
-            dis_probs_real,
-            dis_targets_real
-        )
-        adversarial_loss = (adversarial_loss_real + adversarial_loss_gene)/2
+        adversarial_loss_real = adversarial_loss_fn(dis_probs_real, dis_targets_real)
+        adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / 2
         adversarial_loss.backward()
 
         optimizer_D.step()
 
-        losses = [comparison_loss, adversarial_loss]
+        losses = [comparison_loss.item(), adversarial_loss.item()]
+
         loading_bar_string, epoch_loss_tot = write_loading_bar_string(
-            losses, step, epoch_loss_tot, num_steps, start_time, epoch, training = True
+            losses, step, epoch_loss_tot, num_steps, start_time, epoch, training=True
         )
 
         sys.stdout.write("\r" + loading_bar_string)
         time.sleep(0.1)
 
+        del images
+        del labels
+        del comparison_loss
+        del adversarial_loss
+        del adversarial_loss_real
+        del adversarial_loss_gene
+
         if wandb:
-          wandb.log({"iteration_loss": comparison_loss.mean() + adversarial_loss.mean()})
+            wandb.log(
+                {"iteration_loss": comparison_loss.mean() + adversarial_loss.mean()}
+            )
 
         if step == num_steps:
             break
 
-    return epoch_loss_tot/num_steps
+    return epoch_loss_tot / num_steps
 
 
 def test_cGAN_epoch(cGAN, epoch, dataloader, num_steps, test_metric):
@@ -399,32 +398,37 @@ def test_cGAN_epoch(cGAN, epoch, dataloader, num_steps, test_metric):
         labels = batch["label"]
 
         preds = cGAN.generator.forward(images)
-        labels = torch.tensor(labels).type_as(preds)
-        score = test_metric(preds, labels)
+        labels = labels.type_as(preds)
+        score = test_metric(preds, labels.reshape(preds.shape))
+        score = score.item()
         if not isinstance(score, list):
             score = [score]
 
         loading_bar_string, epoch_score_tot = write_loading_bar_string(
-            score, step, epoch_score_tot, num_steps, start_time, epoch, training = False
+            score, step, epoch_score_tot, num_steps, start_time, epoch, training=False
         )
 
         sys.stdout.write("\r" + loading_bar_string)
         time.sleep(0.1)
 
+        del images
+        del labels
+        del score
+
         if step == num_steps:
             break
 
     print(f"Epoch: {epoch}, test metric: {epoch_score_tot}")
-    return epoch_score_tot/num_steps
+    return epoch_score_tot / num_steps
 
 
 def train_cGAN(config):
 
     cGAN = ConditionalGAN(
-          classes=config.classes,
-          channels=config.channels,
-          dis_dropout=config.dis_dropout,
-          gen_dropout=config.gen_dropout,
+        classes=config.classes,
+        channels=config.channels,
+        dis_dropout=config.dis_dropout,
+        gen_dropout=config.gen_dropout,
     )
 
     if torch.cuda.is_available():
@@ -432,7 +436,9 @@ def train_cGAN(config):
         cGAN.cuda()
 
     if config.loss_parameters:
-        comparison_loss_fn = metric_dict[config.comparison_loss_fn](**config.loss_parameters)
+        comparison_loss_fn = metric_dict[config.comparison_loss_fn](
+            **config.loss_parameters
+        )
     else:
         comparison_loss_fn = metric_dict[config.comparison_loss_fn]()
     if config.test_parameters:
@@ -442,39 +448,39 @@ def train_cGAN(config):
     adversarial_loss_fn = nn.BCELoss()
 
     if config.wandb:
-      wandb.watch(cGAN)
+        wandb.watch(cGAN)
 
     optimizer_G = torch.optim.Adam(cGAN.generator.parameters(), lr=config.lr)
     optimizer_D = torch.optim.Adam(cGAN.discriminator.parameters(), lr=config.lr)
 
     if config.data_dir:
-      train_dataset, test_dataset = landsat_train_test_dataset(
-          data_dir=config.data_dir,
-          channels=config.channels,
-          classes=config.classes,
-          test_size=config.test_size,
-          train_size=config.train_size,
-          random_state=config.random_state,
-      )
+        train_dataset, test_dataset = landsat_train_test_dataset(
+            data_dir=config.data_dir,
+            channels=config.channels,
+            classes=config.classes,
+            test_size=config.test_size,
+            train_size=config.train_size,
+            random_state=config.random_state,
+        )
     else:
-      # Debug case
-      train_dataset = DummyDataset(channels=config.channels, classes=config.classes)
-      test_dataset = DummyDataset(channels=config.channels, classes=config.classes)
+        # Debug case
+        train_dataset = DummyDataset(channels=config.channels, classes=config.classes)
+        test_dataset = DummyDataset(channels=config.channels, classes=config.classes)
 
-    train_dataloader = DataLoader(train_dataset,
-                                  batch_size=config.batch_size,
-                                  collate_fn=skip_tris
-                      )
-    test_dataloader = DataLoader(test_dataset,
-                                 batch_size=config.batch_size,
-                                 collate_fn=skip_tris
-                      )  # Change to own batch size?
+    train_dataloader = DataLoader(
+        train_dataset, batch_size=config.batch_size, collate_fn=skip_tris
+    )
+    test_dataloader = DataLoader(
+        test_dataset, batch_size=config.batch_size, collate_fn=skip_tris
+    )  # Change to own batch size?
 
     train_num_steps = len(train_dataloader)
     test_num_steps = len(test_dataloader)
-    print("Starting training for {} epochs of {} training steps and {} evaluation steps".format(
+    print(
+        "Starting training for {} epochs of {} training steps and {} evaluation steps".format(
             config.num_epochs, train_num_steps, test_num_steps
-    ))
+        )
+    )
 
     for epoch in range(config.num_epochs):
 
@@ -488,7 +494,7 @@ def train_cGAN(config):
             adversarial_loss_fn=adversarial_loss_fn,
             num_steps=train_num_steps,
             comparison_loss_factor=config.comparison_loss_factor,
-            wandb=config.wandb
+            wandb=config.wandb,
         )
         print(f"Training epoch {epoch} done")
         epoch_score = test_cGAN_epoch(
@@ -496,22 +502,18 @@ def train_cGAN(config):
             epoch=epoch,
             dataloader=test_dataloader,
             num_steps=test_num_steps,
-            test_metric=test_metric
+            test_metric=test_metric,
         )
 
         epoch_metrics = {f"epoch_loss": epoch_loss, f"epoch_score": epoch_score}
 
         if config.wandb:
-          wandb.log(epoch_metrics)
+            wandb.log(epoch_metrics)
 
         if (epoch + 1) % config.save_rate == 0:
             # print("Would be saving now")
-            state = {
-                "config": config,
-                "epoch": epoch,
-                "state": cGAN.state_dict()
-            }
+            state = {"config": config, "epoch": epoch, "state": cGAN.state_dict()}
             torch.save(
                 state,
-                os.path.join(dir_path, f"saves/{config.task}_model.epoch{epoch}.t7")
+                os.path.join(dir_path, f"saves/{config.task}_model.epoch{epoch}.t7"),
             )

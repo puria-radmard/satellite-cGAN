@@ -1,5 +1,6 @@
 from imports import *
 
+
 class UNetDownBlock(nn.Module):
     def __init__(self, in_channels, out_channels, dropout, max_before=True):
 
@@ -102,17 +103,16 @@ class UNet(nn.Module):
 
     def forward(self, X, reorder=True):
         """
-    Layers take inputs of size [N, C, H, W]
-    Forward takes inputs of size [N, H, W, C] or [H, W, C]
-    """
-        
+        Layers take inputs of size [N, C, H, W]
+        Forward takes inputs of size [N, H, W, C] or [H, W, C]
+        """
+
         if len(np.shape(X)) == 3:
             X = X[np.newaxis, :]
         if reorder:
             X = X.permute(0, 3, 1, 2)
         if np.shape(X)[1] == 4:
             X = X[:, :3, :, :]
-
 
         X1 = self.down1(X)
         X2 = self.down2(X1)
@@ -131,6 +131,7 @@ class UNet(nn.Module):
             logits = nn.Softmax(dim=1)(logits)
 
         return logits
+
 
 def trainEpoch(model, epoch, optimizer, dataloader, num_steps, loss_fn):
 
@@ -166,9 +167,9 @@ def trainEpoch(model, epoch, optimizer, dataloader, num_steps, loss_fn):
         time.sleep(0.5)
 
         try:
-          wandb.log({"iteration_loss": loss.mean()})
+            wandb.log({"iteration_loss": loss.mean()})
         except NameError:
-          pass
+            pass
 
         if step == num_steps:
             break

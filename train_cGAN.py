@@ -11,17 +11,18 @@ from cGAN import *
 dir_path = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = os.path.join(dir_path, "..", "data_source", "LONDON_DATASET")
 
-class Config:
-  def __init__(self, config):
-    self.__dict__.update(config)
 
-  def __repr__(self):
-    return str(self.__dict__)
+class Config:
+    def __init__(self, config):
+        self.__dict__.update(config)
+
+    def __repr__(self):
+        return str(self.__dict__)
 
 
 def generate_config(args):
 
-    if args.arg_source == None: # i.e. sweep
+    if args.arg_source == None:  # i.e. sweep
 
         if args.train_size == None:
             train_size = 1 - args.test_size
@@ -41,11 +42,15 @@ def generate_config(args):
             "batch_size": batch_size,
             "dis_dropout": dis_dropout,
             "gen_dropout": gen_dropout,
-            "comparison_loss_factor": comparison_loss_factor
+            "comparison_loss_factor": comparison_loss_factor,
         }
 
-        loss_parameters = {param: vars(args)[param] for param in req_args_dict[args.comparison_loss_fn]}
-        test_parameters = {param: vars(args)[param] for param in req_args_dict[args.test_metric]}
+        loss_parameters = {
+            param: vars(args)[param] for param in req_args_dict[args.comparison_loss_fn]
+        }
+        test_parameters = {
+            param: vars(args)[param] for param in req_args_dict[args.test_metric]
+        }
 
         config_dict["test_parameters"] = test_parameters
         config_dict["loss_parameters"] = loss_parameters
@@ -55,12 +60,12 @@ def generate_config(args):
         wandb.init(project="satellite-cGAN", config=config_dict)
         return wandb.config
 
-    else: # i.e. constant run, no sweep
-        with open(args.arg_source, 'r') as stream:
+    else:  # i.e. constant run, no sweep
+        with open(args.arg_source, "r") as stream:
             config_dict = yaml.safe_load(stream)
             config_dict["task"] = args.task
             config_dict["wandb"] = args.wandb
-        
+
         if args.wandb:
             wandb.init(project="satellite-cGAN", config=config_dict)
             return wandb.config
@@ -74,9 +79,11 @@ if __name__ == "__main__":
         description="Give loss function, evaluation metric, and hyperparameters"
     )
 
-    parser.add_argument("--task", type=str) # reg, cls, mix
-    parser.add_argument("--arg_source", type=str, default=None) # args yaml path, None for sweeps
-    parser.add_argument("--wandb", type=int, default=1) # 1 to include wandb
+    parser.add_argument("--task", type=str)  # reg, cls, mix
+    parser.add_argument(
+        "--arg_source", type=str, default=None
+    )  # args yaml path, None for sweeps
+    parser.add_argument("--wandb", type=int, default=1)  # 1 to include wandb
 
     # If you provide an arg_source, none of this is needed. However, if you are calling via a
     # wandb sweep, this is how your args are set.
@@ -103,11 +110,13 @@ if __name__ == "__main__":
     parser.add_argument("--reg_layer", type=int)
     parser.add_argument("--cls_lambda", type=float)
     parser.add_argument("--reg_lambda", type=float)
-    parser.add_argument("--beta", type=float) # For ternaus (BCE part)
-    parser.add_argument("--l", type=float) # For ternaus (weight of Jaccard part)
+    parser.add_argument("--beta", type=float)  # For ternaus (BCE part)
+    parser.add_argument("--l", type=float)  # For ternaus (weight of Jaccard part)
 
     args = parser.parse_args()
     config = generate_config(args)
     config.data_dir = DATA_DIR
     print(config)
-    train_cGAN(config)
+
+    with torch.autograd.set_detect_anomaly(True):
+        train_cGAN(config)
