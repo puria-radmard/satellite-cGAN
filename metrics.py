@@ -26,23 +26,6 @@ class DiceCoefficient(nn.Module):
         return dice_coef(preds, labels)
 
 
-def multiply_by_class_weights(class_weights, class_losses):
-    ## TODO: remove this and parameters related to it - they are not needed
-
-    if type(class_weights) == type(None):
-        class_weights = torch.Tensor([1 for _ in range(len(class_losses))])
-    else:
-        class_weights = torch.tensor(class_weights).float()
-    class_weights = class_weights / torch.norm(class_weights, dim=0)
-
-    class_losses = class_losses.reshape(-1)
-
-    try:
-        return torch.dot(class_losses, class_weights.double())
-    except RuntimeError:
-        return torch.dot(class_losses, class_weights.float())
-
-
 def cross_entropy(output, target, beta):
 
     # TODO: Fix bug below due to inplace operation, implemeting weighting
@@ -58,16 +41,12 @@ def cross_entropy(output, target, beta):
     return loss
 
 
-def perPixelCrossEntropy(preds, labels, class_weights, beta):
+def perPixelCrossEntropy(preds, labels, beta):
     size = torch.prod(torch.tensor(labels.shape)).float()
     assert preds.shape == labels.shape
-    class_losses = -(1 / size) * torch.sum(
-        # Sum over everything but classes
-        cross_entropy(preds, labels, beta),
-        dim=(-2, -1),
-    )
-    print("class_losses", class_losses.shape)
-    return multiply_by_class_weights(class_weights, class_losses)
+    loss = -(1 / size) * torch.sum(cross_entropy(preds, labels, beta))
+    print("ppce loss", loss)
+    return loss
 
 
 def jaccardIndex(preds, labels, class_weights=None):
@@ -78,17 +57,17 @@ def jaccardIndex(preds, labels, class_weights=None):
     preds /= preds.max().item()
     labels -= labels.min().item()
     labels /= labels.max().item()
-    class_indices = (1 / size) * torch.sum(
-        preds * labels / (preds + labels - labels * preds + 1e-10), dim=(-2, -1)
+    indices = (1 / size) * torch.sum(
+        preds * labels / (preds + labels - labels * preds + 1e-10)
     )
-    jaccard = multiply_by_class_weights(class_weights, class_indices)
-    return jaccard
+    
+    return indices
 
 
-def ternausLossfunc(preds, labels, l=1, beta=1, HWs=None, JWs=None):
+def ternausLossfunc(preds, labels, l=1, beta=1):
     # Derived from https://arxiv.org/abs/1801.05746
-    H = perPixelCrossEntropy(preds, labels, HWs, beta)
-    J = jaccardIndex(preds, labels, JWs)
+    H = perPixelCrossEntropy(preds, labels, beta)
+    J = jaccardIndex(preds, labels)
     T = H - l * torch.log(J + 1e-10)
     return T
 
@@ -101,15 +80,13 @@ class TernausLossFunc(nn.Module):
         super(TernausLossFunc, self).__init__()
         self.l = kwargs.get("l", 1)
         self.beta = kwargs.get("beta", 1)
-        self.HWs = kwargs.get("HWs")
-        self.JWs = kwargs.get("JWs")
 
     def forward(
         self, preds: torch.Tensor, labels: torch.Tensor, reorder=False
     ) -> torch.Tensor:
         if reorder:
             labels = labels.permute(0, 3, 1, 2)
-        return ternausLossfunc(preds, labels, self.l, self.beta, self.HWs, self.JWs)
+        return ternausLossfunc(preds, labels, self.l, self.beta)
 
 
 class TargettedRegressionClassification(nn.Module):

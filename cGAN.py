@@ -161,7 +161,6 @@ class LandsatDataset(Dataset):
             "image": np.dstack(input_images),
             "label": np.dstack(label_images),
         }
-        import pdb; pdb.set_trace()
 
         return sample
 
