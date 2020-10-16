@@ -293,7 +293,7 @@ def train_cGAN_epoch(
     adversarial_loss_fn,
     num_steps,
     comparison_loss_factor,
-    wandb,
+    wandb_flag,
 ):
 
     # Might need to fix this
@@ -385,9 +385,9 @@ def train_cGAN_epoch(
         del adversarial_loss_real
         del adversarial_loss_gene
 
-        if wandb:
+        if wandb_flag:
             wandb.log(
-                {"iteration_loss": comparison_loss.mean() + adversarial_loss.mean()}
+                {"iteration_loss": sum(losses)}
             )
 
         if step == num_steps:
@@ -506,7 +506,7 @@ def train_cGAN(config):
             adversarial_loss_fn=adversarial_loss_fn,
             num_steps=train_num_steps,
             comparison_loss_factor=config.comparison_loss_factor,
-            wandb=config.wandb,
+            wandb_flag=config.wandb,
         )
         print(f"Training epoch {epoch} done")
         epoch_score = test_cGAN_epoch(

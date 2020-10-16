@@ -115,7 +115,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     config = generate_config(args)
-    config.data_dir = DATA_DIR
     print(config)
 
     with torch.autograd.set_detect_anomaly(True):

@@ -1,0 +1,33 @@
+{
+    "root": "/scratches/mario/hw501/satellite-cGAN",
+    "program": "train_cGAN.py",
+    "git": {
+        "remote": "https://github.com/puria-radmard/satellite-cGAN.git",
+        "commit": "430d81827e8c4231693bb86ab5abfabcf125dae0"
+    },
+    "email": "hc.wang96@gmail.com",
+    "startedAt": "2020-10-16T00:14:50.884304",
+    "host": "windle",
+    "username": "hw501",
+    "executable": "/scratch/hw501/anaconda3/envs/satellite/bin/python3",
+    "os": "Linux-4.15.0-112-generic-x86_64-with-glibc2.10",
+    "python": "3.8.5",
+    "gpu": "TITAN V",
+    "gpu_count": 1,
+    "cpu_count": 4,
+    "cuda": "9.2.148",
+    "args": [
+        "--task",
+        "reg",
+        "--arg_source",
+        "training_config/reg_constant.yaml",
+        "--wandb",
+        "1"
+    ],
+    "state": "finished",
+    "jobType": null,
+    "mode": "run",
+    "project": "satellite-cGAN",
+    "heartbeatAt": "2020-10-16T01:28:57.426219",
+    "exitcode": 0
+}

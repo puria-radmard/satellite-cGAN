@@ -1,0 +1,102 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.9.3
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.8.5
+batch_size:
+  desc: null
+  value: 5
+channels:
+  desc: null
+  value:
+  - NDVI
+  - NDBI
+  - NDWI
+classes:
+  desc: null
+  value:
+  - LSTN
+comparison_loss_factor:
+  desc: null
+  value: 1.2
+comparison_loss_fn:
+  desc: null
+  value: mse_loss
+data_dir:
+  desc: null
+  value: ../data_source/LONDON_DATASET
+dis_dropout:
+  desc: null
+  value: 0.4
+gen_dropout:
+  desc: null
+  value: 0.4
+loss_parameters:
+  desc: null
+  value: null
+lr:
+  desc: null
+  value: 0.0001
+num_epochs:
+  desc: null
+  value: 20
+random_state:
+  desc: null
+  value: null
+save_rate:
+  desc: null
+  value: 1
+task:
+  desc: null
+  value: reg
+test_metric:
+  desc: null
+  value: mse_loss
+test_parameters:
+  desc: null
+  value: null
+test_size:
+  desc: null
+  value: 0.2
+train_size:
+  desc: null
+  value: null
+wandb:
+  desc: null
+  value: 1
+
+WARNING:root:Found 3088 images in total
+WARNING:root:Found 224 groups in root directory
+179 training instances, 45 testing instances
+Starting training for 20 epochs of 36 training steps and 9 evaluation steps
+/scratch/hw501/anaconda3/envs/satellite/lib/python3.8/site-packages/torch/nn/modules/loss.py:432: UserWarning: Using a target size (torch.Size([4, 256, 256, 1])) that is different to the input size (torch.Size([4, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return F.mse_loss(input, target, reduction=self.reduction)
+Epoch: 0   Step: 0   Batch Loss: 0.9833   Epoch Loss: 0.9833   Epoch ETA: 0.0 m  34 s/scratch/hw501/anaconda3/envs/satellite/lib/python3.8/site-packages/torch/nn/modules/loss.py:432: UserWarning: Using a target size (torch.Size([3, 256, 256, 1])) that is different to the input size (torch.Size([3, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return F.mse_loss(input, target, reduction=self.reduction)
+Epoch: 0   Step: 1   Batch Loss: 0.8252   Epoch Loss: 0.9043   Epoch ETA: 0.0 m  38 s/scratch/hw501/anaconda3/envs/satellite/lib/python3.8/site-packages/torch/nn/modules/loss.py:432: UserWarning: Using a target size (torch.Size([5, 256, 256, 1])) that is different to the input size (torch.Size([5, 1, 256, 256])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return F.mse_loss(input, target, reduction=self.reduction)
+Epoch: 0   Step: 2   Batch Loss: 1.1669   Epoch Loss: 0.9918   Epoch ETA: 0.0 m  38 sEpoch: 0   Step: 3   Batch Loss: 1.0651   Epoch Loss: 1.0102   Epoch ETA: 0.0 m  37 sEpoch: 0   Step: 4   Batch Loss: 1.1645   Epoch Loss: 1.0410   Epoch ETA: 0.0 m  36 sEpoch: 0   Step: 5   Batch Loss: 0.8987   Epoch Loss: 1.0173   Epoch ETA: 0.0 m  35 sEpoch: 0   Step: 6   Batch Loss: 1.3114   Epoch Loss: 1.0593   Epoch ETA: 0.0 m  33 sEpoch: 0   Step: 7   Batch Loss: 1.1964   Epoch Loss: 1.0765   Epoch ETA: 0.0 m  31 sEpoch: 0   Step: 8   Batch Loss: 1.4816   Epoch Loss: 1.1215   Epoch ETA: 0.0 m  30 sEpoch: 0   Step: 9   Batch Loss: 1.1086   Epoch Loss: 1.1202   Epoch ETA: 0.0 m  29 sEpoch: 0   Step: 10   Batch Loss: 1.1410   Epoch Loss: 1.1221   Epoch ETA: 0.0 m  28 sEpoch: 0   Step: 11   Batch Loss: 1.1646   Epoch Loss: 1.1256   Epoch ETA: 0.0 m  27 sEpoch: 0   Step: 12   Batch Loss: 1.2029   Epoch Loss: 1.1316   Epoch ETA: 0.0 m  26 sEpoch: 0   Step: 13   Batch Loss: 1.2967   Epoch Loss: 1.1434   Epoch ETA: 0.0 m  25 sEpoch: 0   Step: 14   Batch Loss: 1.2436   Epoch Loss: 1.1500   Epoch ETA: 0.0 m  24 sEpoch: 0   Step: 15   Batch Loss: 1.1107   Epoch Loss: 1.1476   Epoch ETA: 0.0 m  23 sEpoch: 0   Step: 16   Batch Loss: 1.1534   Epoch Loss: 1.1479   Epoch ETA: 0.0 m  22 sEpoch: 0   Step: 17   Batch Loss: 1.1039   Epoch Loss: 1.1455   Epoch ETA: 0.0 m  21 s/scratches/mario/hw501/satellite-cGAN/cGAN.py:141: RuntimeWarning: All-NaN slice encountered
+  image -= np.nanmin(image)
+/scratches/mario/hw501/satellite-cGAN/cGAN.py:142: RuntimeWarning: All-NaN slice encountered
+  image = 2 * (image / np.nanmax(image)) - 1
+Epoch: 0   Step: 18   Batch Loss: 1.4430   Epoch Loss: 1.1611   Epoch ETA: 0.0 m  19 sEpoch: 0   Step: 19   Batch Loss: 1.2258   Epoch Loss: 1.1644   Epoch ETA: 0.0 m  18 sEpoch: 0   Step: 20   Batch Loss: 1.2801   Epoch Loss: 1.1699   Epoch ETA: 0.0 m  17 sEpoch: 0   Step: 21   Batch Loss: 1.2699   Epoch Loss: 1.1744   Epoch ETA: 0.0 m  16 sEpoch: 0   Step: 22   Batch Loss: 1.0009   Epoch Loss: 1.1669   Epoch ETA: 0.0 m  15 sEpoch: 0   Step: 23   Batch Loss: 1.4403   Epoch Loss: 1.1783   Epoch ETA: 0.0 m  14 sEpoch: 0   Step: 24   Batch Loss: 1.2450   Epoch Loss: 1.1810   Epoch ETA: 0.0 m  13 sEpoch: 0   Step: 25   Batch Loss: 1.3306   Epoch Loss: 1.1867   Epoch ETA: 0.0 m  12 sEpoch: 0   Step: 26   Batch Loss: 1.1604   Epoch Loss: 1.1857   Epoch ETA: 0.0 m  10 sEpoch: 0   Step: 27   Batch Loss: 1.0944   Epoch Loss: 1.1825   Epoch ETA: 0.0 m  9 sEpoch: 0   Step: 28   Batch Loss: 1.3003   Epoch Loss: 1.1865   Epoch ETA: 0.0 m  8 sEpoch: 0   Step: 29   Batch Loss: 1.0911   Epoch Loss: 1.1833   Epoch ETA: 0.0 m  7 sEpoch: 0   Step: 30   Batch Loss: 1.2647   Epoch Loss: 1.1860   Epoch ETA: 0.0 m  6 sEpoch: 0   Step: 31   Batch Loss: 1.3146   Epoch Loss: 1.1900   Epoch ETA: 0.0 m  5 sEpoch: 0   Step: 32   Batch Loss: 1.1592   Epoch Loss: 1.1891   Epoch ETA: 0.0 m  4 sEpoch: 0   Step: 33   Batch Loss: 1.1837   Epoch Loss: 1.1889   Epoch ETA: 0.0 m  3 sEpoch: 0   Step: 34   Batch Loss: 0.9123   Epoch Loss: 1.1810   Epoch ETA: 0.0 m  2 sEpoch: 0   Step: 35   Batch Loss: 1.0822   Epoch Loss: 1.1783   Epoch ETA: 0.0 m  1 sTraining epoch 0 done
+Evaluating epoch: 0   Step: 0   Batch Score: 0.3212   Epoch Score: 0.3212   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 1   Batch Score: 0.3657   Epoch Score: 0.3435   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 2   Batch Score: 0.3349   Epoch Score: 0.3406   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 3   Batch Score: 0.4117   Epoch Score: 0.3584   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 4   Batch Score: 0.3750   Epoch Score: 0.3617   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 5   Batch Score: 0.3076   Epoch Score: 0.3527   Epoch ETA: 0.0 m  0 sEvaluating epoch: 0   Step: 6   Batch Score: 0.3861   Epoch Score: 0.3575   Epoch ETA: 0.0 m  0 sEvaluating epoch: 0   Step: 7   Batch Score: 0.3498   Epoch Score: 0.3565   Epoch ETA: 0.0 m  0 sEvaluating epoch: 0   Step: 8   Batch Score: 0.3826   Epoch Score: 0.3594   Epoch ETA: 0.0 m  0 sEpoch: 0, test metric: 3.2346985042095184
+Traceback (most recent call last):
+  File "train_cGAN.py", line 121, in <module>
+    train_cGAN(config)
+  File "/scratches/mario/hw501/satellite-cGAN/cGAN.py", line 528, in train_cGAN
+    torch.save(
+  File "/scratch/hw501/anaconda3/envs/satellite/lib/python3.8/site-packages/torch/serialization.py", line 370, in save
+    _legacy_save(obj, opened_file, pickle_module, pickle_protocol)
+  File "/scratch/hw501/anaconda3/envs/satellite/lib/python3.8/site-packages/torch/serialization.py", line 443, in _legacy_save
+    pickler.dump(obj)
+  File "/scratch/hw501/anaconda3/envs/satellite/lib/python3.8/site-packages/wandb/wandb_config.py", line 256, in __getattr__
+    return self.__getitem__(key)
+  File "/scratch/hw501/anaconda3/envs/satellite/lib/python3.8/site-packages/wandb/wandb_config.py", line 246, in __getitem__
+    return self._items[key]
+KeyError: '__getstate__'
