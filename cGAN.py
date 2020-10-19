@@ -320,7 +320,7 @@ def train_cGAN_epoch(
         # print("preds:", preds.shape)
         # print("labels:", labels.shape)
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
-            preds.float(), labels.float()
+            preds.float(), labels.float().reshape(preds.shape)
         )
         comparison_loss.backward(retain_graph=True)
 
@@ -508,7 +508,7 @@ def train_cGAN(config):
             comparison_loss_factor=config.comparison_loss_factor,
             wandb_flag=config.wandb,
         )
-        print(f"Training epoch {epoch} done")
+        print(f"\nTraining epoch {epoch} done")
         epoch_score = test_cGAN_epoch(
             cGAN=cGAN,
             epoch=epoch,

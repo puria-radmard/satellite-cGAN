@@ -1,0 +1,71 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.9.3
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.8.5
+batch_size:
+  desc: null
+  value: 8
+channels:
+  desc: null
+  value:
+  - NDVI
+  - NDBI
+  - NDWI
+classes:
+  desc: null
+  value:
+  - LSTN
+comparison_loss_factor:
+  desc: null
+  value: 0.7541843663122376
+comparison_loss_fn:
+  desc: null
+  value: mse_loss
+data_dir:
+  desc: null
+  value: ../data_source/LONDON_DATASET
+dis_dropout:
+  desc: null
+  value: 0.4712876178263226
+gen_dropout:
+  desc: null
+  value: 0.3782830424887728
+loss_parameters:
+  desc: null
+  value: {}
+lr:
+  desc: null
+  value: 0.0002772286163153536
+num_epochs:
+  desc: null
+  value: 75
+random_state:
+  desc: null
+  value: 1
+save_rate:
+  desc: null
+  value: 101
+task:
+  desc: null
+  value: reg
+test_metric:
+  desc: null
+  value: mse_loss
+test_parameters:
+  desc: null
+  value: {}
+test_size:
+  desc: null
+  value: 0.2
+train_size:
+  desc: null
+  value: 0.8
+wandb:
+  desc: null
+  value: 1

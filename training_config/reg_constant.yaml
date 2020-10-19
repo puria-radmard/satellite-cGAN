@@ -17,7 +17,7 @@ test_parameters:
   null
 
 lr:
-  0.0001
+  0.0006398200966216355
 
 data_dir:
   "../data_source/LONDON_DATASET"
@@ -32,19 +32,19 @@ batch_size:
   5
 
 dis_dropout:
-  0.4
+  0.4772206496773703
 
 gen_dropout:
-  0.4
+  0.42446595397318554
 
 save_rate:
-  101
+  10
 
 random_state:
   null
 
 num_epochs:
-  100
+  80
 
 comparison_loss_factor:
-  1.2
+  1

@@ -35,14 +35,14 @@ def generate_config(args):
             "num_epochs": args.num_epochs,
             "test_size": args.test_size,
             "train_size": train_size,
-            "dir_name": args.dir_name,
+            "data_dir": args.data_dir,
             "comparison_loss_fn": args.comparison_loss_fn,
             "test_metric": args.test_metric,
-            "lr": lr,
-            "batch_size": batch_size,
-            "dis_dropout": dis_dropout,
-            "gen_dropout": gen_dropout,
-            "comparison_loss_factor": comparison_loss_factor,
+            "lr": args.lr,
+            "batch_size": args.batch_size,
+            "dis_dropout": args.dis_dropout,
+            "gen_dropout": args.gen_dropout,
+            "comparison_loss_factor": args.comparison_loss_factor,
         }
 
         loss_parameters = {
@@ -54,8 +54,8 @@ def generate_config(args):
 
         config_dict["test_parameters"] = test_parameters
         config_dict["loss_parameters"] = loss_parameters
-        config_dict["channels"] = TASK_CHANNELS["channels"]
-        config_dict["classes"] = TASK_CHANNELS["classes"]
+        config_dict["channels"] = TASK_CHANNELS[args.task]["channels"]
+        config_dict["classes"] = TASK_CHANNELS[args.task]["classes"]
 
         wandb.init(project="satellite-cGAN", config=config_dict)
         return wandb.config
@@ -75,6 +75,7 @@ def generate_config(args):
 
 
 if __name__ == "__main__":
+    print("jbsgubhgio")
     parser = argparse.ArgumentParser(
         description="Give loss function, evaluation metric, and hyperparameters"
     )
@@ -94,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_epochs", type=int, default=20)
     parser.add_argument("--test_size", type=float)
     parser.add_argument("--train_size", type=float, default=None)
-    parser.add_argument("--dir_name", type=str)
+    parser.add_argument("--data_dir", type=str)
     parser.add_argument("--comparison_loss_fn", type=str)
     parser.add_argument("--test_metric", type=str)
 

@@ -1,0 +1,48 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.9.3
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.8.5
+batch_size:
+  desc: null
+  value: 8
+comparison_loss_factor:
+  desc: null
+  value: 1.1541639222587623
+comparison_loss_fn:
+  desc: null
+  value: mse_loss
+dir_name:
+  desc: null
+  value: ../data_source/LONDON_DATASET
+dis_dropout:
+  desc: null
+  value: 0.5813772610706878
+gen_dropout:
+  desc: null
+  value: 0.3697716082288014
+lr:
+  desc: null
+  value: 3.7662027228950694e-07
+num_epochs:
+  desc: null
+  value: 75
+save_rate:
+  desc: null
+  value: 101
+task:
+  desc: null
+  value: reg
+test_metric:
+  desc: null
+  value: mse_loss
+test_size:
+  desc: null
+  value: 0.2
+wandb:
+  desc: null
+  value: 1

@@ -2,12 +2,54 @@ program: train_cGAN.py
 method: bayes
 
 metric:
-  name: iteration_loss
+  name: epoch_loss
   goal: minimize
 
 parameters:
+
   task:
     distribution: constant
     value: reg
+  wandb:
+    distribution: constant
+    value: 1
+  save_rate:
+    distribution: constant
+    value: 101
+  num_epochs:
+    distribution: constant
+    value: 75
+  test_size:
+    distribution: constant
+    value: 0.2
+  data_dir:
+    distribution: constant
+    value: "../data_source/LONDON_DATASET"
 
-# TODO
+  comparison_loss_fn:
+    distribution: constant
+    value: "mse_loss"
+  test_metric:
+    distribution: constant
+    value: "mse_loss"
+
+  batch_size:
+    distribution: constant
+    value: 8
+
+  lr:
+    distribution: log_uniform
+    max: -6.5
+    min: -10.8
+  dis_dropout:
+    distribution: uniform
+    min: 0.2
+    max: 0.6
+  gen_dropout:
+    distribution: uniform
+    min: 0.2
+    max: 0.6
+  comparison_loss_factor:
+    distribution: normal
+    mu: 1.0
+    sigma: 0.1
