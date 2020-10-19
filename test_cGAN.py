@@ -19,8 +19,9 @@ s = int(256 / 2)
 image = image[mix - s : mix + s, miy - s : miy + s]
 plt.imsave("example_index_map.png", image)
 
-LSTN_real = slice_middle(read_raster(f'{image_id}.LSTN.tif')[0])
-plt.imsave("example_LSTN_real.png", (LSTN_real + 1) / 2)
+LSTN_real = read_raster(f'{image_id}.LSTN.tif')[0][:,:,np.newaxis]
+plt.imsave("example_LSTN_real.png", (LSTN_real[:,:,0] + 1) / 2)
 
-LSTN_pred = cGAN.generator(image)
-plt.imsave("example_LSTN_with_sigmoid.png", LSTN_pred)
+LSTN_pred = cGAN.generator(torch.tensor(image)).reshape(256, 256)
+import pdb; pdb.set_trace()
+plt.imsave("example_LSTN_with_sigmoid.png", LSTN_pred.detach())
