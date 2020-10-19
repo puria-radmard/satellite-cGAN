@@ -1,93 +1,0 @@
-wandb_version: 1
-
-_wandb:
-  desc: null
-  value:
-    cli_version: 0.9.3
-    framework: torch
-    is_jupyter_run: false
-    is_kaggle_kernel: false
-    python_version: 3.8.5
-batch_size:
-  desc: null
-  value: 8
-channels:
-  desc: null
-  value:
-  - NDVI
-  - NDBI
-  - NDWI
-classes:
-  desc: null
-  value:
-  - LSTN
-comparison_loss_factor:
-  desc: null
-  value: 0.834418390408657
-comparison_loss_fn:
-  desc: null
-  value: mse_loss
-data_dir:
-  desc: null
-  value: ../data_source/LONDON_DATASET
-dis_dropout:
-  desc: null
-  value: 0.5851416596051047
-gen_dropout:
-  desc: null
-  value: 0.45965087237114494
-loss_parameters:
-  desc: null
-  value: {}
-lr:
-  desc: null
-  value: 6.630624308551307e-05
-num_epochs:
-  desc: null
-  value: 75
-random_state:
-  desc: null
-  value: 1
-save_rate:
-  desc: null
-  value: 101
-task:
-  desc: null
-  value: reg
-test_metric:
-  desc: null
-  value: mse_loss
-test_parameters:
-  desc: null
-  value: {}
-test_size:
-  desc: null
-  value: 0.2
-train_size:
-  desc: null
-  value: 0.8
-wandb:
-  desc: null
-  value: 1
-
-WARNING:root:Found 3088 images in total
-WARNING:root:Found 224 groups in root directory
-179 training instances, 45 testing instances
-Starting training for 75 epochs of 23 training steps and 6 evaluation steps
-Epoch: 0   Step: 0   Batch Loss: 1.0239   Epoch Loss: 1.0239   Epoch ETA: 0.0 m  31 sEpoch: 0   Step: 1   Batch Loss: 0.9537   Epoch Loss: 0.9888   Epoch ETA: 0.0 m  35 sEpoch: 0   Step: 2   Batch Loss: 0.9585   Epoch Loss: 0.9787   Epoch ETA: 0.0 m  31 sEpoch: 0   Step: 3   Batch Loss: 1.0080   Epoch Loss: 0.9860   Epoch ETA: 0.0 m  30 sEpoch: 0   Step: 4   Batch Loss: 0.8626   Epoch Loss: 0.9613   Epoch ETA: 0.0 m  30 sEpoch: 0   Step: 5   Batch Loss: 0.9296   Epoch Loss: 0.9560   Epoch ETA: 0.0 m  28 sEpoch: 0   Step: 6   Batch Loss: 0.8930   Epoch Loss: 0.9470   Epoch ETA: 0.0 m  27 sEpoch: 0   Step: 7   Batch Loss: 0.8926   Epoch Loss: 0.9402   Epoch ETA: 0.0 m  25 sEpoch: 0   Step: 8   Batch Loss: 1.0029   Epoch Loss: 0.9472   Epoch ETA: 0.0 m  23 sEpoch: 0   Step: 9   Batch Loss: 0.8135   Epoch Loss: 0.9338   Epoch ETA: 0.0 m  21 s/scratches/mario/hw501/satellite-cGAN/cGAN.py:141: RuntimeWarning: All-NaN slice encountered
-  image -= np.nanmin(image)
-/scratches/mario/hw501/satellite-cGAN/cGAN.py:142: RuntimeWarning: All-NaN slice encountered
-  image = 2 * (image / np.nanmax(image)) - 1
-Epoch: 0   Step: 10   Batch Loss: 1.0445   Epoch Loss: 0.9439   Epoch ETA: 0.0 m  20 sEpoch: 0   Step: 11   Batch Loss: 0.9232   Epoch Loss: 0.9422   Epoch ETA: 0.0 m  18 sEpoch: 0   Step: 12   Batch Loss: 0.9151   Epoch Loss: 0.9401   Epoch ETA: 0.0 m  17 sEpoch: 0   Step: 13   Batch Loss: 0.9682   Epoch Loss: 0.9421   Epoch ETA: 0.0 m  15 sEpoch: 0   Step: 14   Batch Loss: 0.9992   Epoch Loss: 0.9459   Epoch ETA: 0.0 m  14 sEpoch: 0   Step: 15   Batch Loss: 0.8793   Epoch Loss: 0.9417   Epoch ETA: 0.0 m  13 sEpoch: 0   Step: 16   Batch Loss: 1.0515   Epoch Loss: 0.9482   Epoch ETA: 0.0 m  11 sEpoch: 0   Step: 17   Batch Loss: 1.0206   Epoch Loss: 0.9522   Epoch ETA: 0.0 m  9 sEpoch: 0   Step: 18   Batch Loss: 0.9737   Epoch Loss: 0.9533   Epoch ETA: 0.0 m  8 sEpoch: 0   Step: 19   Batch Loss: 0.9014   Epoch Loss: 0.9507   Epoch ETA: 0.0 m  6 sEpoch: 0   Step: 20   Batch Loss: 0.9648   Epoch Loss: 0.9514   Epoch ETA: 0.0 m  4 sEpoch: 0   Step: 21   Batch Loss: 1.0375   Epoch Loss: 0.9553   Epoch ETA: 0.0 m  3 sEpoch: 0   Step: 22   Batch Loss: 0.9494   Epoch Loss: 0.9551   Epoch ETA: 0.0 m  1 sTraining epoch 0 done
-Evaluating epoch: 0   Step: 0   Batch Score: 0.1902   Epoch Score: 0.1902   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 1   Batch Score: 0.3584   Epoch Score: 0.2743   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 2   Batch Score: 0.2954   Epoch Score: 0.2813   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 3   Batch Score: 0.3093   Epoch Score: 0.2883   Epoch ETA: 0.0 m  1 sEvaluating epoch: 0   Step: 4   Batch Score: 0.4173   Epoch Score: 0.3141   Epoch ETA: 0.0 m  0 sEvaluating epoch: 0   Step: 5   Batch Score: 0.4207   Epoch Score: 0.3319   Epoch ETA: 0.0 m  0 sEpoch: 0, test metric: 1.9911258965730667
-Epoch: 1   Step: 0   Batch Loss: 1.0245   Epoch Loss: 1.0245   Epoch ETA: 0.0 m  31 sEpoch: 1   Step: 1   Batch Loss: 0.9665   Epoch Loss: 0.9955   Epoch ETA: 0.0 m  34 sEpoch: 1   Step: 2   Batch Loss: 0.9555   Epoch Loss: 0.9822   Epoch ETA: 0.0 m  31 sEpoch: 1   Step: 3   Batch Loss: 1.0268   Epoch Loss: 0.9933   Epoch ETA: 0.0 m  30 sEpoch: 1   Step: 4   Batch Loss: 0.8742   Epoch Loss: 0.9695   Epoch ETA: 0.0 m  30 sEpoch: 1   Step: 5   Batch Loss: 0.9443   Epoch Loss: 0.9653   Epoch ETA: 0.0 m  28 sEpoch: 1   Step: 6   Batch Loss: 0.9149   Epoch Loss: 0.9581   Epoch ETA: 0.0 m  27 sEpoch: 1   Step: 7   Batch Loss: 0.9273   Epoch Loss: 0.9542   Epoch ETA: 0.0 m  25 sEpoch: 1   Step: 8   Batch Loss: 1.0436   Epoch Loss: 0.9642   Epoch ETA: 0.0 m  23 sEpoch: 1   Step: 9   Batch Loss: 0.8413   Epoch Loss: 0.9519   Epoch ETA: 0.0 m  21 sEpoch: 1   Step: 10   Batch Loss: 1.0714   Epoch Loss: 0.9628   Epoch ETA: 0.0 m  19 sEpoch: 1   Step: 11   Batch Loss: 0.9598   Epoch Loss: 0.9625   Epoch ETA: 0.0 m  18 sEpoch: 1   Step: 12   Batch Loss: 0.9486   Epoch Loss: 0.9614   Epoch ETA: 0.0 m  17 sEpoch: 1   Step: 13   Batch Loss: 1.0048   Epoch Loss: 0.9645   Epoch ETA: 0.0 m  15 sEpoch: 1   Step: 14   Batch Loss: 1.0420   Epoch Loss: 0.9697   Epoch ETA: 0.0 m  14 sEpoch: 1   Step: 15   Batch Loss: 0.9068   Epoch Loss: 0.9658   Epoch ETA: 0.0 m  12 sEpoch: 1   Step: 16   Batch Loss: 1.0915   Epoch Loss: 0.9732   Epoch ETA: 0.0 m  11 sEpoch: 1   Step: 17   Batch Loss: 1.0586   Epoch Loss: 0.9779   Epoch ETA: 0.0 m  9 sEpoch: 1   Step: 18   Batch Loss: 1.0136   Epoch Loss: 0.9798   Epoch ETA: 0.0 m  8 sEpoch: 1   Step: 19   Batch Loss: 0.9396   Epoch Loss: 0.9778   Epoch ETA: 0.0 m  6 sEpoch: 1   Step: 20   Batch Loss: 1.0097   Epoch Loss: 0.9793   Epoch ETA: 0.0 m  4 sEpoch: 1   Step: 21   Batch Loss: 1.0823   Epoch Loss: 0.9840   Epoch ETA: 0.0 m  3 sEpoch: 1   Step: 22   Batch Loss: 0.9867   Epoch Loss: 0.9841   Epoch ETA: 0.0 m  1 sTraining epoch 1 done
-Evaluating epoch: 1   Step: 0   Batch Score: 0.1874   Epoch Score: 0.1874   Epoch ETA: 0.0 m  1 sEvaluating epoch: 1   Step: 1   Batch Score: 0.3389   Epoch Score: 0.2631   Epoch ETA: 0.0 m  1 sEvaluating epoch: 1   Step: 2   Batch Score: 0.2800   Epoch Score: 0.2687   Epoch ETA: 0.0 m  1 sEvaluating epoch: 1   Step: 3   Batch Score: 0.2905   Epoch Score: 0.2742   Epoch ETA: 0.0 m  1 sEvaluating epoch: 1   Step: 4   Batch Score: 0.3960   Epoch Score: 0.2986   Epoch ETA: 0.0 m  0 sEvaluating epoch: 1   Step: 5   Batch Score: 0.3934   Epoch Score: 0.3144   Epoch ETA: 0.0 m  0 sEpoch: 1, test metric: 1.886202722787857
-Epoch: 2   Step: 0   Batch Loss: 1.0657   Epoch Loss: 1.0657   Epoch ETA: 0.0 m  30 sEpoch: 2   Step: 1   Batch Loss: 1.0175   Epoch Loss: 1.0416   Epoch ETA: 0.0 m  35 sEpoch: 2   Step: 2   Batch Loss: 0.9809   Epoch Loss: 1.0214   Epoch ETA: 0.0 m  30 sEpoch: 2   Step: 3   Batch Loss: 1.0656   Epoch Loss: 1.0324   Epoch ETA: 0.0 m  31 sEpoch: 2   Step: 4   Batch Loss: 0.8966   Epoch Loss: 1.0053   Epoch ETA: 0.0 m  31 sEpoch: 2   Step: 5   Batch Loss: 0.9648   Epoch Loss: 0.9985   Epoch ETA: 0.0 m  29 sEpoch: 2   Step: 6   Batch Loss: 0.9481   Epoch Loss: 0.9913   Epoch ETA: 0.0 m  28 sEpoch: 2   Step: 7   Batch Loss: 0.9517   Epoch Loss: 0.9864   Epoch ETA: 0.0 m  26 sEpoch: 2   Step: 8   Batch Loss: 1.0637   Epoch Loss: 0.9950   Epoch ETA: 0.0 m  23 sEpoch: 2   Step: 9   Batch Loss: 0.8523   Epoch Loss: 0.9807   Epoch ETA: 0.0 m  22 sEpoch: 2   Step: 10   Batch Loss: 1.0943   Epoch Loss: 0.9910   Epoch ETA: 0.0 m  20 sEpoch: 2   Step: 11   Batch Loss: 0.9507   Epoch Loss: 0.9877   Epoch ETA: 0.0 m  19 sEpoch: 2   Step: 12   Batch Loss: 0.9496   Epoch Loss: 0.9847   Epoch ETA: 0.0 m  17 sEpoch: 2   Step: 13   Batch Loss: 0.9969   Epoch Loss: 0.9856   Epoch ETA: 0.0 m  16 sEpoch: 2   Step: 14   Batch Loss: 1.0782   Epoch Loss: 0.9918   Epoch ETA: 0.0 m  14 sEpoch: 2   Step: 15   Batch Loss: 0.9023   Epoch Loss: 0.9862   Epoch ETA: 0.0 m  13 sEpoch: 2   Step: 16   Batch Loss: 1.0787   Epoch Loss: 0.9916   Epoch ETA: 0.0 m  11 sEpoch: 2   Step: 17   Batch Loss: 1.0538   Epoch Loss: 0.9951   Epoch ETA: 0.0 m  9 sEpoch: 2   Step: 18   Batch Loss: 1.0013   Epoch Loss: 0.9954   Epoch ETA: 0.0 m  8 sEpoch: 2   Step: 19   Batch Loss: 0.9505   Epoch Loss: 0.9932   Epoch ETA: 0.0 m  6 sEpoch: 2   Step: 20   Batch Loss: 0.9851   Epoch Loss: 0.9928   Epoch ETA: 0.0 m  4 sEpoch: 2   Step: 21   Batch Loss: 1.0304   Epoch Loss: 0.9945   Epoch ETA: 0.0 m  3 sEpoch: 2   Step: 22   Batch Loss: 0.9727   Epoch Loss: 0.9935   Epoch ETA: 0.0 m  1 sTraining epoch 2 done
-Evaluating epoch: 2   Step: 0   Batch Score: 0.1948   Epoch Score: 0.1948   Epoch ETA: 0.0 m  1 sEvaluating epoch: 2   Step: 1   Batch Score: 0.3393   Epoch Score: 0.2671   Epoch ETA: 0.0 m  1 sEvaluating epoch: 2   Step: 2   Batch Score: 0.2827   Epoch Score: 0.2723   Epoch ETA: 0.0 m  1 sEvaluating epoch: 2   Step: 3   Batch Score: 0.2897   Epoch Score: 0.2766   Epoch ETA: 0.0 m  1 sEvaluating epoch: 2   Step: 4   Batch Score: 0.3968   Epoch Score: 0.3007   Epoch ETA: 0.0 m  0 sEvaluating epoch: 2   Step: 5   Batch Score: 0.3883   Epoch Score: 0.3153   Epoch ETA: 0.0 m  0 sEpoch: 2, test metric: 1.8915939629077911
-Epoch: 3   Step: 0   Batch Loss: 1.0419   Epoch Loss: 1.0419   Epoch ETA: 0.0 m  30 sEpoch: 3   Step: 1   Batch Loss: 0.9998   Epoch Loss: 1.0208   Epoch ETA: 0.0 m  35 sEpoch: 3   Step: 2   Batch Loss: 0.9233   Epoch Loss: 0.9883   Epoch ETA: 0.0 m  31 sEpoch: 3   Step: 3   Batch Loss: 1.0021   Epoch Loss: 0.9918   Epoch ETA: 0.0 m  30 sEpoch: 3   Step: 4   Batch Loss: 0.8744   Epoch Loss: 0.9683   Epoch ETA: 0.0 m  36 sEpoch: 3   Step: 5   Batch Loss: 0.9201   Epoch Loss: 0.9603   Epoch ETA: 0.0 m  33 sEpoch: 3   Step: 6   Batch Loss: 0.9153   Epoch Loss: 0.9538   Epoch ETA: 0.0 m  31 sEpoch: 3   Step: 7   Batch Loss: 0.9163   Epoch Loss: 0.9491   Epoch ETA: 0.0 m  28 sEpoch: 3   Step: 8   Batch Loss: 1.0122   Epoch Loss: 0.9562   Epoch ETA: 0.0 m  26 sEpoch: 3   Step: 9   Batch Loss: 0.8112   Epoch Loss: 0.9417   Epoch ETA: 0.0 m  24 sEpoch: 3   Step: 10   Batch Loss: 1.0494   Epoch Loss: 0.9515   Epoch ETA: 0.0 m  22 sEpoch: 3   Step: 11   Batch Loss: 0.8935   Epoch Loss: 0.9466   Epoch ETA: 0.0 m  20 sEpoch: 3   Step: 12   Batch Loss: 0.8901   Epoch Loss: 0.9423   Epoch ETA: 0.0 m  18 sEpoch: 3   Step: 13   Batch Loss: 0.9144   Epoch Loss: 0.9403   Epoch ETA: 0.0 m  17 sEpoch: 3   Step: 14   Batch Loss: 1.0147   Epoch Loss: 0.9452   Epoch ETA: 0.0 m  15 sEpoch: 3   Step: 15   Batch Loss: 0.8524   Epoch Loss: 0.9394   Epoch ETA: 0.0 m  13 sEpoch: 3   Step: 16   Batch Loss: 0.9850   Epoch Loss: 0.9421   Epoch ETA: 0.0 m  12 sEpoch: 3   Step: 17   Batch Loss: 0.9679   Epoch Loss: 0.9436   Epoch ETA: 0.0 m  10 sEpoch: 3   Step: 18   Batch Loss: 0.9066   Epoch Loss: 0.9416   Epoch ETA: 0.0 m  8 sEpoch: 3   Step: 19   Batch Loss: 0.8717   Epoch Loss: 0.9381   Epoch ETA: 0.0 m  6 sEpoch: 3   Step: 20   Batch Loss: 0.8818   Epoch Loss: 0.9354   Epoch ETA: 0.0 m  5 sEpoch: 3   Step: 21   Batch Loss: 0.9434   Epoch Loss: 0.9358   Epoch ETA: 0.0 m  3 sEpoch: 3   Step: 22   Batch Loss: 0.8828   Epoch Loss: 0.9335   Epoch ETA: 0.0 m  1 sTraining epoch 3 done
-Evaluating epoch: 3   Step: 0   Batch Score: 0.2003   Epoch Score: 0.2003   Epoch ETA: 0.0 m  1 sEvaluating epoch: 3   Step: 1   Batch Score: 0.3448   Epoch Score: 0.2726   Epoch ETA: 0.0 m  1 sEvaluating epoch: 3   Step: 2   Batch Score: 0.2904   Epoch Score: 0.2785   Epoch ETA: 0.0 m  1 sEvaluating epoch: 3   Step: 3   Batch Score: 0.2976   Epoch Score: 0.2833   Epoch ETA: 0.0 m  1 sEvaluating epoch: 3   Step: 4   Batch Score: 0.4057   Epoch Score: 0.3078   Epoch ETA: 0.0 m  0 sEvaluating epoch: 3   Step: 5   Batch Score: 0.3916   Epoch Score: 0.3217   Epoch ETA: 0.0 m  0 sEpoch: 3, test metric: 1.9303237050771713
-Epoch: 4   Step: 0   Batch Loss: 0.9228   Epoch Loss: 0.9228   Epoch ETA: 0.0 m  30 sEpoch: 4   Step: 1   Batch Loss: 0.8741   Epoch Loss: 0.8985   Epoch ETA: 0.0 m  35 sEpoch: 4   Step: 2   Batch Loss: 0.8375   Epoch Loss: 0.8781   Epoch ETA: 0.0 m  31 sEpoch: 4   Step: 3   Batch Loss: 0.8939   Epoch Loss: 0.8821   Epoch ETA: 0.0 m  30 sEpoch: 4   Step: 4   Batch Loss: 0.7625   Epoch Loss: 0.8582   Epoch ETA: 0.0 m  30 sEpoch: 4   Step: 5   Batch Loss: 0.8304   Epoch Loss: 0.8535   Epoch ETA: 0.0 m  29 sEpoch: 4   Step: 6   Batch Loss: 0.8005   Epoch Loss: 0.8460   Epoch ETA: 0.0 m  27 sEpoch: 4   Step: 7   Batch Loss: 0.8014   Epoch Loss: 0.8404   Epoch ETA: 0.0 m  25 sEpoch: 4   Step: 8   Batch Loss: 0.9060   Epoch Loss: 0.8477   Epoch ETA: 0.0 m  23 sEpoch: 4   Step: 9   Batch Loss: 0.6993   Epoch Loss: 0.8329   Epoch ETA: 0.0 m  22 sEpoch: 4   Step: 10   Batch Loss: 0.9078   Epoch Loss: 0.8397   Epoch ETA: 0.0 m  20 sEpoch: 4   Step: 11   Batch Loss: 0.7789   Epoch Loss: 0.8346   Epoch ETA: 0.0 m  20 sEpoch: 4   Step: 12   Batch Loss: 0.7825   Epoch Loss: 0.8306   Epoch ETA: 0.0 m  18 sEpoch: 4   Step: 13   Batch Loss: 0.7819   Epoch Loss: 0.8271   Epoch ETA: 0.0 m  17 sEpoch: 4   Step: 14   Batch Loss: 0.8754   Epoch Loss: 0.8303   Epoch ETA: 0.0 m  15 sEpoch: 4   Step: 15   Batch Loss: 0.7187   Epoch Loss: 0.8234   Epoch ETA: 0.0 m  13 sEpoch: 4   Step: 16   Batch Loss: 0.8578   Epoch Loss: 0.8254   Epoch ETA: 0.0 m  11 sEpoch: 4   Step: 17   Batch Loss: 0.8378   Epoch Loss: 0.8261   Epoch ETA: 0.0 m  10 sEpoch: 4   Step: 18   Batch Loss: 0.7922   Epoch Loss: 0.8243   Epoch ETA: 0.0 m  8 sEpoch: 4   Step: 19   Batch Loss: 0.7452   Epoch Loss: 0.8203   Epoch ETA: 0.0 m  6 sEpoch: 4   Step: 20   Batch Loss: 0.7674   Epoch Loss: 0.8178   Epoch ETA: 0.0 m  5 sEpoch: 4   Step: 21   Batch Loss: 0.8121   Epoch Loss: 0.8176   Epoch ETA: 0.0 m  3 sEpoch: 4   Step: 22   Batch Loss: 0.7374   Epoch Loss: 0.8141   Epoch ETA: 0.0 m  1 sTraining epoch 4 done
-Evaluating epoch: 4   Step: 0   Batch Score: 0.2001   Epoch Score: 0.2001   Epoch ETA: 0.0 m  1 sEvaluating epoch: 4   Step: 1   Batch Score: 0.3369   Epoch Score: 0.2685   Epoch ETA: 0.0 m  1 sEvaluating epoch: 4   Step: 2   Batch Score: 0.2866   Epoch Score: 0.2745   Epoch ETA: 0.0 m  1 sEvaluating epoch: 4   Step: 3   Batch Score: 0.2919   Epoch Score: 0.2789   Epoch ETA: 0.0 m  1 sEvaluating epoch: 4   Step: 4   Batch Score: 0.3980   Epoch Score: 0.3027   Epoch ETA: 0.0 m  0 sEvaluating epoch: 4   Step: 5   Batch Score: 0.3796   Epoch Score: 0.3155   Epoch ETA: 0.0 m  0 sEpoch: 4, test metric: 1.893083393573761
-Epoch: 5   Step: 0   Batch Loss: 0.7714   Epoch Loss: 0.7714   Epoch ETA: 0.0 m  31 sEpoch: 5   Step: 1   Batch Loss: 0.7693   Epoch Loss: 0.7704   Epoch ETA: 0.0 m  35 sEpoch: 5   Step: 2   Batch Loss: 0.7163   Epoch Loss: 0.7524   Epoch ETA: 0.0 m  31 sEpoch: 5   Step: 3   Batch Loss: 0.8005   Epoch Loss: 0.7644   Epoch ETA: 0.0 m  31 sEpoch: 5   Step: 4   Batch Loss: 0.6466   Epoch Loss: 0.7408   Epoch ETA: 0.0 m  30 sEpoch: 5   Step: 5   Batch Loss: 0.7111   Epoch Loss: 0.7359   Epoch ETA: 0.0 m  29 sEpoch: 5   Step: 6   Batch Loss: 0.6953   Epoch Loss: 0.7301   Epoch ETA: 0.0 m  27 sEpoch: 5   Step: 7   Batch Loss: 0.6947   Epoch Loss: 0.7257   Epoch ETA: 0.0 m  25 sEpoch: 5   Step: 8   Batch Loss: 0.7828   Epoch Loss: 0.7320   Epoch ETA: 0.0 m  23 sEpoch: 5   Step: 9   Batch Loss: 0.6131   Epoch Loss: 0.7201   Epoch ETA: 0.0 m  22 sEpoch: 5   Step: 10   Batch Loss: 0.7924   Epoch Loss: 0.7267   Epoch ETA: 0.0 m  20 sEpoch: 5   Step: 11   Batch Loss: 0.6916   Epoch Loss: 0.7238   Epoch ETA: 0.0 m  19 sEpoch: 5   Step: 12   Batch Loss: 0.6861   Epoch Loss: 0.7209   Epoch ETA: 0.0 m  17 sEpoch: 5   Step: 13   Batch Loss: 0.6835   Epoch Loss: 0.7182   Epoch ETA: 0.0 m  16 sEpoch: 5   Step: 14   Batch Loss: 0.7767   Epoch Loss: 0.7221   Epoch ETA: 0.0 m  14 sEpoch: 5   Step: 15   Batch Loss: 0.6396   Epoch Loss: 0.7169   Epoch ETA: 0.0 m  13 sEpoch: 5   Step: 16   Batch Loss: 0.7659   Epoch Loss: 0.7198   Epoch ETA: 0.0 m  11 sEpoch: 5   Step: 17   Batch Loss: 0.7447   Epoch Loss: 0.7212   Epoch ETA: 0.0 m  9 sEpoch: 5   Step: 18   Batch Loss: 0.7103   Epoch Loss: 0.7206   Epoch ETA: 0.0 m  8 sEpoch: 5   Step: 19   Batch Loss: 0.6717   Epoch Loss: 0.7182   Epoch ETA: 0.0 m  6 sEpoch: 5   Step: 20   Batch Loss: 0.6779   Epoch Loss: 0.7163   Epoch ETA: 0.0 m  5 sEpoch: 5   Step: 21   Batch Loss: 0.7338   Epoch Loss: 0.7171   Epoch ETA: 0.0 m  3 sEpoch: 5   Step: 22   Batch Loss: 0.6674   Epoch Loss: 0.7149   Epoch ETA: 0.0 m  1 sTraining epoch 5 done
-Evaluating epoch: 5   Step: 0   Batch Score: 0.1986   Epoch Score: 0.1986   Epoch ETA: 0.0 m  1 sEvaluating epoch: 5   Step: 1   Batch Score: 0.3240   Epoch Score: 0.2613   Epoch ETA: 0.0 m  1 sEvaluating epoch: 5   Step: 2   Batch Score: 0.2784   Epoch Score: 0.2670   Epoch ETA: 0.0 m  1 sEvaluating epoch: 5   Step: 3   Batch Score: 0.2827   Epoch Score: 0.2709   Epoch ETA: 0.0 m  1 sEvaluating epoch: 5   Step: 4   Batch Score: 0.3834   Epoch Score: 0.2934   Epoch ETA: 0.0 m  0 sEvaluating epoch: 5   Step: 5   Batch Score: 0.3586   Epoch Score: 0.3043   Epoch ETA: 0.0 m  0 sEpoch: 5, test metric: 1.8257184773683548
-Epoch: 6   Step: 0   Batch Loss: 0.6916   Epoch Loss: 0.6916   Epoch ETA: 0.0 m  30 sEpoch: 6   Step: 1   Batch Loss: 0.6981   Epoch Loss: 0.6949   Epoch ETA: 0.0 m  35 sEpoch: 6   Step: 2   Batch Loss: 0.6525   Epoch Loss: 0.6808   Epoch ETA: 0.0 m  31 sEpoch: 6   Step: 3   Batch Loss: 0.7093   Epoch Loss: 0.6879   Epoch ETA: 0.0 m  30 sEpoch: 6   Step: 4   Batch Loss: 0.5923   Epoch Loss: 0.6688   Epoch ETA: 0.0 m  30 sEpoch: 6   Step: 5   Batch Loss: 0.6449   Epoch Loss: 0.6648   Epoch ETA: 0.0 m  29 sEpoch: 6   Step: 6   Batch Loss: 0.6277   Epoch Loss: 0.6595   Epoch ETA: 0.0 m  27 sEpoch: 6   Step: 7   Batch Loss: 0.6454   Epoch Loss: 0.6577   Epoch ETA: 0.0 m  25 sEpoch: 6   Step: 8   Batch Loss: 0.7427   Epoch Loss: 0.6672   Epoch ETA: 0.0 m  23 sEpoch: 6   Step: 9   Batch Loss: 0.5607   Epoch Loss: 0.6565   Epoch ETA: 0.0 m  21 sEpoch: 6   Step: 10   Batch Loss: 0.7218   Epoch Loss: 0.6625   Epoch ETA: 0.0 m  20 sEpoch: 6   Step: 11   Batch Loss: 0.6288   Epoch Loss: 0.6597   Epoch ETA: 0.0 m  19 sEpoch: 6   Step: 12   Batch Loss: 0.6349   Epoch Loss: 0.6578   Epoch ETA: 0.0 m  17 sEpoch: 6   Step: 13   Batch Loss: 0.6248   Epoch Loss: 0.6554   Epoch ETA: 0.0 m  16 sEpoch: 6   Step: 14   Batch Loss: 0.7234   Epoch Loss: 0.6599   Epoch ETA: 0.0 m  14 s
