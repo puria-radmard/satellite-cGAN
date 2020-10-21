@@ -64,7 +64,7 @@ class Discriminator(nn.Module):
             LambdaLayer(lambd=lambda X: X.mean(-1).mean(-1)),
             # Fully connected -> real probability for each type
             nn.Linear(convchan5, self.num_classes),
-            nn.Sigmoid(),
+            nn.Sigmoid()
         ]
 
         self.model = construct_debug_model(layers, False)
@@ -73,10 +73,6 @@ class Discriminator(nn.Module):
         """
         X comes in as [N, H, W, C]
         """
-        try:
-            assert torch.min(X) >= -1 and torch.max(X) <= 1
-        except:
-            logging.warning("Exceeding standard range")
         if len(np.shape(X)) == 3:
             X = X[np.newaxis, :]
         if reorder:

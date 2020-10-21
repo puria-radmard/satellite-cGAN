@@ -125,12 +125,14 @@ class UNet(nn.Module):
         up = self.up4(up, X1)
         logits = self.out(up)
 
-        if self.n_classes == 1:
-            logits = nn.Sigmoid()(logits)
-        else:
-            logits = nn.Softmax(dim=1)(logits)
-
         return logits
+
+        if self.n_classes == 1:
+            output = nn.Sigmoid()(logits)
+        else:
+            output = nn.Softmax(dim=1)(logits)
+
+        return output
 
 
 def trainEpoch(model, epoch, optimizer, dataloader, num_steps, loss_fn):

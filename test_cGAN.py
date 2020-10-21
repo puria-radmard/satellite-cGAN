@@ -3,7 +3,7 @@ from train_cGAN import Config
 from pipelines.utils import *
 import torch
 
-model_weights = torch.load("saves/reg_model.epoch79.t7")["state"]
+model_weights = torch.load("saves/reg_no_sig_model.epoch79.t7")["state"]
 cGAN = ConditionalGAN(["LSTN"], ["NDVI", "NDBI", "NDWI"], 0, 0)
 cGAN.load_state_dict(model_weights)
 
@@ -31,4 +31,4 @@ LSTN_real /= np.nanmax(LSTN_real)
 plt.imsave("example_LSTN_real.png", (LSTN_real[:,:,0] + 1) / 2)
 
 LSTN_pred = cGAN.generator(torch.tensor(image)).reshape(256, 256)
-plt.imsave("example_LSTN_with_sigmoid.png", LSTN_pred.detach())
+plt.imsave("example_LSTN_without_sigmoid.png", LSTN_pred.detach())
