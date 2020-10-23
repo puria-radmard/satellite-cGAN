@@ -1,7 +1,12 @@
-from .opt import *
-from ..pipelines.utils import read_raster
+import sys
+from train_cGAN import Config
+from opt import *
+from cGAN import slice_middle
+from pipelines.utils import read_raster
 
-def optimised_NDVI_for_LSTN(model_path, image_root, config):
+default_config = Config({'lr': 1e-4})
+
+def optimised_NDVI_for_LSTN(model_path, image_root, config = default_config):
 
     map_optimiser = MapOptimiser(
         model_path=model_path,
@@ -9,18 +14,19 @@ def optimised_NDVI_for_LSTN(model_path, image_root, config):
         sub = ["NDVI"],
         classes = ["LSTN"]
     )
+    map_optimiser.cuda()
     loss_agent = NDVIToLSTNEvaluation()
 
     optimizer = torch.optim.Adam(map_optimiser.parameters(), lr=config.lr)
 
-    NDBI_image = read_raster(f"{image_root}.NDBI.tif")[0]
-    NDWI_image = read_raster(f"{image_root}.NDBI.tif")[0]
+    NDBI_image = slice_middle(read_raster(f"{image_root}.NDBI.tif")[0][:,:,np.newaxis])
+    NDWI_image = slice_middle(read_raster(f"{image_root}.NDBI.tif")[0][:,:,np.newaxis])
     LSTN_gt = read_raster(f"{image_root}.LSTN.tif")[0]
 
     map_optimiser.init_image(
         {
             "NDBI": NDBI_image,
-            "NWDI": NDWI_image
+            "NDWI": NDWI_image
         }
     )
 
@@ -32,5 +38,9 @@ def optimised_NDVI_for_LSTN(model_path, image_root, config):
             NDVI_map = map_optimiser.sub_image,
             original_LSTN_map = LSTN_gt
         )
-        loss.backwards()
+        loss.backward()
         optimizer.step()
+
+if __name__ == '__main__':
+
+    optimised_NDVI_for_LSTN(*sys.argv[1:])

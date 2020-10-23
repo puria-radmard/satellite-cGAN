@@ -1,7 +1,7 @@
 import torch
 from torch import nn
-from ..cGAN import ConditionalGAN
-from ..pipelines.utils import *
+from cGAN import ConditionalGAN
+from pipelines.utils import *
 from typing import List, Dict
 
 class MapOptimiser(nn.Module):
@@ -25,12 +25,12 @@ class MapOptimiser(nn.Module):
         self.flat = flat
         self.model_path = model_path
 
-    def init_image(self, flat_images: Dict[str, None]):
+    def init_image(self, flat_images):
 
         images = []
         for band in self.flat:
             images.append(flat_images[band])
-        self.flat_image = torch.Tensor(np.dstack(images))
+        self.flat_image = torch.Tensor(np.dstack(images)).cuda()
         self.sub_image = torch.autograd.Variable(torch.randn(256, 256, 1).cuda(), requires_grad=True)
 
     def forward(self):
@@ -48,6 +48,7 @@ class MapOptimiser(nn.Module):
 class NDVIToLSTNEvaluation(nn.Module):
 
     def __init__(self, NDVI_factor = 0.5):
+        super(NDVIToLSTNEvaluation, self).__init__()
         self.NDVI_factor = NDVI_factor
 
     @staticmethod
@@ -62,7 +63,7 @@ class NDVIToLSTNEvaluation(nn.Module):
         UHI = self.extract_thresh(LSTN_map, 1.0)
         UHI_squared_sum = torch.sum(torch.mul(UHI, UHI))
         
-        UHI_baseline = self.extract_thresh(original_LSTN_map, 1.0)
+        UHI_baseline = self.extract_thresh(torch.tensor(original_LSTN_map), 1.0)
         UHI_squared_sum_baseline = torch.sum(torch.mul(UHI_baseline, UHI_baseline))
 
         squared_loss = UHI_squared_sum - UHI_squared_sum_baseline\
