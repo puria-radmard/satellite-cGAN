@@ -1,15 +1,16 @@
 import sys
-from train_cGAN import Config
+import wandb
 from opt import *
+from train_cGAN import Config
 from cGAN import slice_middle
 from pipelines.utils import read_raster
 
 default_config = Config({'lr': 1e-4})
 
-def optimised_NDVI_for_LSTN(model_path, image_root, config = default_config):
+def optimised_NDVI_for_LSTN(config):
 
     map_optimiser = MapOptimiser(
-        model_path=model_path,
+        model_path=config.model_path,
         flat = ["NDBI", "NDWI"],
         sub = ["NDVI"],
         classes = ["LSTN"]
@@ -19,9 +20,17 @@ def optimised_NDVI_for_LSTN(model_path, image_root, config = default_config):
 
     optimizer = torch.optim.Adam(map_optimiser.parameters(), lr=config.lr)
 
-    NDBI_image = slice_middle(read_raster(f"{image_root}.NDBI.tif")[0][:,:,np.newaxis])
-    NDWI_image = slice_middle(read_raster(f"{image_root}.NDBI.tif")[0][:,:,np.newaxis])
-    LSTN_gt = read_raster(f"{image_root}.LSTN.tif")[0]
+    NDBI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
+    NDWI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
+    LSTN_gt = read_raster(f"{config.image_root}.LSTN.tif")[0]
+
+    wandb.log(
+        {
+            "NDBI image": [wandb.Image(NDBI_image, caption=f"NDBI image")],
+            "NDWI image": [wandb.Image(NDWI_image, caption=f"NDWI image")],
+            "Ground Truth temp image": [wandb.Image(LSTN_gt, caption=f"Ground Truth temp image")],
+        }
+    )
 
     map_optimiser.init_image(
         {
@@ -30,7 +39,7 @@ def optimised_NDVI_for_LSTN(model_path, image_root, config = default_config):
         }
     )
 
-    for _ in tqdm(range(5)):
+    for round_num_num in tqdm(range(5)):
 
         LSTN_map = map_optimiser()
         loss = loss_agent(
@@ -41,6 +50,16 @@ def optimised_NDVI_for_LSTN(model_path, image_root, config = default_config):
         loss.backward()
         optimizer.step()
 
+        wandb.log({"Round image": [wandb.Image(map_optimiser, caption=f"Round {round_num}")]})
+
+
+
 if __name__ == '__main__':
 
-    optimised_NDVI_for_LSTN(*sys.argv[1:])
+    config = {
+        "lr": ,
+        "model_path": ,
+        "image_root": ,
+    }
+    wandb.init(project="satellite-cGAN", config=config)
+    optimised_NDVI_for_LSTN(wandb.config)

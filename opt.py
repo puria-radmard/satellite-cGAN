@@ -1,8 +1,8 @@
 import torch
 from torch import nn
-from cGAN import ConditionalGAN
 from pipelines.utils import *
 from typing import List, Dict
+from cGAN import ConditionalGAN
 
 class MapOptimiser(nn.Module):
 
@@ -39,6 +39,8 @@ class MapOptimiser(nn.Module):
         LSTN_map = self.cGAN.generator(input_image)
 
         return LSTN_map
+
+    def show_
 
     def show_image(self):
 
