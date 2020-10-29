@@ -24,7 +24,6 @@ for image_id in tqdm(image_ids):
     imV[imV!=imV]=0
     imB[imB!=imB]=0
     imW[imW!=imW]=0
-
     image = np.dstack([imV, imB, imW])
 
     LSTN_real = read_raster(f'{image_id}.LSTN.tif')[0][:,:,np.newaxis]
@@ -40,27 +39,27 @@ for image_id in tqdm(image_ids):
     fig, axs = plt.subplots(2, 3, figsize = (30, 20))
     fig.suptitle(image_name, fontsize=50)
 
-    axs[0,0].imshow(imV, cmap='Greens')
+    axs[0,0].imshow(imV, cmap='Greens', vmin=-1.0, vmax=1.0)
     axs[0,0].set_title("NDVI", fontsize = 30)
     fig.colorbar(cm.ScalarMappable(cmap='Greens'), ax=axs[0,0])
 
-    axs[0,1].imshow(imB, cmap='gray')   
+    axs[0,1].imshow(imB, cmap='gray', vmin=-1.0, vmax=1.0)  
     axs[0,1].set_title("NDBI", fontsize = 30)
     fig.colorbar(cm.ScalarMappable(cmap='gray'), ax=axs[0,1])
 
-    axs[0,2].imshow(imW, cmap='Blues')  
+    axs[0,2].imshow(imW, cmap='Blues', vmin=-1.0, vmax=1.0)
     axs[0,2].set_title("NDWI", fontsize = 30)
     fig.colorbar(cm.ScalarMappable(cmap='Blues'), ax=axs[0,2])
 
-    axs[1,0].imshow(LST_real, cmap='inferno')
+    axs[1,0].imshow(LST_real, cmap='inferno', vmin=-3.0, vmax=3.0)
     axs[1,0].set_title("Real temperature (C)", fontsize = 30)
     fig.colorbar(cm.ScalarMappable(cmap='inferno'), ax=axs[1,0])
 
-    axs[1,1].imshow(LSTN_pred, cmap='magma')  
+    axs[1,1].imshow(LSTN_pred, cmap='magma', vmin=-3.0, vmax=3.0)  
     axs[1,1].set_title("Predicted normalised temperature", fontsize = 30)
     fig.colorbar(cm.ScalarMappable(cmap='magma'), ax=axs[1,1])
 
-    axs[1,2].imshow(LSTN_pred-LSTN_real, cmap='plasma') 
+    axs[1,2].imshow(LSTN_pred-LSTN_real, cmap='plasma', vmin=-3.0, vmax=3.0) 
     axs[1,2].set_title("Predicted - real normalised LST", fontsize = 30)
     fig.colorbar(cm.ScalarMappable(cmap='plasma'), ax=axs[1,2])
 
