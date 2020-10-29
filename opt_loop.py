@@ -22,7 +22,7 @@ def optimised_NDVI_for_LSTN(config):
 
     NDBI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
     NDWI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
-    LSTN_gt = read_raster(f"{config.image_root}.LSTN.tif")[0]
+    LSTN_gt    = slice_middle(read_raster(f"{config.image_root}.LSTN.tif")[0][:,:,np.newaxis])
 
     wandb.log(
         {
@@ -36,10 +36,11 @@ def optimised_NDVI_for_LSTN(config):
         {
             "NDBI": NDBI_image,
             "NDWI": NDWI_image
-        }
+        },
+        LSTN_gt
     )
 
-    for round_num_num in tqdm(range(5)):
+    for round_num in tqdm(range(config.epochs)):
 
         LSTN_map = map_optimiser()
         loss = loss_agent(
@@ -49,17 +50,17 @@ def optimised_NDVI_for_LSTN(config):
         )
         loss.backward()
         optimizer.step()
-
-        wandb.log({"Round image": [wandb.Image(map_optimiser, caption=f"Round {round_num}")]})
+        wandb.log({"Round image": [wandb.Image(map_optimiser.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
 
 
 
 if __name__ == '__main__':
 
     config = {
-        "lr": ,
-        "model_path": ,
-        "image_root": ,
+        "lr": 1e-4,
+        "model_path": sys.argv[1],
+        "image_root": sys.argv[2],
+        "epochs": 500
     }
     wandb.init(project="satellite-cGAN", config=config)
     optimised_NDVI_for_LSTN(wandb.config)

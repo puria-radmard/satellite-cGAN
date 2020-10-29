@@ -1,3 +1,4 @@
+import wandb
 import torch
 from torch import nn
 from pipelines.utils import *
@@ -25,13 +26,16 @@ class MapOptimiser(nn.Module):
         self.flat = flat
         self.model_path = model_path
 
-    def init_image(self, flat_images):
+    def init_image(self, flat_images, init_image):
 
         images = []
         for band in self.flat:
             images.append(flat_images[band])
         self.flat_image = torch.Tensor(np.dstack(images)).cuda()
-        self.sub_image = torch.autograd.Variable(torch.randn(256, 256, 1).cuda(), requires_grad=True)
+        self.sub_image = torch.autograd.Variable(
+            torch.randn(256, 256, 1).cuda() + torch.tensor(init_image).cuda(),
+            requires_grad=True
+        ).double()
 
     def forward(self):
 
@@ -39,8 +43,6 @@ class MapOptimiser(nn.Module):
         LSTN_map = self.cGAN.generator(input_image)
 
         return LSTN_map
-
-    def show_
 
     def show_image(self):
 
@@ -67,6 +69,14 @@ class NDVIToLSTNEvaluation(nn.Module):
         
         UHI_baseline = self.extract_thresh(torch.tensor(original_LSTN_map), 1.0)
         UHI_squared_sum_baseline = torch.sum(torch.mul(UHI_baseline, UHI_baseline))
+        import pdb; pdb.set_trace()
+
+        wandb.log(
+            {
+                "UHI_diff": UHI_squared_sum - UHI_squared_sum_baseline,
+                "Vegetation squared sum": vegetation_squared_sum
+            }
+        )
 
         squared_loss = UHI_squared_sum - UHI_squared_sum_baseline\
               + self.NDVI_factor * vegetation_squared_sum

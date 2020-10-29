@@ -26,7 +26,6 @@ class EarthEngineDownloader:
     def read_dataset_geojson(geojson_addr: str) -> dict:
         with open(geojson_addr, "r") as gjfile:
             gjinfo = json.load(gjfile)
-        gjinfo = cambs_geojson.copy()
         return gjinfo
 
     @staticmethod
