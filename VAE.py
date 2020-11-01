@@ -32,8 +32,8 @@ class VAE32UpBlock(nn.Module):
         # Channels are doubled by upconv
         layers = [
             nn.Conv2d(in_channels, out_channels, kernel_size=4, padding=0),
-            nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
+            nn.BatchNorm2d(out_channels),
             nn.Dropout(p=dropout),
         ]
         self.dbconv = nn.Sequential(*layers)
