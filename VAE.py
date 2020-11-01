@@ -71,7 +71,9 @@ class VariationalAutoencoder32(nn.Module):
             VAE32DownBlock(128, 512, dropout),
             LambdaLayer(lambd= lambda X: X.view(X.shape[0], -1)),
             nn.Linear(4608, latent_dim),
-            VAE32UpBlock(512, 128, dropout),
+            nn.SamplingLayer(latent_dim),
+            LambdaLayer(lambd= lambda X: X.view(X.shape[0], 4, 4, 64)),
+            VAE32UpBlock(64, 128, dropout),
             VAE32UpBlock(128, 64, dropout),
             VAE32UpBlock(64, 3, dropout)
         ]
