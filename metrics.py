@@ -60,7 +60,7 @@ def jaccardIndex(preds, labels, class_weights=None):
     indices = (1 / size) * torch.sum(
         preds * labels / (preds + labels - labels * preds + 1e-10)
     )
-    
+
     return indices
 
 
@@ -107,13 +107,15 @@ class TargettedRegressionClassification(nn.Module):
         self.reg_lambda = kwargs["reg_lambda"]
 
     def forward(self, preds, labels):
-        reg_preds = preds[:,self.reg_layer]
-        cls_preds = preds[:,self.cls_layer]
+        reg_preds = preds[:, self.reg_layer]
+        cls_preds = preds[:, self.cls_layer]
         mul_preds = cls_preds * reg_preds
 
-        reg_labels = labels[:,:,:,self.reg_layer]
-        cls_labels = labels[:,:,:,self.cls_layer]
-        import pdb; pdb.set_trace() # check that cls_layer is binary
+        reg_labels = labels[:, :, :, self.reg_layer]
+        cls_labels = labels[:, :, :, self.cls_layer]
+        import pdb
+
+        pdb.set_trace()  # check that cls_layer is binary
 
         reg_loss = self.reg_loss_func(mul_preds, reg_labels)
         cls_loss = self.cls_loss_func(cls_preds, cls_labels)
