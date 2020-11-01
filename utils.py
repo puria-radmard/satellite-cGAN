@@ -1,6 +1,7 @@
 import torch
 import numpy as np
-
+from torch import nn
+from imports import *
 
 def reshape_for_discriminator(a, num_classes):
     # Change shape from [N, C, H, W] to [NxC, 1, H, W]
@@ -35,7 +36,7 @@ class LambdaLayer(nn.Module):
         return self.lambd(X)
 
 
-class LandsatDataset(Dataset):
+class BaseCNNDatabase(Dataset):
     def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
         """
         TODO: Ask about transformation viability

@@ -11,7 +11,7 @@ class VAE32DownBlock(nn.Module):
         super().__init__()
 
         layers = [
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=0),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
             nn.Dropout(p=dropout),
@@ -33,7 +33,7 @@ class VAE32UpBlock(nn.Module):
         layers = [
             nn.ConvTranspose2d(
                 in_channels, out_channels, kernel_size=2, stride=2
-            )
+            ),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
         ]
@@ -61,19 +61,19 @@ class SamplingLayer(nn.Module):
 
 class VariationalAutoencoder32(nn.Module):
 
-    def __init__(self, latent_dim):
+    def __init__(self, latent_dim, dropout):
 
         super(VariationalAutoencoder32, self).__init__()
         
         layers = [
-            VAE32DownBlock(1, 64, dropout),
+            VAE32DownBlock(3, 64, dropout),
             VAE32DownBlock(64, 128, dropout),
             VAE32DownBlock(128, 512, dropout),
             LambdaLayer(lambd= lambda X: X.view(X.shape[0], -1)),
-            nn.Linear(500, latent_dim),
+            nn.Linear(4608, latent_dim),
             VAE32UpBlock(512, 128, dropout),
             VAE32UpBlock(128, 64, dropout),
-            VAE32UpBlock(64, 1, dropout)
+            VAE32UpBlock(64, 3, dropout)
         ]
 
         self.model = construct_debug_model(layers, True)
