@@ -24,10 +24,13 @@ class NDBIOperation(Operation):
     bands_required = ["B6", "B5"]
 
     def operation(self, rasters):
-        return [
-            (rasters["B6"][0] - rasters["B5"][0])
-            / (rasters["B6"][0] + rasters["B5"][0])
-        ], None
+        return (
+            [
+                (rasters["B6"][0] - rasters["B5"][0])
+                / (rasters["B6"][0] + rasters["B5"][0])
+            ],
+            None,
+        )
 
 
 class NDWIOperation(Operation):
@@ -35,10 +38,13 @@ class NDWIOperation(Operation):
     bands_required = ["B3", "B5"]
 
     def operation(self, rasters):
-        return [
-            (rasters["B3"][0] - rasters["B5"][0])
-            / (rasters["B3"][0] + rasters["B5"][0])
-        ], None
+        return (
+            [
+                (rasters["B3"][0] - rasters["B5"][0])
+                / (rasters["B3"][0] + rasters["B5"][0])
+            ],
+            None,
+        )
 
 
 class NDVIOperation(Operation):
@@ -46,10 +52,13 @@ class NDVIOperation(Operation):
     bands_required = ["B4", "B5"]
 
     def operation(self, rasters):
-        return [
-            (rasters["B5"][0] - rasters["B4"][0])
-            / (rasters["B5"][0] + rasters["B4"][0])
-        ], None
+        return (
+            [
+                (rasters["B5"][0] - rasters["B4"][0])
+                / (rasters["B5"][0] + rasters["B4"][0])
+            ],
+            None,
+        )
 
 
 def emissivity_func(P_v, NDVI, args):

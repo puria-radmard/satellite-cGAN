@@ -5,8 +5,6 @@ from train_cGAN import Config
 from cGAN import slice_middle
 from pipelines.utils import read_raster
 
-default_config = Config({'lr': 1e-4})
-
 def optimised_NDVI_for_LSTN(config):
 
     map_optimiser = MapOptimiser(
@@ -51,7 +49,6 @@ def optimised_NDVI_for_LSTN(config):
         loss.backward()
         optimizer.step()
         wandb.log({"Round image": [wandb.Image(map_optimiser.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
-
 
 
 if __name__ == '__main__':

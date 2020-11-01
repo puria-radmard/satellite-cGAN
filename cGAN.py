@@ -1,38 +1,13 @@
 from pprint import pprint
 from pipelines.utils import *
 from imports import *
+from utils import *
 from unet import *
 from config import metric_dict
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class LambdaLayer(nn.Module):
-    def __init__(self, lambd):
-        super(LambdaLayer, self).__init__()
-        self.lambd = lambd
-
-    def forward(self, X):
-        return self.lambd(X)
-
-
-class PrintLayer(nn.Module):
-    def __init__(self):
-        super(PrintLayer, self).__init__()
-
-    def forward(self, X):
-        print(X.shape)
-        return X
-
-
-def construct_debug_model(layers, debug=False):
-    modules = []
-    for layer in layers:
-        modules.append(layer)
-        if debug:
-            modules.append(PrintLayer())
-    model = nn.Sequential(*modules)
-    return model
 
 
 class Discriminator(nn.Module):
@@ -65,7 +40,7 @@ class Discriminator(nn.Module):
             LambdaLayer(lambd=lambda X: X.mean(-1).mean(-1)),
             # Fully connected -> real probability for each type
             nn.Linear(convchan5, self.num_classes),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         ]
 
         self.model = construct_debug_model(layers, False)
@@ -102,125 +77,6 @@ class ConditionalGAN(nn.Module):
         )
 
 
-class LandsatDataset(Dataset):
-    def __init__(
-        self,
-        groups,
-        channels: List[str],
-        classes: List[str],
-        transform=None,
-    ):
-        """
-        TODO: Ask about transformation viability
-        """
-
-        # Group comes in as a train/test set - it is split up before it gets here
-        self.groups = groups
-        self.transform = transform
-        # Channel names must be in the right order
-        self.channels = channels
-        self.classes = classes
-
-    def __len__(self):
-        return len(self.groups)
-
-    def __getitem__(self, idx):
-
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        group = self.groups[idx]
-        input_images = []
-        label_images = []
-
-        for input_channel in self.channels:
-            image = read_raster(group[input_channel])[0]
-            image -= np.nanmin(image)
-            image = 2 * (image / np.nanmax(image)) - 1
-            image = np.expand_dims(image, -1)
-            image = slice_middle(image)
-            if isinstance(image, type(None)):
-                return {
-                    "image": np.array([None]),
-                    "label": np.array([None]),
-                }
-            input_images.append(image)
-
-        for label_channel in self.classes:
-            image = read_raster(group[label_channel])[0]
-            image -= np.nanmin(image)
-            image = 2 * (image / np.nanmax(image)) - 1
-            image = np.expand_dims(image, -1)
-            image = slice_middle(image)
-            label_images.append(image)
-
-        sample = {
-            "image": np.dstack(input_images),
-            "label": np.dstack(label_images),
-        }
-
-        return sample
-
-
-class DummyDataset(Dataset):
-    def __init__(self, channels, classes):
-        self.channels = channels
-        self.classes = classes
-        self.groups = [1 for a in range(60)]
-
-    def __len__(self):
-        return len(self.groups)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        dummy_instance = self.groups[idx]
-
-        sample = {
-            "image": np.random.rand(256, 256, len(self.channels)),
-            "label": np.random.rand(len(self.classes), 256, 256),
-        }
-
-        return sample
-
-
-def slice_middle(image, size=256, remove_nan=True):
-    mix, miy = [int(m / 2) for m in image.shape[:2]]
-    s = int(size / 2)
-    sliced_image = image[mix - s : mix + s, miy - s : miy + s]
-    if remove_nan:
-        sliced_image[sliced_image != sliced_image] = 0.0
-    if sliced_image.shape != (size, size, 1):
-        return None
-    return sliced_image
-
-
-def write_loading_bar_string(
-    metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training=True
-):
-
-    if training:
-        metric_name = "Loss"
-        title = "E"
-    else:
-        metric_name = "Score"
-        title = "Evaluating e"
-
-    metric = sum(metrics)
-    epoch_metric_tot += metric
-    epoch_metric = epoch_metric_tot / ((step + 1))
-    steps_left = num_steps - step
-    time_passed = time.time() - start_time
-    ETA = (time_passed / (step + 1)) * (steps_left)
-    ETA = "{} m  {} s".format(np.floor(ETA / 60), int(ETA % 60))
-
-    string = "{}poch: {}   Step: {}   Batch {}: {:.4f}   Epoch {}: {:.4f}   Epoch ETA: {}".format(
-        title, epoch, step, metric_name, metric, metric_name, epoch_metric, ETA
-    )
-
-    return string, epoch_metric_tot
-
 
 def landsat_train_test_dataset(
     data_dir,
@@ -241,10 +97,7 @@ def landsat_train_test_dataset(
     groups = group_bands(data_dir, channels + classes)
 
     train_groups, test_groups = train_test_split(
-        groups,
-        test_size=test_size,
-        train_size=train_size,
-        random_state=random_state,
+        groups, test_size=test_size, train_size=train_size, random_state=random_state
     )
 
     print(
@@ -252,36 +105,13 @@ def landsat_train_test_dataset(
     )
 
     train_dataset = LandsatDataset(
-        groups=train_groups,
-        channels=channels,
-        classes=classes,
+        groups=train_groups, channels=channels, classes=classes
     )
     test_dataset = LandsatDataset(
-        groups=test_groups,
-        channels=channels,
-        classes=classes,
+        groups=test_groups, channels=channels, classes=classes
     )
 
     return train_dataset, test_dataset
-
-
-def reshape_for_discriminator(a, num_classes):
-    # Change shape from [N, C, H, W] to [NxC, 1, H, W]
-    return a.view(a.shape[0] * num_classes, 1, a.shape[2], a.shape[3])
-
-
-def reshape_for_discriminator2(a, num_classes):
-    # Change shape from [N, C, H, W] to [NxC, 1, H, W]
-    return a.view(a.shape[0] * num_classes, 1, a.shape[1], a.shape[2])
-
-
-def skip_tris(batch):
-    batch = list(filter(lambda x: x["image"].shape[:2] is (256, 256), batch))
-    for b in batch:
-        b['image'] = b['image'].astype('float64')
-        b['label'] = b['label'].astype('float64')
-    print(len(batch))
-    return default_collate(batch)
 
 
 def train_cGAN_epoch(
@@ -343,9 +173,7 @@ def train_cGAN_epoch(
 
         # Train discriminator
         # Very dodgy way to do this
-        dis_targets_real = torch.cat(
-            [torch.eye(len(cGAN.classes)) for _ in preds],
-        )
+        dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
         # print("dis_targets_real", dis_targets_real)
         labels = labels.type_as(preds)
 
@@ -387,9 +215,7 @@ def train_cGAN_epoch(
         del adversarial_loss_gene
 
         if wandb_flag:
-            wandb.log(
-                {"iteration_loss": sum(losses)}
-            )
+            wandb.log({"iteration_loss": sum(losses)})
 
         if step == num_steps:
             break

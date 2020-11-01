@@ -217,12 +217,7 @@ def get_area_bbox(geojson):
     coords = [np.array(a["geometry"]["coordinates"][0]) for a in geojson["features"]]
     Xs = np.concatenate([a[:, 0] for a in coords])
     Ys = np.concatenate([a[:, 1] for a in coords])
-    bounds = {
-        "top": max(Ys),
-        "bottom": min(Ys),
-        "right": max(Xs),
-        "left": min(Xs),
-    }
+    bounds = {"top": max(Ys), "bottom": min(Ys), "right": max(Xs), "left": min(Xs)}
 
     coords = [
         [bounds["left"], bounds["top"]],
