@@ -31,10 +31,11 @@ class VAE32UpBlock(nn.Module):
 
         # Channels are doubled by upconv
         layers = [
-            nn.Conv2d(in_channels, out_channels, kernel_size=4, padding=0),
+            nn.ConvTranspose2d(
+                in_channels, out_channels, kernel_size=2, stride=2
+            )
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
-            nn.Dropout(p=dropout),
         ]
         self.dbconv = nn.Sequential(*layers)
 
@@ -69,5 +70,14 @@ class VariationalAutoencoder32(nn.Module):
             VAE32DownBlock(64, 128, dropout),
             VAE32DownBlock(128, 512, dropout),
             LambdaLayer(lambd= lambda X: X.view(X.shape[0], -1)),
-            nn.Linear(, latent_dim)
+            nn.Linear(500, latent_dim),
+            VAE32UpBlock(512, 128, dropout),
+            VAE32UpBlock(128, 64, dropout),
+            VAE32UpBlock(64, 1, dropout)
         ]
+
+        self.model = construct_debug_model(layers, True)
+
+    def forward(self, X):
+
+        return self.model(X)

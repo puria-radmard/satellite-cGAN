@@ -7,13 +7,6 @@ from config import metric_dict
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class PrintLayer(nn.Module):
-    def __init__(self):
-        super(PrintLayer, self).__init__()
-
-    def forward(self, X):
-        print(X.shape)
-        return X
 
 
 class Discriminator(nn.Module):

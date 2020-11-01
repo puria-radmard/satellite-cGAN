@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 
+
 def reshape_for_discriminator(a, num_classes):
     # Change shape from [N, C, H, W] to [NxC, 1, H, W]
     return a.view(a.shape[0] * num_classes, 1, a.shape[2], a.shape[3])
@@ -16,6 +17,15 @@ def skip_tris(batch):
     return default_collate(batch)
 
 
+class PrintLayer(nn.Module):
+    def __init__(self):
+        super(PrintLayer, self).__init__()
+
+    def forward(self, X):
+        print(X.shape)
+        return X
+
+
 class LambdaLayer(nn.Module):
     def __init__(self, lambd):
         super(LambdaLayer, self).__init__()
@@ -23,7 +33,7 @@ class LambdaLayer(nn.Module):
 
     def forward(self, X):
         return self.lambd(X)
-        
+
 
 class LandsatDataset(Dataset):
     def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
