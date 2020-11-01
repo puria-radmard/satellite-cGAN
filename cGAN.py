@@ -1,3 +1,4 @@
+from pprint import pprint
 from pipelines.utils import *
 from imports import *
 from unet import *
@@ -140,8 +141,8 @@ class LandsatDataset(Dataset):
             image = slice_middle(image)
             if isinstance(image, type(None)):
                 return {
-                    "image": [None],
-                    "label": [None],
+                    "image": np.array([None]),
+                    "label": np.array([None]),
                 }
             input_images.append(image)
 
@@ -275,7 +276,11 @@ def reshape_for_discriminator2(a, num_classes):
 
 
 def skip_tris(batch):
-    batch = list(filter(lambda x: x["image"][0] is not None, batch))
+    batch = list(filter(lambda x: x["image"].shape[:2] is (256, 256), batch))
+    for b in batch:
+        b['image'] = b['image'].astype('float64')
+        b['label'] = b['label'].astype('float64')
+    print(len(batch))
     return default_collate(batch)
 
 
@@ -476,10 +481,10 @@ def train_cGAN(config):
         test_dataset = DummyDataset(channels=config.channels, classes=config.classes)
 
     train_dataloader = DataLoader(
-        train_dataset, batch_size=config.batch_size, collate_fn=skip_tris
+        train_dataset, batch_size=config.batch_size, # collate_fn=skip_tris
     )
     test_dataloader = DataLoader(
-        test_dataset, batch_size=config.batch_size, collate_fn=skip_tris
+        test_dataset, batch_size=config.batch_size, # collate_fn=skip_tris
     )  # Change to own batch size?
 
     train_num_steps = len(train_dataloader)
