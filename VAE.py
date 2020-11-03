@@ -54,9 +54,10 @@ class SamplingLayer(nn.Module):
     def forward(self, X):
         "X comes in size (batch_size, latent_dim)"
 
-        t_mean, t_log_var = X[:,:self.latent_dim], X[:,self.latent_dim:]
+        t_mean = X[:,:int(self.latent_dim/2)]
+        t_log_var = X[:,int(self.latent_dim/2):]
 
-        return torch.normal(t_mean, np.exp(0.5 * t_log_var))
+        return torch.normal(t_mean, torch.exp(0.5 * t_log_var))
 
 
 class VariationalAutoencoder32(nn.Module):
@@ -64,6 +65,8 @@ class VariationalAutoencoder32(nn.Module):
     def __init__(self, latent_dim, dropout):
 
         super(VariationalAutoencoder32, self).__init__()
+
+        self.latent_dim = latent_dim
         
         layers = [
             VAE32DownBlock(3, 64, dropout),
@@ -71,9 +74,9 @@ class VariationalAutoencoder32(nn.Module):
             VAE32DownBlock(128, 512, dropout),
             LambdaLayer(lambd= lambda X: X.view(X.shape[0], -1)),
             nn.Linear(4608, latent_dim),
-            nn.SamplingLayer(latent_dim),
-            LambdaLayer(lambd= lambda X: X.view(X.shape[0], 4, 4, 64)),
-            VAE32UpBlock(64, 128, dropout),
+            SamplingLayer(latent_dim),
+            LambdaLayer(lambd= lambda X: X.view(X.shape[0], int(latent_dim/32), 4, 4)),
+            VAE32UpBlock(int(latent_dim/32), 128, dropout),
             VAE32UpBlock(128, 64, dropout),
             VAE32UpBlock(64, 3, dropout)
         ]

@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from torch import nn
 from imports import *
+from pipelines.utils import *
 
 def reshape_for_discriminator(a, num_classes):
     # Change shape from [N, C, H, W] to [NxC, 1, H, W]
