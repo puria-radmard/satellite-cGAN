@@ -1,7 +1,9 @@
-from .imports import *
+# from .imports import *
+import os, ee, glob, json, pyproj, pygeohash, logging, rasterio, numpy as np, matplotlib.pyplot as plt
+from itertools import groupby
+from tqdm import tqdm
 
-
-def group_bands(root: str, bands: List[str]) -> List[Dict[str, str]]:
+def group_bands(root: str, bands: list[str]) -> list[dict[str, str]]:
     """
     Given a root folder (e.g. "/../../../LONDON_DATASET") and a list of bands, such as ["B2", "B3", "B4"], this
     returns a list of dicts like
@@ -51,7 +53,7 @@ def group_bands(root: str, bands: List[str]) -> List[Dict[str, str]]:
     return groups
 
 
-def group_cities_by_time(root: str, band: str) -> Dict[str, Dict[str, str]]:
+def group_cities_by_time(root: str, band: str) -> dict[str, dict[str, str]]:
     """
     This is similar to group_bands, except returns a mapping of images taken at the same time in the root
     """
@@ -83,7 +85,7 @@ def group_cities_by_time(root: str, band: str) -> Dict[str, Dict[str, str]]:
     return out_dict
 
 
-def save_calculated_raster(raster_meta: Dict, path: str, image: np.ndarray):
+def save_calculated_raster(raster_meta: dict, path: str, image: np.ndarray):
     """Save image as a tif with metadata"""
 
     image = image[0]
@@ -97,7 +99,7 @@ def save_calculated_raster(raster_meta: Dict, path: str, image: np.ndarray):
             dst.write_band(1, image)
 
 
-def get_property_path(group: Dict[str, str], prop_name: str):
+def get_property_path(group: dict[str, str], prop_name: str):
     """
     Given a group, as in an element of a list produced by group_bands, and a band name, this returns the new
     filename for that band image.
@@ -195,7 +197,7 @@ def rasterise_bands(root, bands):
                 dst.write_band(id, fa)
 
 
-def get_metadata(group: Dict[str, str]):
+def get_metadata(group: dict[str, str]):
     """
     Given a group produced by group_bands, this gets the metadata from the same folder
     """
