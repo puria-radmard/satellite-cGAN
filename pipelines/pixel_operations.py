@@ -26,8 +26,8 @@ class NDBIOperation(Operation):
     def operation(self, rasters):
         return (
             [
-                (rasters["B6"][0] - rasters["B5"][0])
-                / (rasters["B6"][0] + rasters["B5"][0])
+                (rasters["B6"][0].astype(float) - rasters["B5"][0].astype(float))
+                / (rasters["B6"][0].astype(float) + rasters["B5"][0].astype(float))
             ],
             None,
         )
@@ -40,8 +40,8 @@ class NDWIOperation(Operation):
     def operation(self, rasters):
         return (
             [
-                (rasters["B3"][0] - rasters["B5"][0])
-                / (rasters["B3"][0] + rasters["B5"][0])
+                (rasters["B3"][0].astype(float) - rasters["B5"][0].astype(float))
+                / (rasters["B3"][0].astype(float) + rasters["B5"][0].astype(float))
             ],
             None,
         )
@@ -54,8 +54,8 @@ class NDVIOperation(Operation):
     def operation(self, rasters):
         return (
             [
-                (rasters["B5"][0] - rasters["B4"][0])
-                / (rasters["B5"][0] + rasters["B4"][0])
+                (rasters["B5"][0].astype(float) - rasters["B4"][0].astype(float))
+                / (rasters["B5"][0].astype(float) + rasters["B4"][0].astype(float))
             ],
             None,
         )
@@ -100,18 +100,18 @@ class LSTOperation(Operation):
     def operation(self, rasters):
         # Notice format return [image], None
         TOA_raster = (
-            self.variables["M_L"] * rasters["B10"][0] + self.variables["A_L"] - 0.29
+            self.variables["M_L"] * rasters["B10"][0].astype(float) + self.variables["A_L"] - 0.29
         )
         BT_raster = (
             self.variables["K2"] / np.log(1 + self.variables["K1"] / TOA_raster)
         ) - 273.15
         VEP_raster = (
-            (rasters["NDVI"][0] - self.variables["NDVIs"])
+            (rasters["NDVI"][0].astype(float) - self.variables["NDVIs"])
             / (self.variables["NDVIv"] - self.variables["NDVIs"])
         ) ** 2
         # EPS_raster = self.variables["C_lambda"] + self.variables["EPS_v_lambda"]*VEP_raster + self.variables["EPS_s_lambda"]*(1-VEP_raster)
         EPS_raster = np.vectorize(emissivity_func)(
-            P_v=VEP_raster, NDVI=rasters["NDVI"][0], args=self.variables
+            P_v=VEP_raster, NDVI=rasters["NDVI"][0].astype(float), args=self.variables
         )
         LST_raster = BT_raster / (
             1
@@ -121,3 +121,16 @@ class LSTOperation(Operation):
             / self.variables["CONST_B"]
         )
         return [LST_raster], None
+
+if __name__ == '__main__':
+    landsat_operation_pipeline = OperationPipeline(
+        sequence = [
+          NDVIOperation(),
+          NDBIOperation(),
+          NDWIOperation(),
+          LSTOperation(),
+        ]
+    )
+
+    landsat_operation_pipeline(root = "../../data_source/LONDON_DATASET/")
+

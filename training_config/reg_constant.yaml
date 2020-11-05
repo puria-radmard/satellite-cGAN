@@ -17,7 +17,7 @@ test_parameters:
   null
 
 lr:
-  0.0006398200966216355
+  0.000193276
 
 data_dir:
   "../data_source/LONDON_DATASET"
@@ -35,7 +35,7 @@ dis_dropout:
   0.4772206496773703
 
 gen_dropout:
-  0.42446595397318554
+  0.241197
 
 save_rate:
   10

@@ -150,6 +150,8 @@ def train_cGAN_epoch(
         # print("doing comparison loss between")
         # print("preds:", preds.shape)
         # print("labels:", labels.shape)
+
+        comparison_loss_factor = 1.0
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
             preds.float(), labels.float().reshape(preds.shape)
         )
@@ -159,21 +161,21 @@ def train_cGAN_epoch(
         #    "discriminating preds for generator with input size",
         #    reshape_for_discriminator(preds, len(cGAN.classes)).shape
         # )
-        dis_probs_gene = cGAN.discriminator.forward(
-            reshape_for_discriminator(preds, len(cGAN.classes)), reorder=False
-        )
+#        dis_probs_gene = cGAN.discriminator.forward(
+#            reshape_for_discriminator(preds, len(cGAN.classes)), reorder=False
+#        )
 
         # print("dis_probs_gene", dis_probs_gene.shape)
-        adversarial_loss_gene = adversarial_loss_fn(
-            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
-        )
-        adversarial_loss_gene.backward()
+#        adversarial_loss_gene = adversarial_loss_fn(
+#            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
+#        )
+#        adversarial_loss_gene.backward()
 
         optimizer_G.step()
 
         # Train discriminator
         # Very dodgy way to do this
-        dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
+#        dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
         # print("dis_targets_real", dis_targets_real)
         labels = labels.type_as(preds)
 
@@ -181,24 +183,24 @@ def train_cGAN_epoch(
         #     "discriminating real labels for discriminator with input size",
         #     reshape_for_discriminator2(labels, len(cGAN.classes)).shape
         # )
-        dis_probs_real = cGAN.discriminator.forward(
-            reshape_for_discriminator2(labels, len(cGAN.classes)), reorder=False
-        )
+#        dis_probs_real = cGAN.discriminator.forward(
+#            reshape_for_discriminator2(labels, len(cGAN.classes)), reorder=False
+#        )
         # print("dis_probs_real", dis_probs_real)
         # print("discriminating preds for discriminator")
-        dis_probs_gene = cGAN.discriminator.forward(
-            reshape_for_discriminator(preds.detach(), len(cGAN.classes)), reorder=False
-        )
-        adversarial_loss_gene = adversarial_loss_fn(
-            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
-        )
-        adversarial_loss_real = adversarial_loss_fn(dis_probs_real, dis_targets_real)
-        adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / 2
-        adversarial_loss.backward()
+#        dis_probs_gene = cGAN.discriminator.forward(
+#            reshape_for_discriminator(preds.detach(), len(cGAN.classes)), reorder=False
+#        )
+#        adversarial_loss_gene = adversarial_loss_fn(
+#            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
+#        )
+#        adversarial_loss_real = adversarial_loss_fn(dis_probs_real, dis_targets_real)
+#        adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / 2
+#        adversarial_loss.backward()
 
-        optimizer_D.step()
+#        optimizer_D.step()
 
-        losses = [comparison_loss.item(), adversarial_loss.item()]
+        losses = [comparison_loss.item()]#, adversarial_loss.item()]
 
         loading_bar_string, epoch_loss_tot = write_loading_bar_string(
             losses, step, epoch_loss_tot, num_steps, start_time, epoch, training=True
@@ -210,9 +212,9 @@ def train_cGAN_epoch(
         del images
         del labels
         del comparison_loss
-        del adversarial_loss
-        del adversarial_loss_real
-        del adversarial_loss_gene
+#        del adversarial_loss
+#        del adversarial_loss_real
+#        del adversarial_loss_gene
 
         if wandb_flag:
             wandb.log({"iteration_loss": sum(losses)})
@@ -354,5 +356,5 @@ def train_cGAN(config):
             state = {"config": config, "epoch": epoch, "state": cGAN.state_dict()}
             torch.save(
                 state,
-                os.path.join(dir_path, f"saves/{config.task}_model.epoch{epoch}.t7"),
+                os.path.join(dir_path, f"saves/{config.task}_nodis_model.epoch{epoch}.t7"),
             )

@@ -1,5 +1,4 @@
-from .utils import *
-
+from utils import *
 
 class Operation:
     def __init__(self):

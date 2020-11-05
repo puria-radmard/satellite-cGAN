@@ -35,7 +35,7 @@ parameters:
 
   batch_size:
     distribution: constant
-    value: 16
+    value: 8
 
   lr:
     distribution: log_uniform
