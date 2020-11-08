@@ -96,7 +96,7 @@ class MapOptimiser(nn.Module):
         UHI_squared_sum = torch.sum(torch.mul(UHI, UHI))
 
         wandb.log({
-            "UHI_diff": UHI_squared_sum,
+            "LSTN > 0 squared sum": UHI_squared_sum,
             "Vegetation squared sum": vegetation_squared_sum
         })
 
