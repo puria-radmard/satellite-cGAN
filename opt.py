@@ -83,7 +83,6 @@ class MapOptimiser(nn.Module):
 
         return torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
 
-
     @staticmethod
     def extract_thresh(image, thres):
         return torch.clamp(image, thres, 1) - thres

@@ -25,7 +25,8 @@ def optimised_NDVI_for_LSTN(config):
         {
             "NDBI image": [wandb.Image(NDBI_image, caption=f"NDBI image")],
             "NDWI image": [wandb.Image(NDWI_image, caption=f"NDWI image")],
-            "Ground Truth temp image": [wandb.Image(LSTN_gt, caption=f"Ground Truth temp image")],
+            "Ground Truth NDVI image": [wandb.Image(NDVI_image, caption=f"Ground Truth temp image")],
+            "Ground Truth LSTN image": [wandb.Image(LSTN_gt, caption=f"Ground Truth temp image")],
         }
     )
 
