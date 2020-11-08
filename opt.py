@@ -17,13 +17,14 @@ class MapOptimiser(nn.Module):
             dis_dropout=0, # Change this
             gen_dropout=0, # Change this
         )
+        self.Predictor.eval()
         model_weights = torch.load(model_path)["state"]
         self.Predictor.load_state_dict(model_weights)
         for name, p in self.Predictor.named_parameters():
             p.requires_grad = False
 
         self.Predictor = self.Predictor.generator
-        self.StructureCNN = self.Predictor # May change later on
+        self.StructureLayers = list(self.Predictor._modules.items())[:5] # This may change
 
         self.sub = sub
         self.flat = flat
@@ -35,7 +36,7 @@ class MapOptimiser(nn.Module):
         for band in self.flat:
             images.append(image_dict[band])
         self.flat_image = torch.Tensor(np.dstack(images)).cuda()
-        self.P_channel = torch.Tensor(image_dict[self.sub])
+        self.P_channel = torch.Tensor(image_dict[self.sub]).cuda().double()
         self.sub_image = torch.autograd.Variable(
             torch.randn(256, 256, 1).cuda() + torch.tensor(init_image).cuda(),
             requires_grad=True
@@ -47,12 +48,29 @@ class MapOptimiser(nn.Module):
         input_image = torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
         LSTN_map = self.Predictor(input_image)
 
-
         return LSTN_map
+
+    @staticmethod
+    def layer_loss(x_image, p_image):
+
+        return nn.functional.mse_loss(x_image, p_image)
 
     def structural_loss(self):
 
-        import pdb; pdb.set_trace()
+        x_image = torch.cat([self.sub_image, self.flat_image], -1).reshape(1, 3, 256, 256)
+        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256)
+
+        layer_losses = {}
+
+        for layer_name, layer_module in self.StructureLayers:
+
+            x_image = layer_module(x_image)
+            p_image = layer_module(x_image)
+
+            layer_losses[layer_name] = self.layer_loss(x_image, p_image)
+
+        #Weight them here:
+        return torch.stack(list(layer_losses.values())).sum()
 
     def show_image(self):
 
