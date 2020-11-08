@@ -81,8 +81,17 @@ class VariationalAutoencoder32(nn.Module):
             VAE32UpBlock(64, 3, dropout)
         ]
 
-        self.model = construct_debug_model(layers, True)
+        self.model = construct_debug_model(layers, False)
 
     def forward(self, X):
 
         return self.model(X)
+
+
+class NDVIOptimiser(nn.Module):
+
+    def __init__(self):
+
+        super(NDVIOptimiser, self).__init__()
+
+        layers = 

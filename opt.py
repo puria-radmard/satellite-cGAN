@@ -11,42 +11,52 @@ class MapOptimiser(nn.Module):
 
         super(MapOptimiser, self).__init__()
 
-        self.cGAN = ConditionalGAN(
+        self.Predictor = ConditionalGAN(
             classes=classes,
             channels= flat + [sub],
             dis_dropout=0, # Change this
             gen_dropout=0, # Change this
         )
         model_weights = torch.load(model_path)["state"]
-        self.cGAN.load_state_dict(model_weights)
-        for name, p in self.cGAN.named_parameters():
+        self.Predictor.load_state_dict(model_weights)
+        for name, p in self.Predictor.named_parameters():
             p.requires_grad = False
+
+        self.Predictor = self.Predictor.generator
+        self.StructureCNN = self.Predictor # May change later on
 
         self.sub = sub
         self.flat = flat
         self.model_path = model_path
 
-    def init_image(self, flat_images, init_image):
+    def init_image(self, image_dict):
 
         images = []
         for band in self.flat:
-            images.append(flat_images[band])
+            images.append(image_dict[band])
         self.flat_image = torch.Tensor(np.dstack(images)).cuda()
+        self.P_channel = torch.Tensor(image_dict[self.sub])
         self.sub_image = torch.autograd.Variable(
             torch.randn(256, 256, 1).cuda() + torch.tensor(init_image).cuda(),
             requires_grad=True
         ).double()
 
-    def forward(self):
+    def prediction(self):
 
-        input_image = torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE
-        LSTN_map = self.cGAN.generator(input_image)
+        # Sub in the variable image channel
+        input_image = torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
+        LSTN_map = self.Predictor(input_image)
+
 
         return LSTN_map
 
+    def structural_loss(self):
+
+        import pdb; pdb.set_trace()
+
     def show_image(self):
 
-        return torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE
+        return torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
 
 
 class NDVIToLSTNEvaluation(nn.Module):

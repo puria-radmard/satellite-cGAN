@@ -2,10 +2,13 @@ import sys
 import wandb
 from opt import *
 from train_cGAN import Config
-from cGAN import slice_middle
+from cGAN import *
 from pipelines.utils import read_raster
 
 def optimised_NDVI_for_LSTN(config):
+
+
+    performance_loss = NDVIToLSTNEvaluation()
 
     map_optimiser = MapOptimiser(
         model_path=config.model_path,
@@ -14,13 +17,9 @@ def optimised_NDVI_for_LSTN(config):
         classes = ["LSTN"]
     )
     map_optimiser.cuda()
-    loss_agent = NDVIToLSTNEvaluation()
-
-    optimizer = torch.optim.Adam(map_optimiser.parameters(), lr=config.lr)
 
     NDBI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
     NDWI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
-    LSTN_gt    = slice_middle(read_raster(f"{config.image_root}.LSTN.tif")[0][:,:,np.newaxis])
 
     wandb.log(
         {
@@ -35,18 +34,21 @@ def optimised_NDVI_for_LSTN(config):
             "NDBI": NDBI_image,
             "NDWI": NDWI_image
         },
-        LSTN_gt
     )
+
+    optimizer = torch.optim.Adam(map_optimiser.sub_image.parameters(), lr=config.lr)
 
     for round_num in tqdm(range(config.epochs)):
 
-        LSTN_map = map_optimiser()
-        loss = loss_agent(
+        LSTN_map = map_optimiser.prediction()
+        ploss = performance_loss(
             LSTN_map = LSTN_map,
             NDVI_map = map_optimiser.sub_image,
             original_LSTN_map = LSTN_gt
         )
-        loss.backward()
+        ploss.backward()
+        sloss = map_optimiser.structural_loss()
+        sloss.backward()
         optimizer.step()
         wandb.log({"Round image": [wandb.Image(map_optimiser.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
 
