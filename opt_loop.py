@@ -63,5 +63,8 @@ if __name__ == '__main__':
         "image_root": sys.argv[2],
         "epochs": 500
     }
-    wandb.init(project="satellite-cGAN", config=config)
-    optimised_NDVI_for_LSTN(wandb.config)
+
+    # wandb.init(project="satellite-cGAN", config=config)
+    # config = wandb.config
+    config = Config(config)
+    optimised_NDVI_for_LSTN(config)
