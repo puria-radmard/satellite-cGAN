@@ -13,7 +13,7 @@ def optimised_NDVI_for_LSTN(config):
     map_optimiser = MapOptimiser(
         model_path=config.model_path,
         flat = ["NDBI", "NDWI"],
-        sub = ["NDVI"],
+        sub = "NDVI",
         classes = ["LSTN"]
     )
     map_optimiser.cuda()
@@ -21,6 +21,8 @@ def optimised_NDVI_for_LSTN(config):
     NDBI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
     NDWI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
     NDVI_image = slice_middle(read_raster(f"{config.image_root}.NDVI.tif")[0][:,:,np.newaxis])
+
+    LSTN_gt = slice_middle(read_raster(f"{config.image_root}.LSTN.tif")[0][:,:,np.newaxis])
 
     # wandb.log(
     #     {
