@@ -72,7 +72,12 @@ class MapOptimiser(nn.Module):
             layer_losses[layer_name] = self.layer_loss(x_image, p_image)
 
         #Weight them here:
-        return torch.stack(list(layer_losses.values())).sum()
+        structural_loss = torch.stack(list(layer_losses.values())).sum()
+
+        wandb.log({"Full structure loss": float(structural_loss)})
+        wandb.log(layer_losses)
+
+        return structural_loss
 
     def show_image(self):
 
@@ -88,23 +93,17 @@ class MapOptimiser(nn.Module):
         vegetation = self.extract_thresh(NDVI_map, 0.2)
         vegetation_squared_sum = torch.sum(torch.mul(vegetation, vegetation))
 
-        UHI = self.extract_thresh(LSTN_map, 1.0)
+        UHI = self.extract_thresh(LSTN_map, 0.0) # Changed from 1.0!
         UHI_squared_sum = torch.sum(torch.mul(UHI, UHI))
-        
-        UHI_baseline = self.extract_thresh(torch.tensor(original_LSTN_map), 1.0)
-        UHI_squared_sum_baseline = torch.sum(torch.mul(UHI_baseline, UHI_baseline))
 
-        wandb.log(
-            {
-                "UHI_diff": UHI_squared_sum - UHI_squared_sum_baseline,
-                "Vegetation squared sum": vegetation_squared_sum
-            }
-        )
+        wandb.log({
+            "UHI_diff": UHI_squared_sum,
+            "Vegetation squared sum": vegetation_squared_sum
+        })
 
-        squared_loss = UHI_squared_sum - UHI_squared_sum_baseline\
-              + self.NDVI_factor * vegetation_squared_sum
+        performance_loss = UHI_squared_sum + self.NDVI_factor * vegetation_squared_sum
 
-        return squared_loss
+        return performance_loss
 
 # Penalise vegetation cross with water & buildings
 # Penalise area of UHI

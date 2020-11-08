@@ -45,6 +45,7 @@ def optimised_NDVI_for_LSTN(config):
     for round_num in tqdm(range(config.epochs)):
 
         LSTN_map = map_optimiser.prediction()
+
         ploss = map_optimiser.evaluation_loss(
             LSTN_map = LSTN_map,
             NDVI_map = map_optimiser.sub_image,
@@ -57,7 +58,8 @@ def optimised_NDVI_for_LSTN(config):
 
         optimizer.step()
 
-        wandb.log({"Round image": [wandb.Image(map_optimiser.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
+        wandb.log({"Round NDVI image": [wandb.Image(map_optimiser.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
+        wandb.log({"Round LSTN image": [wandb.Image(LSTN_map.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
 
 
 if __name__ == '__main__':
