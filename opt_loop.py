@@ -40,7 +40,10 @@ def optimised_NDVI_for_LSTN(config):
         },
     )
 
-    optimizer = torch.optim.Adam(map_optimiser.sub_image.parameters(), lr=config.lr)
+    optimizer = torch.optim.Adam(
+        [map_optimiser.sub_image],
+        lr=config.lr
+    )
 
     for round_num in tqdm(range(config.epochs)):
 
