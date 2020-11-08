@@ -35,10 +35,10 @@ class MapOptimiser(nn.Module):
         images = []
         for band in self.flat:
             images.append(image_dict[band])
-        self.flat_image = torch.Tensor(np.dstack(images)).cuda()
+        self.flat_image = torch.Tensor(np.dstack(images)).cuda().double()
         self.P_channel = torch.Tensor(image_dict[self.sub]).cuda().double()
         self.sub_image = torch.autograd.Variable(
-            torch.randn(256, 256, 1).cuda() + torch.tensor(image_dict[self.sub]).cuda(),
+            0.1*torch.randn(256, 256, 1).cuda() + torch.tensor(image_dict[self.sub]).cuda(),
             requires_grad=True
         ).double()
 
@@ -58,14 +58,14 @@ class MapOptimiser(nn.Module):
     def structural_loss(self):
 
         x_image = torch.cat([self.sub_image, self.flat_image], -1).reshape(1, 3, 256, 256)
-        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256)
+        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256).detach()
 
         layer_losses = {}
 
         for layer_name, layer_module in self.StructureLayers:
 
             x_image = layer_module(x_image)
-            p_image = layer_module(x_image)
+            p_image = layer_module(p_image)
 
             layer_losses[layer_name] = self.layer_loss(x_image, p_image)
 
@@ -98,12 +98,12 @@ class NDVIToLSTNEvaluation(nn.Module):
         UHI_baseline = self.extract_thresh(torch.tensor(original_LSTN_map), 1.0)
         UHI_squared_sum_baseline = torch.sum(torch.mul(UHI_baseline, UHI_baseline))
 
-        # wandb.log(
-        #     {
-        #         "UHI_diff": UHI_squared_sum - UHI_squared_sum_baseline,
-        #         "Vegetation squared sum": vegetation_squared_sum
-        #     }
-        # )
+        wandb.log(
+            {
+                "UHI_diff": UHI_squared_sum - UHI_squared_sum_baseline,
+                "Vegetation squared sum": vegetation_squared_sum
+            }
+        )
 
         squared_loss = UHI_squared_sum - UHI_squared_sum_baseline\
               + self.NDVI_factor * vegetation_squared_sum
