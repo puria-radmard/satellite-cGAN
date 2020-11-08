@@ -7,9 +7,6 @@ from pipelines.utils import read_raster
 
 def optimised_NDVI_for_LSTN(config):
 
-
-    performance_loss = NDVIToLSTNEvaluation()
-
     map_optimiser = MapOptimiser(
         model_path=config.model_path,
         flat = ["NDBI", "NDWI"],
@@ -48,7 +45,7 @@ def optimised_NDVI_for_LSTN(config):
     for round_num in tqdm(range(config.epochs)):
 
         LSTN_map = map_optimiser.prediction()
-        ploss = performance_loss(
+        ploss = map_optimiser.evaluation_loss(
             LSTN_map = LSTN_map,
             NDVI_map = map_optimiser.sub_image,
             original_LSTN_map = LSTN_gt

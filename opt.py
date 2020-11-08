@@ -7,7 +7,7 @@ from cGAN import ConditionalGAN
 
 class MapOptimiser(nn.Module):
 
-    def __init__(self, model_path, flat: List[str], sub: str, classes = ["LSTN"]):
+    def __init__(self, model_path, flat: List[str], sub: str, classes = ["LSTN"], NDVI_factor = 0.5):
 
         super(MapOptimiser, self).__init__()
 
@@ -29,6 +29,8 @@ class MapOptimiser(nn.Module):
         self.sub = sub
         self.flat = flat
         self.model_path = model_path
+
+        self.NDVI_factor = NDVI_factor
 
     def init_image(self, image_dict):
 
@@ -77,17 +79,11 @@ class MapOptimiser(nn.Module):
         return torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
 
 
-class NDVIToLSTNEvaluation(nn.Module):
-
-    def __init__(self, NDVI_factor = 0.5):
-        super(NDVIToLSTNEvaluation, self).__init__()
-        self.NDVI_factor = NDVI_factor
-
     @staticmethod
     def extract_thresh(image, thres):
         return torch.clamp(image, thres, 1) - thres
 
-    def forward(self, LSTN_map, NDVI_map, original_LSTN_map):
+    def evaluation_loss(self, LSTN_map, NDVI_map, original_LSTN_map):
 
         vegetation = self.extract_thresh(NDVI_map, 0.2)
         vegetation_squared_sum = torch.sum(torch.mul(vegetation, vegetation))
