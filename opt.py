@@ -74,7 +74,7 @@ class MapOptimiser(nn.Module):
         #Weight them here:
         structural_loss = torch.stack(list(layer_losses.values())).sum()
 
-        wandb.log({"Full structure loss": float(structural_loss)})
+        wandb.log({"Full structure loss": structural_loss})
         wandb.log(layer_losses)
 
         return structural_loss

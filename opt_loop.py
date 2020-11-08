@@ -59,7 +59,7 @@ def optimised_NDVI_for_LSTN(config):
         optimizer.step()
 
         wandb.log({"Round NDVI image": [wandb.Image(map_optimiser.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
-        wandb.log({"Round LSTN image": [wandb.Image(LSTN_map.sub_image.detach().cpu().numpy(), caption=f"Round {round_num}")]})
+        wandb.log({"Round LSTN image": [wandb.Image(LSTN_map.detach().cpu().numpy(), caption=f"Round {round_num}")]})
 
 
 if __name__ == '__main__':
