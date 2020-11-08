@@ -20,19 +20,21 @@ def optimised_NDVI_for_LSTN(config):
 
     NDBI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
     NDWI_image = slice_middle(read_raster(f"{config.image_root}.NDBI.tif")[0][:,:,np.newaxis])
+    NDVI_image = slice_middle(read_raster(f"{config.image_root}.NDVI.tif")[0][:,:,np.newaxis])
 
-    wandb.log(
-        {
-            "NDBI image": [wandb.Image(NDBI_image, caption=f"NDBI image")],
-            "NDWI image": [wandb.Image(NDWI_image, caption=f"NDWI image")],
-            "Ground Truth temp image": [wandb.Image(LSTN_gt, caption=f"Ground Truth temp image")],
-        }
-    )
+    # wandb.log(
+    #     {
+    #         "NDBI image": [wandb.Image(NDBI_image, caption=f"NDBI image")],
+    #         "NDWI image": [wandb.Image(NDWI_image, caption=f"NDWI image")],
+    #         "Ground Truth temp image": [wandb.Image(LSTN_gt, caption=f"Ground Truth temp image")],
+    #     }
+    # )
 
     map_optimiser.init_image(
         {
             "NDBI": NDBI_image,
-            "NDWI": NDWI_image
+            "NDWI": NDWI_image,
+            "NDVI": NDVI_image,
         },
     )
 
