@@ -40,9 +40,8 @@ class MapOptimiser(nn.Module):
         self.flat_image = torch.Tensor(np.dstack(images)).cuda().double()
         self.P_channel = torch.Tensor(image_dict[self.sub]).cuda().double()
         self.sub_image = torch.autograd.Variable(
-            0.1*torch.randn(256, 256, 1).cuda() + torch.tensor(image_dict[self.sub]).cuda(),
-            requires_grad=True
-        ).double()
+            0.5*torch.randn(256, 256, 1).cuda() + torch.tensor(image_dict[self.sub]).cuda(),
+        ).double().requires_grad_()
 
     def prediction(self):
 
@@ -92,7 +91,7 @@ class MapOptimiser(nn.Module):
         vegetation = self.extract_thresh(NDVI_map, 0.2)
         vegetation_squared_sum = torch.sum(torch.mul(vegetation, vegetation))
 
-        UHI = self.extract_thresh(LSTN_map, 0.0) # Changed from 1.0!
+        UHI = self.extract_thresh(LSTN_map+1, 0.0) # Changed from 1.0!
         UHI_squared_sum = torch.sum(torch.mul(UHI, UHI))
 
         wandb.log({
