@@ -1,17 +1,16 @@
-# from utils import *
-# from root_classes import *
-# from imports import *
-import os, ee, json, time
+#  Also used in the Google colab notebook
+import os, ee, json, warnings
 from utils import get_geohash, split_into_grid, get_area_bbox
 from datetime import datetime
 from tqdm import tqdm
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 class EarthEngineDownloader:
     """
     Downloads data straight to Google Drive. Currently only works for Landsat 8 :/
     Example usage:
-
       eed = EarthEngineDownloader()
       eed("example_dataset.json", multiple_mode = True)
 
@@ -19,7 +18,6 @@ class EarthEngineDownloader:
     """
 
     def __init__(self):
-
         try:
             ee.Initialize()
         except ee.EEException:
@@ -34,31 +32,33 @@ class EarthEngineDownloader:
 
     @staticmethod
     def generate_metadata_json(dataset_dir, image_description, image_information):
-        # Await folder to be created - clean this code
-        for i in range(20):
-            try:
-                with open(
-                    os.path.join(dataset_dir, f"{image_description}.METADATA.json"), "w"
-                ) as jfile:
-                    json.dump(image_information, jfile)
-                    return None
-            except FileNotFoundError:
-                print(
-                    "Awaiting folder creation for",
-                    dataset_dir,
-                    image_description,
-                    "." * i,
-                )
-                time.sleep(3)
-        raise FileNotFoundError("Unknown timeout from GEE")
+        """ Generate the metadata of the fetched datasets"""
+        # TODO: Await folder to be created - clean this code
+
+        os.makedirs(dataset_dir, exist_ok=True)
+        with open(os.path.join(dataset_dir, f"{image_description}.METADATA.json"), "w") as jfile:
+            json.dump(image_information, jfile)
+        return None
+        # for i in range(20):
+        #     try:
+        #         with open(os.path.join(dataset_dir, f"{image_description}.METADATA.json"), "w") as jfile:
+        #             json.dump(image_information, jfile)
+        #         return None
+        #     except FileNotFoundError:
+        #         print(
+        #             "Awaiting folder creation for",
+        #             dataset_dir,
+        #             image_description,
+        #             "." * i,
+        #         )
+        #         time.sleep(3)
+        # raise FileNotFoundError("Unknown timeout from GEE")
 
     @staticmethod
     def prepare_download_info(geometry, dataset_properties, raw_image_collection):
-
+        """ Given dates, band and location, returns the query dict for Google Earth API"""
         dates = dataset_properties["dates"]
-        image_collection = raw_image_collection.filterBounds(geometry).filterDate(
-            dates[0], dates[1]
-        )
+        image_collection = raw_image_collection.filterBounds(geometry).filterDate(dates[0], dates[1])
 
         all_bands = image_collection.first().bandNames().getInfo()
         bands = list(set(dataset_properties["bands"]).intersection(all_bands))
@@ -84,30 +84,26 @@ class EarthEngineDownloader:
         geometry_id,
         dataset_properties,
         raw_image_collection,
-        multiple_mode=True,
-    ):
+        multiple_mode=True):
+        """"""
 
         exampledownload_info = self.prepare_download_info(
-            ee.Geometry.Polygon(geometry), dataset_properties, raw_image_collection
-        )
+            ee.Geometry.Polygon(geometry), dataset_properties, raw_image_collection)
         exampleimage = ee.Image(exampledownload_info["collection_list"].get(0))
         exampleimage_information = exampleimage.getInfo()
         end_code = exampleimage_information["bands"][0]["crs"]
 
+        # i.e. if it's a single place, we don't split into grids
         if not multiple_mode:
-            # i.e. if it's a single place, we don't split into grids
             grid_geoms = {get_geohash(geometry): geometry}
         else:
-            grid_geoms = {
-                get_geohash(geom): geom for geom in split_into_grid(geometry, end_code)
-            }
+            grid_geoms = {get_geohash(geom): geom for geom in split_into_grid(geometry, end_code)}
 
         # Remove index!!!!
         for square_geohash, square_geom in list(grid_geoms.items())[9:]:
 
             download_info = self.prepare_download_info(
-                square_geom, dataset_properties, raw_image_collection
-            )
+                square_geom, dataset_properties, raw_image_collection)
 
             bands = download_info["bands"]
             region = download_info["region"]
@@ -115,7 +111,7 @@ class EarthEngineDownloader:
             collection_list = download_info["collection_list"]
             collection_size = download_info["collection_size"]
 
-            area_id = dataset_properties["area_id"]
+            # area_id = dataset_properties["area_id"]
             cloud_cover_thres = dataset_properties["cloud_cover_thres"]
             cloud_access_path = dataset_properties["cloud_access_path"]
 
@@ -124,9 +120,7 @@ class EarthEngineDownloader:
                 image = ee.Image(collection_list.get(j))
                 image_information = image.getInfo()
                 image_millis = int(image_information["properties"]["system:time_start"])
-                image_datetime = datetime.fromtimestamp(
-                    int(image_millis) / 1000.0
-                ).strftime("%Y-%m-%d--%H-%M-%S")
+                image_datetime = datetime.fromtimestamp(int(image_millis) / 1000.0).strftime("%Y-%m-%d--%H-%M-%S")
                 image_description = f"{square_geohash}--{geometry_id}--{image_datetime}"
 
                 m = image_information.copy()
@@ -137,9 +131,7 @@ class EarthEngineDownloader:
                 print(f"Downloading {image_description} with cloud cover {m}")
 
                 for band in bands:
-
                     description = image_description + f".{band}"
-
                     task = ee.batch.Export.image.toDrive(
                         image=image.select(band),
                         description=description,
@@ -163,11 +155,8 @@ class EarthEngineDownloader:
         if not multiple_mode:
             bounds = get_area_bbox(gjinfo)
             geometry = {gjinfo["properties"]["area_id"]: ee.Geometry.Polygon(bounds)}
-
         else:
-            geometry = {
-                b["id"]: b["geometry"]["coordinates"] for b in gjinfo["features"]
-            }
+            geometry = {b["id"]: b["geometry"]["coordinates"] for b in gjinfo["features"]}
 
         dataset_properties = gjinfo["properties"]
         raw_image_collection = ee.ImageCollection(dataset_properties["earth_engine_id"])
@@ -183,3 +172,8 @@ class EarthEngineDownloader:
         for geom_id, geom in tqdm(geometry.items()):
             print(f"Downloading from {geom_id}")
             download_operation(geom_id, geom)
+
+
+if __name__ == "__main__":
+    eed = EarthEngineDownloader()
+    eed(r'./London_Only.json', multiple_mode=True)
