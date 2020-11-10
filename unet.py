@@ -28,12 +28,20 @@ class UNetDownBlock(nn.Module):
 
 
 class UNetUpBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, dropout):
+    def __init__(self, in_channels, out_channels, dropout, no_skips):
         super().__init__()
 
         # Channels are doubled by upconv
+        self.upconv = nn.ConvTranspose2d(
+            in_channels, out_channels, kernel_size=2, stride=2
+        )
+
+        self.no_skips = no_skips
+        if no_skips:
+            in_channels = in_channels/2
+
         layers = [
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.Conv2d(_in_channels, out_channels, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
             nn.Dropout(p=dropout),
@@ -43,9 +51,6 @@ class UNetUpBlock(nn.Module):
             nn.Dropout(p=dropout),
         ]
 
-        self.upconv = nn.ConvTranspose2d(
-            in_channels, out_channels, kernel_size=2, stride=2
-        )
         self.dbconv = nn.Sequential(*layers)
 
     def forward(self, X1, X2):
@@ -54,7 +59,10 @@ class UNetUpBlock(nn.Module):
         X1 = self.upconv(X1)
 
         # Taking input NCHW
-        X = torch.cat([X2, X1], dim=1)
+        if self.no_skips:
+            X = X1
+        else:
+            X = torch.cat([X2, X1], dim=1)
 
         return self.dbconv(X)
 
@@ -70,10 +78,12 @@ class UNetOutBlock(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, dropout, n_channels=3, n_classes=1):
+    def __init__(self, dropout, no_skips, n_channels=3, n_classes=1):
+
         super(UNet, self).__init__()
 
         # To call later
+        self.no_skips = no_skips
         self.n_classes = n_classes
         self.n_channels = n_channels
 
@@ -94,10 +104,10 @@ class UNet(nn.Module):
         convchan8 = 128
         convchan9 = 64
 
-        self.up1 = UNetUpBlock(convchan5, convchan6, dropout)
-        self.up2 = UNetUpBlock(convchan6, convchan7, dropout)
-        self.up3 = UNetUpBlock(convchan7, convchan8, dropout)
-        self.up4 = UNetUpBlock(convchan8, convchan9, dropout)
+        self.up1 = UNetUpBlock(convchan5, convchan6, dropout, no_skips=no_skips)
+        self.up2 = UNetUpBlock(convchan6, convchan7, dropout, no_skips=no_skips)
+        self.up3 = UNetUpBlock(convchan7, convchan8, dropout, no_skips=no_skips)
+        self.up4 = UNetUpBlock(convchan8, convchan9, dropout, no_skips=no_skips)
 
         self.out = UNetOutBlock(convchan9, n_classes)
 

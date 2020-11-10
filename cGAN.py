@@ -61,19 +61,23 @@ class Discriminator(nn.Module):
 
 
 class ConditionalGAN(nn.Module):
-    def __init__(self, classes, channels, dis_dropout, gen_dropout):
+    def __init__(self, classes, channels, dis_dropout, gen_dropout, no_discriminator, no_skips):
 
         # Is this needed?
         super(ConditionalGAN, self).__init__()
         self.classes = classes
         self.channels = channels
 
-        self.discriminator = Discriminator(
-            num_classes=len(classes), dropout=dis_dropout
-        )
+        if no_discriminator:
+            self.discriminator = False
+        
+        else:
+            self.discriminator = Discriminator(
+                num_classes=len(classes), dropout=dis_dropout
+            )
 
         self.generator = UNet(
-            dropout=gen_dropout, n_channels=len(channels), n_classes=len(classes)
+            dropout=gen_dropout, n_channels=len(channels), n_classes=len(classes), no_skips=no_skips
         )
 
 
@@ -135,11 +139,10 @@ def train_cGAN_epoch(
 
     for step, batch in enumerate(dataloader):
 
-        images = batch["image"]
-        labels = batch["label"]
+        images = batch["image"]; labels = batch["label"]
+        labels = labels.type_as(preds)
 
-        optimizer_G.zero_grad()
-        optimizer_D.zero_grad()
+        optimizer_G.zero_grad(); optimizer_D.zero_grad()
 
         # print("generating images")
         preds = cGAN.generator.forward(images)
@@ -147,60 +150,50 @@ def train_cGAN_epoch(
         # Train generator
         cGAN.float()
 
-        # print("doing comparison loss between")
-        # print("preds:", preds.shape)
-        # print("labels:", labels.shape)
+        loss_mag = (1 + comparison_loss_factor**2)**0.5
+        comparison_loss_factor /= loss_mag
 
-        comparison_loss_factor = 1.0
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
             preds.float(), labels.float().reshape(preds.shape)
         )
         comparison_loss.backward(retain_graph=True)
 
-        # print(
-        #    "discriminating preds for generator with input size",
-        #    reshape_for_discriminator(preds, len(cGAN.classes)).shape
-        # )
-#        dis_probs_gene = cGAN.discriminator.forward(
-#            reshape_for_discriminator(preds, len(cGAN.classes)), reorder=False
-#        )
+        losses = [comparison_loss.item()]
+    
+        if cGAN.discriminator:
 
-        # print("dis_probs_gene", dis_probs_gene.shape)
-#        adversarial_loss_gene = adversarial_loss_fn(
-#            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
-#        )
-#        adversarial_loss_gene.backward()
-
-        optimizer_G.step()
+            dis_probs_gene = cGAN.discriminator.forward(
+                reshape_for_discriminator(preds, len(cGAN.classes)), reorder=False
+            )
+            adversarial_loss_gene = adversarial_loss_fn(
+                dis_probs_gene, torch.zeros(dis_probs_gene.shape)
+            )
+            adversarial_loss_gene.backward()
 
         # Train discriminator
         # Very dodgy way to do this
-#        dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
-        # print("dis_targets_real", dis_targets_real)
-        labels = labels.type_as(preds)
+           dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
+        
 
-        # print(
-        #     "discriminating real labels for discriminator with input size",
-        #     reshape_for_discriminator2(labels, len(cGAN.classes)).shape
-        # )
-#        dis_probs_real = cGAN.discriminator.forward(
-#            reshape_for_discriminator2(labels, len(cGAN.classes)), reorder=False
-#        )
-        # print("dis_probs_real", dis_probs_real)
-        # print("discriminating preds for discriminator")
-#        dis_probs_gene = cGAN.discriminator.forward(
-#            reshape_for_discriminator(preds.detach(), len(cGAN.classes)), reorder=False
-#        )
-#        adversarial_loss_gene = adversarial_loss_fn(
-#            dis_probs_gene, torch.zeros(dis_probs_gene.shape)
-#        )
-#        adversarial_loss_real = adversarial_loss_fn(dis_probs_real, dis_targets_real)
-#        adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / 2
-#        adversarial_loss.backward()
 
-#        optimizer_D.step()
+            dis_probs_real = cGAN.discriminator.forward(
+                reshape_for_discriminator2(labels, len(cGAN.classes)), reorder=False
+            )
+            dis_probs_gene = cGAN.discriminator.forward(
+                reshape_for_discriminator(preds.detach(), len(cGAN.classes)), reorder=False
+            )
+            adversarial_loss_gene = adversarial_loss_fn(
+                dis_probs_gene, torch.zeros(dis_probs_gene.shape)
+            )
+            adversarial_loss_real = adversarial_loss_fn(dis_probs_real, dis_targets_real)
+            adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / 2
+            adversarial_loss.backward()
 
-        losses = [comparison_loss.item()]#, adversarial_loss.item()]
+            loss.append(adversarial_loss.item())
+
+            optimizer_D.step()
+
+        optimizer_G.step()
 
         loading_bar_string, epoch_loss_tot = write_loading_bar_string(
             losses, step, epoch_loss_tot, num_steps, start_time, epoch, training=True
@@ -212,9 +205,11 @@ def train_cGAN_epoch(
         del images
         del labels
         del comparison_loss
-#        del adversarial_loss
-#        del adversarial_loss_real
-#        del adversarial_loss_gene
+
+        if cGAN.discriminator:
+            del adversarial_loss
+            del adversarial_loss_real
+            del adversarial_loss_gene
 
         if wandb_flag:
             wandb.log({"iteration_loss": sum(losses)})
@@ -265,11 +260,21 @@ def test_cGAN_epoch(cGAN, epoch, dataloader, num_steps, test_metric):
 
 def train_cGAN(config):
 
+    message_string = "Starting training with "
+    if config.no_discriminator:
+        message_string += "no "
+    message_string += "discriminator and "
+    if config.no_skips:
+        message_string += "no "
+    message_string += "skip connections in generator"
+
     cGAN = ConditionalGAN(
         classes=config.classes,
         channels=config.channels,
         dis_dropout=config.dis_dropout,
         gen_dropout=config.gen_dropout,
+        no_discriminator=config.no_discriminator,
+        no_skips=config.no_skips,
     )
 
     if torch.cuda.is_available():
@@ -292,7 +297,10 @@ def train_cGAN(config):
         wandb.watch(cGAN)
 
     optimizer_G = torch.optim.Adam(cGAN.generator.parameters(), lr=config.lr)
-    optimizer_D = torch.optim.Adam(cGAN.discriminator.parameters(), lr=config.lr)
+    if config.no_discriminator:
+        optimizer_D = None
+    else:
+        optimizer_D = torch.optim.Adam(cGAN.discriminator.parameters(), lr=config.lr)
 
     if config.data_dir:
         train_dataset, test_dataset = landsat_train_test_dataset(

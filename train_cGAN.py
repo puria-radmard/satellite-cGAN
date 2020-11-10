@@ -43,6 +43,8 @@ def generate_config(args):
             "dis_dropout": args.dis_dropout,
             "gen_dropout": args.gen_dropout,
             "comparison_loss_factor": args.comparison_loss_factor,
+            "use_discriminator": use_discriminator,
+            "use_skips": use_skips,
         }
 
         loss_parameters = {
@@ -98,6 +100,8 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir", type=str)
     parser.add_argument("--comparison_loss_fn", type=str)
     parser.add_argument("--test_metric", type=str)
+    parser.add_argument("--no_discriminator", action='store_false')
+    parser.add_argument("--no_skips", action='store_false')
 
     # Universal parameters
     parser.add_argument("--lr", type=float)

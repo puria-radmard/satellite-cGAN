@@ -40,7 +40,7 @@ class MapOptimiser(nn.Module):
         self.flat_image = torch.Tensor(np.dstack(images)).cuda().double()
         self.P_channel = torch.Tensor(image_dict[self.sub]).cuda().double()
         self.sub_image = torch.autograd.Variable(
-            0.1*torch.randn(256, 256, 1).cuda() + torch.tensor(image_dict[self.sub]).cuda(),
+            0.5*torch.randn(256, 256, 1).cuda() + torch.tensor(image_dict[self.sub]).cuda(),
             requires_grad=True
         ).double()
 
@@ -60,7 +60,7 @@ class MapOptimiser(nn.Module):
     def structural_loss(self):
 
         x_image = torch.cat([self.sub_image, self.flat_image], -1).reshape(1, 3, 256, 256)
-        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256).detach()
+        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256).detach() # Make this a constant!
 
         layer_losses = {}
 
