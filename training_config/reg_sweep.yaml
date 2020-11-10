@@ -25,6 +25,12 @@ parameters:
   data_dir:
     distribution: constant
     value: "../data_source/LONDON_DATASET"
+  no_discriminator:
+    distribution: constant
+    value: True
+  no_skip:
+    distribution: constant
+    value: True
 
   comparison_loss_fn:
     distribution: constant

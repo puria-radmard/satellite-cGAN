@@ -59,7 +59,7 @@ class MapOptimiser(nn.Module):
     def structural_loss(self):
 
         x_image = torch.cat([self.sub_image, self.flat_image], -1).reshape(1, 3, 256, 256)
-        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256).detach()
+        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256).detach() # Make this a constant!
 
         layer_losses = {}
 
