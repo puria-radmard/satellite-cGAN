@@ -1,0 +1,59 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "area_id": "London_Only",
+    "dates": [
+      "2016-01-01",
+      "2020-10-01"
+    ],
+    "earth_engine_id": "LANDSAT/LC08/C01/T1",
+    "bands": [
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "B5",
+      "B6",
+      "B10"
+    ],
+    "cloud_cover_thres": 0.3,
+    "cloud_access_path": [
+      "properties",
+      "CLOUD_COVER_LAND"
+    ]
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "LONDON",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -0.542449951171875,
+              51.24902276043772
+            ],
+            [
+              0.318603515625,
+              51.24902276043772
+            ],
+            [
+              0.318603515625,
+              51.7151177895987
+            ],
+            [
+              -0.542449951171875,
+              51.7151177895987
+            ],
+            [
+              -0.542449951171875,
+              51.24902276043772
+            ]
+          ]
+        ]
+      },
+      "properties": {}
+    }
+  ]
+}
