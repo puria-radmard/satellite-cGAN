@@ -1,28 +1,13 @@
-import os
-from tqdm import tqdm
-from glob import glob as glob
+
+import os, sys, cv2, time, torch, wandb, logging, rasterio, random, tifffile, subprocess, torch.nn as nn, \
+    numpy as np, pandas as pd, seaborn as sns, shapely.wkt, shapely.affinity, matplotlib.pyplot as plt
 from torch.utils.data import Dataset, IterableDataset, DataLoader
-import torch
-import torch.nn as nn
-import numpy as np
-from skimage import io, transform
-import matplotlib.pyplot as plt
-import random
-import sys
-import cv2
-from typing import List
-import time
-import wandb
-import subprocess
-from operator import mul
-from functools import reduce
-import pandas as pd
-import shapely.wkt
-import shapely.affinity
-import tifffile
-from sklearn.model_selection import train_test_split
 from torch.utils.data._utils.collate import default_collate
-import seaborn as sns
+from sklearn.model_selection import train_test_split
+from skimage import io, transform
+from glob import glob as glob
+from functools import reduce
 from scipy import ndimage
-import logging
-import rasterio
+from operator import mul
+from typing import List
+from tqdm import tqdm

@@ -8,8 +8,6 @@ from config import metric_dict
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-
-
 class Discriminator(nn.Module):
     def __init__(self, num_classes, dropout=0.4):
         """
