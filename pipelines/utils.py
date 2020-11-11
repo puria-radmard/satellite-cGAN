@@ -74,7 +74,7 @@ def purge_groups(groups, target_band = "B3"):
 
     for group in groups:
 
-        target_path = get_property_path(group, prop_name: target_band)
+        target_path = get_property_path(group, prop_name= target_band)
         image = slice_middle(read_raster(target_band)[0], remove_nan=False)
         if type(image) == type(None):
             continue

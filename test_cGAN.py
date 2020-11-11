@@ -8,7 +8,7 @@ import torch
 from glob import glob
 
 model_weights = torch.load("saves/reg_nodis_model.epoch79.t7")["state"]
-cGAN = ConditionalGAN(["LSTN"], ["NDVI", "NDBI", "NDWI"], 0, 0)
+cGAN = ConditionalGAN(["LSTN"], ["NDVI", "NDBI", "NDWI"], 0, 0, True, True)
 cGAN.load_state_dict(model_weights)
 
 image_ids = glob("../data_source/LONDON_DATASET/*NDVI.tif")
@@ -78,5 +78,5 @@ for image_id in tqdm(image_ids):
     m.set_clim(np.amin(diff), np.amax(diff))
     fig.colorbar(m, ax=axs[1, 2])
 
-    fig.savefig(f"results/NO_DIS_ALL_ENGLAND_CITIES/{image_name}.RESULTS.png")
+    fig.savefig(f"results/NO_DIS_NO_SKIPS_ALL_ENGLAND_CITIES/{image_name}.RESULTS.png")
 
