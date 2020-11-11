@@ -51,6 +51,44 @@ def group_bands(root: str, bands: List[str]) -> List[Dict[str, str]]:
     return groups
 
 
+def slice_middle(image, size=256, remove_nan=True):
+    mix, miy = [int(m / 2) for m in image.shape[:2]]
+    s = int(size / 2)
+    sliced_image = image[mix - s : mix + s, miy - s : miy + s]
+    if remove_nan:
+        sliced_image[sliced_image != sliced_image] = 0.0
+    if sliced_image.shape != (size, size, 1):
+        return None
+    return sliced_image
+
+
+def purge_groups(groups, target_band = "B3"):
+    """
+    Removes any groups where the raw data has NaN edges due to satellite projections.
+    We use the raw band as a target as we can remove NaNs during processing.
+    
+    (This started as a quick fix on 11/11/2020)
+    """
+
+    outgroups = []
+
+    for group in groups:
+
+        target_path = get_property_path(group, prop_name: target_band)
+        image = slice_middle(read_raster(target_band)[0], remove_nan=False)
+        if type(image) == type(None):
+            continue
+        elif any(image[0] != image[0]): #  Any NaNs
+            continue
+        else:
+            outgroups.append(group)
+
+    return outgroups
+        
+
+        
+
+
 def group_cities_by_time(root: str, band: str) -> Dict[str, Dict[str, str]]:
     """
     This is similar to group_bands, except returns a mapping of images taken at the same time in the root

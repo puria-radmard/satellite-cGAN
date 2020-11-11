@@ -155,17 +155,6 @@ class DummyDataset(Dataset):
         return sample
 
 
-def slice_middle(image, size=256, remove_nan=True):
-    mix, miy = [int(m / 2) for m in image.shape[:2]]
-    s = int(size / 2)
-    sliced_image = image[mix - s : mix + s, miy - s : miy + s]
-    if remove_nan:
-        sliced_image[sliced_image != sliced_image] = 0.0
-    if sliced_image.shape != (size, size, 1):
-        return None
-    return sliced_image
-
-
 def write_loading_bar_string(
     metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training=True
 ):

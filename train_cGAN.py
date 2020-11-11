@@ -45,6 +45,7 @@ def generate_config(args):
             "comparison_loss_factor": args.comparison_loss_factor,
             "no_discriminator": args.no_discriminator,
             "no_skips": args.no_skips,
+            "purge_data": args.purge_data,
         }
 
         loss_parameters = {

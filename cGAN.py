@@ -8,8 +8,6 @@ from config import metric_dict
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-
-
 class Discriminator(nn.Module):
     def __init__(self, num_classes, dropout=0.4):
         """
@@ -272,7 +270,9 @@ def train_cGAN(config):
     message_string += "discriminator and "
     if config.no_skips:
         message_string += "no "
-    message_string += "skip connections in generator"
+    message_string += "skip connections in generator."
+    if config.purge_data:
+        message_string += "Purging any data with irregulat boundaries as well"
 
     print(message_string)
 
