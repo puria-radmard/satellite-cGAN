@@ -137,21 +137,25 @@ def train_cGAN_epoch(
     epoch_loss_tot = 0
     start_time = time.time()
 
+    if cGAN.discriminator:
+        loss_mag = (1 + comparison_loss_factor**2)**0.5
+    else:
+        loss_mag = comparison_loss_factor
+    comparison_loss_factor /= loss_mag
+
     for step, batch in enumerate(dataloader):
 
         images = batch["image"]; labels = batch["label"]
-        labels = labels.type_as(preds)
-
-        optimizer_G.zero_grad(); optimizer_D.zero_grad()
+        optimizer_G.zero_grad()
+        if optimizer_D:
+            optimizer_D.zero_grad()
 
         # print("generating images")
         preds = cGAN.generator.forward(images)
+        labels = labels.type_as(preds)
 
         # Train generator
         cGAN.float()
-
-        loss_mag = (1 + comparison_loss_factor**2)**0.5
-        comparison_loss_factor /= loss_mag
 
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
             preds.float(), labels.float().reshape(preds.shape)
@@ -168,14 +172,13 @@ def train_cGAN_epoch(
             adversarial_loss_gene = adversarial_loss_fn(
                 dis_probs_gene, torch.zeros(dis_probs_gene.shape)
             )
+            adversarial_loss_gene /= loss_mag
             adversarial_loss_gene.backward()
 
         # Train discriminator
         # Very dodgy way to do this
-           dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
+            dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
         
-
-
             dis_probs_real = cGAN.discriminator.forward(
                 reshape_for_discriminator2(labels, len(cGAN.classes)), reorder=False
             )
@@ -186,7 +189,7 @@ def train_cGAN_epoch(
                 dis_probs_gene, torch.zeros(dis_probs_gene.shape)
             )
             adversarial_loss_real = adversarial_loss_fn(dis_probs_real, dis_targets_real)
-            adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / 2
+            adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / (2*loss_mag)
             adversarial_loss.backward()
 
             loss.append(adversarial_loss.item())
@@ -267,6 +270,8 @@ def train_cGAN(config):
     if config.no_skips:
         message_string += "no "
     message_string += "skip connections in generator"
+
+    print(message_string)
 
     cGAN = ConditionalGAN(
         classes=config.classes,

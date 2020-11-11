@@ -38,10 +38,10 @@ class UNetUpBlock(nn.Module):
 
         self.no_skips = no_skips
         if no_skips:
-            in_channels = in_channels/2
+            in_channels = int(in_channels/2)
 
         layers = [
-            nn.Conv2d(_in_channels, out_channels, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
             nn.Dropout(p=dropout),
