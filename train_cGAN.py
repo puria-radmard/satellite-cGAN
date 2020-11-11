@@ -102,6 +102,7 @@ if __name__ == "__main__":
     parser.add_argument("--test_metric", type=str)
     parser.add_argument("--no_discriminator", type=bool)
     parser.add_argument("--no_skips", type=bool)
+    parser.add_argument("--purge_data", type=bool)
 
     # Universal parameters
     parser.add_argument("--lr", type=float)

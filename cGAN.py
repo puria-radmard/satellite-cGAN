@@ -89,6 +89,7 @@ def landsat_train_test_dataset(
     test_size=0.3,
     train_size=None,
     random_state=None,
+    purge_data=False
 ):
 
     if train_size == None:
@@ -99,6 +100,8 @@ def landsat_train_test_dataset(
         raise AssertionError("test_size + train_size > 1, which is not allowed")
 
     groups = group_bands(data_dir, channels + classes)
+    if purge_data:
+        groups = purge_groups(groups)
 
     train_groups, test_groups = train_test_split(
         groups, test_size=test_size, train_size=train_size, random_state=random_state
@@ -315,6 +318,7 @@ def train_cGAN(config):
             test_size=config.test_size,
             train_size=config.train_size,
             random_state=config.random_state,
+            purge_data=config.purge_data
         )
     else:
         # Debug case
