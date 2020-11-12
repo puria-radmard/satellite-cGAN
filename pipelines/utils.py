@@ -1,4 +1,7 @@
-from .imports import *
+try:
+    from .imports import *
+except ImportError:
+    from imports import *
 
 
 def group_bands(root: str, bands: List[str]) -> List[Dict[str, str]]:

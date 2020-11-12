@@ -18,6 +18,16 @@ landsat_operation_pipeline = OperationPipeline(
 landsat_operation_pipeline(root = "/content/drive/My Drive/LONDON_DATASET/")
 """
 
+class LSTN2Operation(Operation):
+    band_name = "LSTN2"
+    bands_required = ["LST"]
+
+    def operation(self, rasters):
+        mu = np.nanmean(rasters["LST"][0].astype(float))
+        sigma = np.nanstd(rasters["LST"][0].astype(float))
+
+        return [(rasters["LST"][0]-mu)/sigma], None
+
 
 class NDBIOperation(Operation):
     band_name = "NDBI"
@@ -125,10 +135,11 @@ class LSTOperation(Operation):
 if __name__ == '__main__':
     landsat_operation_pipeline = OperationPipeline(
         sequence = [
-          NDVIOperation(),
-          NDBIOperation(),
-          NDWIOperation(),
-          LSTOperation(),
+          # NDVIOperation(),
+          # NDBIOperation(),
+          # NDWIOperation(),
+          # LSTOperation(),
+          LSTN2Operation(),
         ]
     )
 
