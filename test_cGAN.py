@@ -78,5 +78,5 @@ for image_id in tqdm(image_ids):
     m.set_clim(np.amin(diff), np.amax(diff))
     fig.colorbar(m, ax=axs[1, 2])
 
-    fig.savefig(f"results/PURIFIED_DATASET_ENGLAND/{image_name}.RESULTS.png")
+    fig.savefig(f"results/REG/LSTN2/{image_name}.RESULTS.png")
 

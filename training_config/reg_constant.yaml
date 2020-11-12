@@ -2,7 +2,7 @@ channels:
   ["NDVI", "NDBI", "NDWI"]
 
 classes: 
-  ["LSTN"]
+  ["LSTN2"]
 
 comparison_loss_fn:
   "mse_loss"
@@ -56,4 +56,4 @@ comparison_loss_factor:
   1
 
 purge_data:
-  True
+  False
