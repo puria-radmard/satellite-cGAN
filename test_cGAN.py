@@ -28,8 +28,8 @@ for image_id in tqdm(image_ids):
     imW[imW != imW] = 0
     image = np.dstack([imV, imB, imW])
 
-    LSTN_real = read_raster(f"{image_id}.LSTN2.tif")[0][:, :, np.newaxis]
-    LSTN_real = slice_middle(LSTN_real).reshape(256, 256)
+    LSTN2_real = read_raster(f"{image_id}.LSTN2.tif")[0][:, :, np.newaxis]
+    LSTN2_real = slice_middle(LSTN2_real).reshape(256, 256)
 
     LST_real = read_raster(f"{image_id}.LST.tif")[0][:, :, np.newaxis]
     LST_real = slice_middle(LST_real).reshape(256, 256)
@@ -38,7 +38,7 @@ for image_id in tqdm(image_ids):
 
     LSTN_pred = cGAN.generator(torch.tensor(image)).reshape(256, 256).detach().numpy()
 
-    fig, axs = plt.subplots(2, 3, figsize=(30, 20))
+    fig, axs = plt.subplots(2, 4, figsize=(30, 20))
     fig.suptitle(image_name, fontsize=50)
 
     axs[0, 0].imshow(imV, cmap="Greens")
@@ -66,14 +66,20 @@ for image_id in tqdm(image_ids):
     fig.colorbar(m, ax=axs[1, 0])
 
     axs[1, 1].imshow(LSTN_pred, cmap="magma")
-    axs[1, 1].set_title("Predicted normalised temperature", fontsize=30)
+    axs[1, 1].set_title("Real normalised\n temperature (LSTN2)", fontsize=30)
+    m = cm.ScalarMappable(cmap="magma")
+    m.set_clim(np.amin(LSTN2_real), np.amax(LSTN2_real))
+    fig.colorbar(m, ax=axs[1, 1])
+
+    axs[1, 1].imshow(LSTN_pred, cmap="magma")
+    axs[1, 2].set_title("Predicted normalised\n temperature (LSTN2)", fontsize=30)
     m = cm.ScalarMappable(cmap="magma")
     m.set_clim(np.amin(LSTN_pred), np.amax(LSTN_pred))
     fig.colorbar(m, ax=axs[1, 1])
 
-    diff = LSTN_pred - LSTN_real
-    axs[1, 2].imshow(diff, cmap="plasma")
-    axs[1, 2].set_title("Predicted - real normalised LST", fontsize=30)
+    diff = LSTN_pred - LSTN2_real
+    axs[1, 3].imshow(diff, cmap="plasma")
+   
     m = cm.ScalarMappable(cmap="plasma")
     m.set_clim(np.amin(diff), np.amax(diff))
     fig.colorbar(m, ax=axs[1, 2])
