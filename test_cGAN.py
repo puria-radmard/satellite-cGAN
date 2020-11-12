@@ -38,7 +38,7 @@ for image_id in tqdm(image_ids):
 
     LSTN_pred = cGAN.generator(torch.tensor(image)).reshape(256, 256).detach().numpy()
 
-    fig, axs = plt.subplots(2, 4, figsize=(30, 20))
+    fig, axs = plt.subplots(2, 4, figsize=(40, 30))
     fig.suptitle(image_name, fontsize=50)
 
     axs[0, 0].imshow(imV, cmap="Greens")
@@ -65,13 +65,13 @@ for image_id in tqdm(image_ids):
     m.set_clim(np.amin(LST_real), np.amax(LST_real))
     fig.colorbar(m, ax=axs[1, 0])
 
-    axs[1, 1].imshow(LSTN_pred, cmap="magma")
+    axs[1, 1].imshow(LSTN2_real, cmap="magma")
     axs[1, 1].set_title("Real normalised\n temperature (LSTN2)", fontsize=30)
     m = cm.ScalarMappable(cmap="magma")
     m.set_clim(np.amin(LSTN2_real), np.amax(LSTN2_real))
     fig.colorbar(m, ax=axs[1, 1])
 
-    axs[1, 1].imshow(LSTN_pred, cmap="magma")
+    axs[1, 2].imshow(LSTN_pred, cmap="magma")
     axs[1, 2].set_title("Predicted normalised\n temperature (LSTN2)", fontsize=30)
     m = cm.ScalarMappable(cmap="magma")
     m.set_clim(np.amin(LSTN_pred), np.amax(LSTN_pred))
@@ -79,10 +79,9 @@ for image_id in tqdm(image_ids):
 
     diff = LSTN_pred - LSTN2_real
     axs[1, 3].imshow(diff, cmap="plasma")
-   
     m = cm.ScalarMappable(cmap="plasma")
     m.set_clim(np.amin(diff), np.amax(diff))
-    fig.colorbar(m, ax=axs[1, 2])
+    fig.colorbar(m, ax=axs[1, 3])
 
     fig.savefig(f"results/REG/LSTN2/{image_name}.RESULTS.png")
 
