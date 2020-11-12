@@ -28,7 +28,7 @@ for image_id in tqdm(image_ids):
     imW[imW != imW] = 0
     image = np.dstack([imV, imB, imW])
 
-    LSTN_real = read_raster(f"{image_id}.LSTN.tif")[0][:, :, np.newaxis]
+    LSTN_real = read_raster(f"{image_id}.LSTN2.tif")[0][:, :, np.newaxis]
     LSTN_real = slice_middle(LSTN_real).reshape(256, 256)
 
     LST_real = read_raster(f"{image_id}.LST.tif")[0][:, :, np.newaxis]
