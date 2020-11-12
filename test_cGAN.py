@@ -75,7 +75,7 @@ for image_id in tqdm(image_ids):
     axs[1, 2].set_title("Predicted normalised\n temperature (LSTN2)", fontsize=30)
     m = cm.ScalarMappable(cmap="magma")
     m.set_clim(np.amin(LSTN_pred), np.amax(LSTN_pred))
-    fig.colorbar(m, ax=axs[1, 1])
+    fig.colorbar(m, ax=axs[1, 2])
 
     diff = LSTN_pred - LSTN2_real
     axs[1, 3].imshow(diff, cmap="plasma")
