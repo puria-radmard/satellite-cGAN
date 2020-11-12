@@ -21,7 +21,7 @@ lr:
   0.0001
 
 data_dir:
-  "/content/drive/My Drive/LONDON_DATASET"
+  "../data_source/LONDON_DATASET"
 
 test_size:
   0.2
@@ -30,22 +30,28 @@ train_size:
   null
 
 batch_size:
-  5
+  8
 
 dis_dropout:
-  0.4
+  0.3
 
 gen_dropout:
-  0.4
+  0.3
 
 save_rate:
-  1
+  10
 
 random_state:
   null
 
 num_epochs:
-  20
+  80
 
 comparison_loss_factor:
   1.2
+
+no_skips:
+  False
+
+no_discriminator:
+  True
