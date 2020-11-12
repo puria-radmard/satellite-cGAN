@@ -73,9 +73,9 @@ def purge_groups(groups, target_band = "B3"):
     outgroups = []
 
     for group in groups:
-
+        
         target_path = get_property_path(group, prop_name= target_band)
-        image = slice_middle(read_raster(target_band)[0], remove_nan=False)
+        image = slice_middle(read_raster(target_path, remove_zero = True)[0][:,:,np.newaxis], remove_nan=False)
         if type(image) == type(None):
             continue
         elif any(image[0] != image[0]): #  Any NaNs
@@ -83,11 +83,10 @@ def purge_groups(groups, target_band = "B3"):
         else:
             outgroups.append(group)
 
+    print(f"Removed {len(groups)-len(outgroups)} groups for having NaN padding")
+
     return outgroups
         
-
-        
-
 
 def group_cities_by_time(root: str, band: str) -> Dict[str, Dict[str, str]]:
     """
@@ -140,7 +139,6 @@ def get_property_path(group: Dict[str, str], prop_name: str):
     Given a group, as in an element of a list produced by group_bands, and a band name, this returns the new
     filename for that band image.
     """
-
     group_name = list(group.values())[0].split(".")[-3].split("/")[-1]
     prop_path = os.path.join(
         "/".join(list(group.values())[0].split("/")[:-1]),

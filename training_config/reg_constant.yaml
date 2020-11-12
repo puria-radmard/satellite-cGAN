@@ -47,10 +47,13 @@ num_epochs:
   80
 
 no_skips:
-  True
+  False
 
 no_discriminator:
   True
 
 comparison_loss_factor:
   1
+
+purge_data:
+  True

@@ -272,7 +272,7 @@ def train_cGAN(config):
         message_string += "no "
     message_string += "skip connections in generator."
     if config.purge_data:
-        message_string += "Purging any data with irregulat boundaries as well"
+        message_string += "Purging any data with irregular boundaries as well"
 
     print(message_string)
 
