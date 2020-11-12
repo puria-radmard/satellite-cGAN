@@ -59,7 +59,7 @@ class Discriminator(nn.Module):
 
 
 class ConditionalGAN(nn.Module):
-    def __init__(self, classes, channels, dis_dropout, gen_dropout, no_discriminator, no_skips):
+    def __init__(self, classes, channels, dis_dropout, gen_dropout, no_discriminator, no_skips, sigmoid_channels):
 
         # Is this needed?
         super(ConditionalGAN, self).__init__()
@@ -75,7 +75,7 @@ class ConditionalGAN(nn.Module):
             )
 
         self.generator = UNet(
-            dropout=gen_dropout, n_channels=len(channels), n_classes=len(classes), no_skips=no_skips
+            dropout=gen_dropout, n_channels=len(channels), n_classes=len(classes), no_skips=no_skips, sigmoid_channels=sigmoid_channels
         )
 
 
@@ -277,6 +277,17 @@ def train_cGAN(config):
 
     print(message_string)
 
+    if config.task == "reg":
+        sigmoid_channels = [False]
+    elif config.task == "cls":
+        sigmoid_channels = [True]
+    elif config.task == "mix":
+        sigmoid_channels = [None, None]
+        sigmoid_channels[config.reg_layer] = False
+        sigmoid_channels[config.cls_layer] = True
+    else:
+        raise ValueError(f"{config.task} is not a recognised task (reg, cls, mix)")
+
     cGAN = ConditionalGAN(
         classes=config.classes,
         channels=config.channels,
@@ -284,6 +295,7 @@ def train_cGAN(config):
         gen_dropout=config.gen_dropout,
         no_discriminator=config.no_discriminator,
         no_skips=config.no_skips,
+        sigmoid_channels=sigmoid_channels
     )
 
     if torch.cuda.is_available():

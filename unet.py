@@ -78,7 +78,7 @@ class UNetOutBlock(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, dropout, no_skips, n_channels=3, n_classes=1):
+    def __init__(self, dropout, no_skips, sigmoid_channels, n_channels=3, n_classes=1):
 
         super(UNet, self).__init__()
 
@@ -86,6 +86,10 @@ class UNet(nn.Module):
         self.no_skips = no_skips
         self.n_classes = n_classes
         self.n_channels = n_channels
+        self.sigmoid_channels = sigmoid_channels
+
+        if len(sigmoid_channels) != n_classes:
+            raise ValueError("len(sigmoid_channels) != n_classes")
 
         convchan1 = 64
         convchan2 = 128
@@ -135,14 +139,13 @@ class UNet(nn.Module):
         up = self.up4(up, X1)
         logits = self.out(up)
 
-        return logits
+        if len(self.sigmoid_channels) != 1:
+            raise NotImplementedError("Haven't figured out mixed result yet")
 
-        if self.n_classes == 1:
-            output = nn.Sigmoid()(logits)
+        if self.sigmoid_channels[0]:
+            return nn.Sigmoid()(logits)
         else:
-            output = nn.Softmax(dim=1)(logits)
-
-        return output
+            return logits
 
 
 def trainEpoch(model, epoch, optimizer, dataloader, num_steps, loss_fn):
