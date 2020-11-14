@@ -373,5 +373,5 @@ def train_cGAN(config):
             state = {"config": config, "epoch": epoch, "state": cGAN.state_dict()}
             torch.save(
                 state,
-                os.path.join(dir_path, f"saves/{config.task}_nodis_model.epoch{epoch}.t7"),
+                os.path.join(dir_path, f"saves/{config.task}_LSTN2_model.epoch{epoch}.t7"),
             )

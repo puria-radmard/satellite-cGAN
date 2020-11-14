@@ -7,7 +7,7 @@ from pipelines.utils import *
 import torch
 from glob import glob
 
-model_weights = torch.load("saves/reg_nodis_model.epoch79.t7")["state"]
+model_weights = torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"]
 cGAN = ConditionalGAN(["LSTN"], ["NDVI", "NDBI", "NDWI"], 0, 0, True, False)
 cGAN.load_state_dict(model_weights)
 
@@ -83,5 +83,5 @@ for image_id in tqdm(image_ids):
     m.set_clim(np.amin(diff), np.amax(diff))
     fig.colorbar(m, ax=axs[1, 3])
 
-    fig.savefig(f"results/REG/LSTN2/{image_name}.RESULTS.png")
-
+    fig.savefig(f"results/REG/LSTN2_EUROPE/{image_name}.RESULTS.png")
+    fig.clf()

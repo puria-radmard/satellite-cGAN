@@ -135,10 +135,10 @@ class LSTOperation(Operation):
 if __name__ == '__main__':
     landsat_operation_pipeline = OperationPipeline(
         sequence = [
-          # NDVIOperation(),
-          # NDBIOperation(),
-          # NDWIOperation(),
-          # LSTOperation(),
+          NDVIOperation(),
+          NDBIOperation(),
+          NDWIOperation(),
+          LSTOperation(),
           LSTN2Operation(),
         ]
     )
