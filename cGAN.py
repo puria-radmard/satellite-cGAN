@@ -140,9 +140,10 @@ def train_cGAN_epoch(
 
     if cGAN.discriminator:
         loss_mag = (1 + comparison_loss_factor**2)**0.5
+        comparison_loss_factor /= loss_mag
     else:
-        loss_mag = comparison_loss_factor
-    comparison_loss_factor /= loss_mag
+        loss_mag = 1
+        comparison_loss_factor = 1
 
     for step, batch in enumerate(dataloader):
 
@@ -193,7 +194,7 @@ def train_cGAN_epoch(
             adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / (2*loss_mag)
             adversarial_loss.backward()
 
-            loss.append(adversarial_loss.item())
+            losses.append(adversarial_loss.item())
 
             optimizer_D.step()
 

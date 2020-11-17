@@ -25,7 +25,7 @@ req_args_dict = {
 }
 
 TASK_CHANNELS = {
-    "reg": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LSTN"]},
+    "reg": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LSTN2"]},
     "cls": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["UHI"]},
     "mix": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LSTN", "UHI"]},
 }

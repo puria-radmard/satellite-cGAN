@@ -18,10 +18,10 @@ parameters:
     value: 101
   num_epochs:
     distribution: constant
-    value: 75
+    value: 60
   test_size:
     distribution: constant
-    value: 0.2
+    value: 0.1
   data_dir:
     distribution: constant
     value: "../data_source/LONDON_DATASET"
@@ -30,7 +30,7 @@ parameters:
     value: True
   no_skip:
     distribution: constant
-    value: True
+    value: false
 
   comparison_loss_fn:
     distribution: constant
@@ -47,15 +47,15 @@ parameters:
     distribution: log_uniform
     max: -6.5
     min: -10.8
-  dis_dropout:
-    distribution: uniform
-    min: 0.2
-    max: 0.6
+#  dis_dropout:
+#    distribution: uniform
+#    min: 0.2
+#    max: 0.6
   gen_dropout:
     distribution: uniform
     min: 0.2
     max: 0.6
-  comparison_loss_factor:
-    distribution: normal
-    mu: 1.0
-    sigma: 0.1
+#  comparison_loss_factor:
+#    distribution: normal
+#    mu: 1.0
+#    sigma: 0.1

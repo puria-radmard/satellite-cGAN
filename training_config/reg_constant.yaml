@@ -29,7 +29,7 @@ train_size:
   null
 
 batch_size:
-  8
+  4
 
 dis_dropout:
   0.4772206496773703
@@ -38,7 +38,7 @@ gen_dropout:
   0.2966
 
 save_rate:
-  10
+  100
 
 random_state:
   null
