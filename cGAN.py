@@ -104,6 +104,7 @@ def landsat_train_test_dataset(
     train_groups, test_groups = train_test_split(
         groups, test_size=test_size, train_size=train_size, random_state=random_state
     )
+    record_groups(train_groups = train_groups, test_groups = test_groups)
 
     print(
         f"{len(train_groups)} training instances, {len(test_groups)} testing instances"
