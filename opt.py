@@ -5,6 +5,7 @@ from pipelines.utils import *
 from typing import List, Dict
 from cGAN import ConditionalGAN
 
+
 class MapOptimiser(nn.Module):
 
     def __init__(self, model_path, flat: List[str], sub: str, classes = ["LSTN"], NDVI_factor = 0.5):

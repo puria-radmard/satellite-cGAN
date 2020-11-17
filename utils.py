@@ -3,6 +3,7 @@ import numpy as np
 from torch import nn
 from imports import *
 from pipelines.utils import *
+import datetime
 
 def reshape_for_discriminator(a, num_classes):
     # Change shape from [N, C, H, W] to [NxC, 1, H, W]
@@ -17,6 +18,23 @@ def reshape_for_discriminator2(a, num_classes):
 def skip_tris(batch):
     batch = list(filter(lambda x: x["image"][0] is not None, batch))
     return default_collate(batch)
+
+def record_groups(train_groups, test_groups):
+    ts = '-'.join((str(datetime.now()).split()))
+    
+    with open(f"groups_{ts}.txt", "w") as fout:
+
+        fout.write("TRAIN_GROUPS")
+        for group in train_groups:
+            fout.write(get_property_path(group, "XXX"))
+            fout.write('\n')
+
+        fout.write('\n')
+            
+        fout.write("TRAIN_GROUPS")
+        for group in train_groups:
+            fout.write(get_property_path(group, "XXX"))
+            fout.write('\n')
 
 
 class PrintLayer(nn.Module):
