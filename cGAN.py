@@ -178,8 +178,8 @@ def train_cGAN_epoch(
             adversarial_loss_gene /= loss_mag
             adversarial_loss_gene.backward()
 
-        # Train discriminator
-        # Very dodgy way to do this
+            # Train discriminator
+            # Very dodgy way to do this
             dis_targets_real = torch.cat([torch.eye(len(cGAN.classes)) for _ in preds])
         
             dis_probs_real = cGAN.discriminator.forward(
