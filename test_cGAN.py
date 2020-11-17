@@ -79,14 +79,14 @@ for image_id in tqdm(image_ids):
 
     diff = LSTN_pred - LSTN2_real
     axs[1, 2].imshow(diff, cmap="plasma")
-    axs[1, 2].set_title("Predicted LSTN2 -\n real LSTN2")
+    axs[1, 2].set_title("Predicted LSTN2 -\n real LSTN2", fontsize=30)
     m = cm.ScalarMappable(cmap="plasma")
     m.set_clim(np.amin(diff), np.amax(diff))
     fig.colorbar(m, ax=axs[1, 2])
 
     diff2 = diff**2
-    axs[1, 3].imshow(diff, cmap="plasma")
-    axs[1, 3].set_title("$L2$ error for LSTN2")
+    axs[1, 3].imshow(diff2, cmap="plasma")
+    axs[1, 3].set_title("$L2$ error for LSTN2", fontsize=30)
     m = cm.ScalarMappable(cmap="plasma")
     m.set_clim(np.amin(diff2), np.amax(diff2))
     fig.colorbar(m, ax=axs[1, 3])
