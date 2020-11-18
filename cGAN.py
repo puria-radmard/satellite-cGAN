@@ -125,7 +125,8 @@ def train_cGAN_epoch(
     epoch,
     optimizer_G,
     optimizer_D,
-    dataloader,
+    dataset,
+    batch_size,
     comparison_loss_fn,
     adversarial_loss_fn,
     num_steps,
@@ -145,6 +146,10 @@ def train_cGAN_epoch(
     else:
         loss_mag = 1
         comparison_loss_factor = 1
+
+    dataloader = DataLoader(
+        dataset, batch_size=config.batch_size, shuffle=True # collate_fn=skip_tris
+    )
 
     for step, batch in enumerate(dataloader):
 
@@ -241,7 +246,7 @@ def test_cGAN_epoch(cGAN, epoch, dataloader, num_steps, test_metric):
 
         preds = cGAN.generator.forward(images)
         labels = labels.type_as(preds)
-        score = test_metric(preds, labels.reshape(preds.shape))
+        score = test_metric(preds.float(), labels.reshape(preds.shape).float())
         score = score.item()
         if not isinstance(score, list):
             score = [score]
@@ -339,9 +344,7 @@ def train_cGAN(config):
         train_dataset = DummyDataset(channels=config.channels, classes=config.classes)
         test_dataset = DummyDataset(channels=config.channels, classes=config.classes)
 
-    train_dataloader = DataLoader(
-        train_dataset, batch_size=config.batch_size, # collate_fn=skip_tris
-    )
+
     test_dataloader = DataLoader(
         test_dataset, batch_size=config.batch_size, # collate_fn=skip_tris
     )  # Change to own batch size?
@@ -361,7 +364,8 @@ def train_cGAN(config):
             epoch=epoch,
             optimizer_D=optimizer_D,
             optimizer_G=optimizer_G,
-            dataloader=train_dataloader,
+            dataset=train_dataset,
+            batch_size=config.batch_size,
             comparison_loss_fn=comparison_loss_fn,
             adversarial_loss_fn=adversarial_loss_fn,
             num_steps=train_num_steps,
