@@ -2,6 +2,7 @@ from imports import *
 
 
 class UNetDownBlock(nn.Module):
+    
     def __init__(self, in_channels, out_channels, dropout, max_before=True):
 
         super().__init__()

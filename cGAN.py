@@ -2,7 +2,7 @@ from pprint import pprint
 from pipelines.utils import *
 from imports import *
 from utils import *
-from unet import *
+from models.unet import *
 from config import metric_dict
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

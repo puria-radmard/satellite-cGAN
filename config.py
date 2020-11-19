@@ -1,5 +1,17 @@
 from imports import *
 from metrics import *
+from models import *
+
+
+models_dict = {
+    "unet": UNet,
+    "fpn": FPN
+}
+
+models_args_dict = {
+    "unet": ["no_skips"],
+    "fpn": []
+}
 
 metric_dict = {
     "bce_loss": nn.BCELoss,
