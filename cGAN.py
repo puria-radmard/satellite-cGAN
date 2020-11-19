@@ -146,6 +146,8 @@ def train_cGAN_epoch(
         loss_mag = 1
         comparison_loss_factor = 1
 
+    import pdb; pdb.set_trace()
+
     for step, batch in enumerate(dataloader):
 
         images = batch["image"]; labels = batch["label"]

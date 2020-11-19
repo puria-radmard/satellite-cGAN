@@ -3,7 +3,7 @@ import numpy as np
 from torch import nn
 from imports import *
 from pipelines.utils import *
-import datetime
+from datetime import datetime
 
 def reshape_for_discriminator(a, num_classes):
     # Change shape from [N, C, H, W] to [NxC, 1, H, W]
@@ -25,13 +25,15 @@ def record_groups(train_groups, test_groups):
     with open(f"groups_{ts}.txt", "w") as fout:
 
         fout.write("TRAIN_GROUPS")
+        fout.write("\n")
         for group in train_groups:
             fout.write(get_property_path(group, "XXX"))
             fout.write('\n')
 
         fout.write('\n')
             
-        fout.write("TRAIN_GROUPS")
+        fout.write("TEST_GROUPS")
+        fout.write("\n")
         for group in train_groups:
             fout.write(get_property_path(group, "XXX"))
             fout.write('\n')

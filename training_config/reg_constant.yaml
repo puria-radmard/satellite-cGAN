@@ -38,7 +38,7 @@ gen_dropout:
   0.2966
 
 save_rate:
-  100
+  20
 
 random_state:
   null

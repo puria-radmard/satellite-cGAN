@@ -8,7 +8,7 @@ import torch
 from glob import glob
 
 model_weights = torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"]
-cGAN = ConditionalGAN(["LSTN"], ["NDVI", "NDBI", "NDWI"], 0, 0, True, False)
+cGAN = ConditionalGAN(["LSTN"], ["NDVI", "NDBI", "NDWI"], 0, 0, True, False, [False])
 cGAN.load_state_dict(model_weights)
 
 image_ids = glob("../data_source/LONDON_DATASET/*NDVI.tif")
