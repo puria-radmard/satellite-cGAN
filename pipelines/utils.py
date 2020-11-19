@@ -65,7 +65,7 @@ def slice_middle(image, size=256, remove_nan=True):
     return sliced_image
 
 
-def purge_groups(groups, target_band = "B3"):
+def purge_groups(groups, target_band="B3"):
     """
     Removes any groups where the raw data has NaN edges due to satellite projections.
     We use the raw band as a target as we can remove NaNs during processing.
@@ -76,12 +76,15 @@ def purge_groups(groups, target_band = "B3"):
     outgroups = []
 
     for group in groups:
-        
-        target_path = get_property_path(group, prop_name= target_band)
-        image = slice_middle(read_raster(target_path, remove_zero = True)[0][:,:,np.newaxis], remove_nan=False)
+
+        target_path = get_property_path(group, prop_name=target_band)
+        image = slice_middle(
+            read_raster(target_path, remove_zero=True)[0][:, :, np.newaxis],
+            remove_nan=False,
+        )
         if type(image) == type(None):
             continue
-        elif any(image[0] != image[0]): #  Any NaNs
+        elif any(image[0] != image[0]):  #  Any NaNs
             continue
         else:
             outgroups.append(group)
@@ -89,7 +92,7 @@ def purge_groups(groups, target_band = "B3"):
     print(f"Removed {len(groups)-len(outgroups)} groups for having NaN padding")
 
     return outgroups
-        
+
 
 def group_cities_by_time(root: str, band: str) -> Dict[str, Dict[str, str]]:
     """

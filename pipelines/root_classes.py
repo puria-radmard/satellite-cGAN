@@ -1,5 +1,6 @@
 from utils import *
 
+
 class Operation:
     def __init__(self):
         try:

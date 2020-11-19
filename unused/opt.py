@@ -7,16 +7,17 @@ from cGAN import ConditionalGAN
 
 
 class MapOptimiser(nn.Module):
-
-    def __init__(self, model_path, flat: List[str], sub: str, classes = ["LSTN"], NDVI_factor = 0.5):
+    def __init__(
+        self, model_path, flat: List[str], sub: str, classes=["LSTN"], NDVI_factor=0.5
+    ):
 
         super(MapOptimiser, self).__init__()
 
         self.Predictor = ConditionalGAN(
             classes=classes,
-            channels= flat + [sub],
-            dis_dropout=0, # Change this
-            gen_dropout=0, # Change this
+            channels=flat + [sub],
+            dis_dropout=0,  # Change this
+            gen_dropout=0,  # Change this
         )
         self.Predictor.eval()
         model_weights = torch.load(model_path)["state"]
@@ -25,7 +26,9 @@ class MapOptimiser(nn.Module):
             p.requires_grad = False
 
         self.Predictor = self.Predictor.generator
-        self.StructureLayers = list(self.Predictor._modules.items())[:5] # This may change
+        self.StructureLayers = list(self.Predictor._modules.items())[
+            :5
+        ]  # This may change
 
         self.sub = sub
         self.flat = flat
@@ -40,14 +43,21 @@ class MapOptimiser(nn.Module):
             images.append(image_dict[band])
         self.flat_image = torch.Tensor(np.dstack(images)).cuda().double()
         self.P_channel = torch.Tensor(image_dict[self.sub]).cuda().double()
-        self.sub_image = torch.autograd.Variable(
-            0.5*torch.randn(256, 256, 1).cuda() + torch.tensor(image_dict[self.sub]).cuda(),
-        ).double().requires_grad_()
+        self.sub_image = (
+            torch.autograd.Variable(
+                0.5 * torch.randn(256, 256, 1).cuda()
+                + torch.tensor(image_dict[self.sub]).cuda()
+            )
+            .double()
+            .requires_grad_()
+        )
 
     def prediction(self):
 
         # Sub in the variable image channel
-        input_image = torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
+        input_image = torch.cat(
+            [self.sub_image, self.flat_image], -1
+        )  # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
         LSTN_map = self.Predictor(input_image)
 
         return LSTN_map
@@ -59,8 +69,14 @@ class MapOptimiser(nn.Module):
 
     def structural_loss(self):
 
-        x_image = torch.cat([self.sub_image, self.flat_image], -1).reshape(1, 3, 256, 256)
-        p_image = torch.cat([self.P_channel, self.flat_image], -1).reshape(1, 3, 256, 256).detach() # Make this a constant!
+        x_image = torch.cat([self.sub_image, self.flat_image], -1).reshape(
+            1, 3, 256, 256
+        )
+        p_image = (
+            torch.cat([self.P_channel, self.flat_image], -1)
+            .reshape(1, 3, 256, 256)
+            .detach()
+        )  # Make this a constant!
 
         layer_losses = {}
 
@@ -71,7 +87,7 @@ class MapOptimiser(nn.Module):
 
             layer_losses[layer_name] = self.layer_loss(x_image, p_image)
 
-        #Weight them here:
+        # Weight them here:
         structural_loss = torch.stack(list(layer_losses.values())).sum()
 
         wandb.log({"Full structure loss": structural_loss})
@@ -81,7 +97,9 @@ class MapOptimiser(nn.Module):
 
     def show_image(self):
 
-        return torch.cat([self.sub_image, self.flat_image], -1)    # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
+        return torch.cat(
+            [self.sub_image, self.flat_image], -1
+        )  # CHANGE THIS ASAP TO BE CONFIGURABLE ORDER
 
     @staticmethod
     def extract_thresh(image, thres):
@@ -92,17 +110,20 @@ class MapOptimiser(nn.Module):
         vegetation = self.extract_thresh(NDVI_map, 0.2)
         vegetation_squared_sum = torch.sum(torch.mul(vegetation, vegetation))
 
-        UHI = self.extract_thresh(LSTN_map+1, 0.0) # Changed from 1.0!
+        UHI = self.extract_thresh(LSTN_map + 1, 0.0)  # Changed from 1.0!
         UHI_squared_sum = torch.sum(torch.mul(UHI, UHI))
 
-        wandb.log({
-            "LSTN > 0 squared sum": UHI_squared_sum,
-            "Vegetation squared sum": vegetation_squared_sum
-        })
+        wandb.log(
+            {
+                "LSTN > 0 squared sum": UHI_squared_sum,
+                "Vegetation squared sum": vegetation_squared_sum,
+            }
+        )
 
         performance_loss = UHI_squared_sum + self.NDVI_factor * vegetation_squared_sum
 
         return performance_loss
+
 
 # Penalise vegetation cross with water & buildings
 # Penalise area of UHI

@@ -5,6 +5,7 @@ from imports import *
 from pipelines.utils import *
 from datetime import datetime
 
+
 def reshape_for_discriminator(a, num_classes):
     # Change shape from [N, C, H, W] to [NxC, 1, H, W]
     return a.view(a.shape[0] * num_classes, 1, a.shape[2], a.shape[3])
@@ -19,24 +20,25 @@ def skip_tris(batch):
     batch = list(filter(lambda x: x["image"][0] is not None, batch))
     return default_collate(batch)
 
+
 def record_groups(train_groups, test_groups):
-    ts = '-'.join((str(datetime.now()).split()))
-    
+    ts = "-".join((str(datetime.now()).split()))
+
     with open(f"groups_{ts}.txt", "w") as fout:
 
         fout.write("TRAIN_GROUPS")
         fout.write("\n")
         for group in train_groups:
             fout.write(get_property_path(group, "XXX"))
-            fout.write('\n')
+            fout.write("\n")
 
-        fout.write('\n')
-            
+        fout.write("\n")
+
         fout.write("TEST_GROUPS")
         fout.write("\n")
         for group in train_groups:
             fout.write(get_property_path(group, "XXX"))
-            fout.write('\n')
+            fout.write("\n")
 
 
 class PrintLayer(nn.Module):
@@ -106,49 +108,41 @@ class BaseCNNDatabase(Dataset):
 
 
 class LandsatDataset(BaseCNNDatabase):
-
     def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
-        
+
         super(LandsatDataset, self).__init__(
-            groups = groups,
-            channels = channels,
-            classes = classes,
-            transform = transform
+            groups=groups, channels=channels, classes=classes, transform=transform
         )
 
     def __getitem__(self, idx):
-        
+
         return self.base_getitem(idx)
-        
+
 
 class AutoEncoderDataset(BaseCNNDatabase):
-
     def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
-        
+
         super(LandsatDataset, self).__init__(
-            groups = groups,
-            channels = channels,
-            classes = classes,
-            transform = transform
+            groups=groups, channels=channels, classes=classes, transform=transform
         )
 
     def __getitem__(self, idx):
-        
+
         sample = self.base_getitem(idx)
         split_image = []
         split_label = []
 
-        for j in range(256/32):
+        for j in range(256 / 32):
             split_image.append(
-                sample['image'][j*32:(j+1)*32,j*32:(j+1)*32,:]
+                sample["image"][j * 32 : (j + 1) * 32, j * 32 : (j + 1) * 32, :]
             )
             split_label.append(
-                sample['label'][j*32:(j+1)*32,j*32:(j+1)*32,:]
+                sample["label"][j * 32 : (j + 1) * 32, j * 32 : (j + 1) * 32, :]
             )
 
         sample = {
-            'image': np.stack(split_image, axis=0),
-            'label': np.stack(split_label, axis=0),
+            "image": np.stack(split_image, axis=0),
+            "label": np.stack(split_label, axis=0),
         }
 
 
@@ -199,6 +193,7 @@ def write_loading_bar_string(
     )
 
     return string, epoch_metric_tot
+
 
 def construct_debug_model(layers, debug=False):
     modules = []

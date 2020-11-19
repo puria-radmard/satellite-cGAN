@@ -2,7 +2,6 @@ from imports import *
 
 
 class UNetDownBlock(nn.Module):
-    
     def __init__(self, in_channels, out_channels, dropout, max_before=True):
 
         super().__init__()
@@ -39,7 +38,7 @@ class UNetUpBlock(nn.Module):
 
         self.no_skips = no_skips
         if no_skips:
-            in_channels = int(in_channels/2)
+            in_channels = int(in_channels / 2)
 
         layers = [
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),

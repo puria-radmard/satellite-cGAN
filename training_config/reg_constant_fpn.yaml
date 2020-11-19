@@ -1,0 +1,65 @@
+channels: 
+  ["NDVI", "NDBI", "NDWI"]
+
+classes: 
+  ["LSTN2"]
+
+model:
+  "fpn"
+
+resnet_encoder:
+  "resnet18"
+
+comparison_loss_fn:
+  "mse_loss"
+
+loss_parameters:
+  null
+
+test_metric:
+  "mse_loss"
+
+test_parameters:
+  null
+
+lr:
+  0.000123276
+
+data_dir:
+  "../data_source/LONDON_DATASET"
+
+test_size:
+  0.05
+
+train_size:
+  null
+
+batch_size:
+  4
+
+dis_dropout:
+  0.4772206496773703
+
+gen_dropout:
+  0.2966
+
+save_rate:
+  20
+
+random_state:
+  null
+
+num_epochs:
+  80
+
+no_skips:
+  False
+
+no_discriminator:
+  True
+
+comparison_loss_factor:
+  1
+
+purge_data:
+  False

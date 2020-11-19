@@ -18,6 +18,7 @@ landsat_operation_pipeline = OperationPipeline(
 landsat_operation_pipeline(root = "/content/drive/My Drive/LONDON_DATASET/")
 """
 
+
 class LSTN2Operation(Operation):
     band_name = "LSTN2"
     bands_required = ["LST"]
@@ -26,7 +27,7 @@ class LSTN2Operation(Operation):
         mu = np.nanmean(rasters["LST"][0].astype(float))
         sigma = np.nanstd(rasters["LST"][0].astype(float))
 
-        return [(rasters["LST"][0]-mu)/sigma], None
+        return [(rasters["LST"][0] - mu) / sigma], None
 
 
 class NDBIOperation(Operation):
@@ -110,7 +111,9 @@ class LSTOperation(Operation):
     def operation(self, rasters):
         # Notice format return [image], None
         TOA_raster = (
-            self.variables["M_L"] * rasters["B10"][0].astype(float) + self.variables["A_L"] - 0.29
+            self.variables["M_L"] * rasters["B10"][0].astype(float)
+            + self.variables["A_L"]
+            - 0.29
         )
         BT_raster = (
             self.variables["K2"] / np.log(1 + self.variables["K1"] / TOA_raster)
@@ -132,16 +135,16 @@ class LSTOperation(Operation):
         )
         return [LST_raster], None
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     landsat_operation_pipeline = OperationPipeline(
-        sequence = [
-          NDVIOperation(),
-          NDBIOperation(),
-          NDWIOperation(),
-          LSTOperation(),
-          LSTN2Operation(),
+        sequence=[
+            NDVIOperation(),
+            NDBIOperation(),
+            NDWIOperation(),
+            LSTOperation(),
+            LSTN2Operation(),
         ]
     )
 
-    landsat_operation_pipeline(root = "../../data_source/LONDON_DATASET/")
-
+    landsat_operation_pipeline(root="../../data_source/LONDON_DATASET/")

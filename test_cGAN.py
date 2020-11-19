@@ -1,4 +1,3 @@
-
 from cGAN import *
 from matplotlib import cm
 import matplotlib as mpl
@@ -84,7 +83,7 @@ for image_id in tqdm(image_ids):
     m.set_clim(np.amin(diff), np.amax(diff))
     fig.colorbar(m, ax=axs[1, 2])
 
-    diff2 = diff**2
+    diff2 = diff ** 2
     axs[1, 3].imshow(diff2, cmap="plasma")
     axs[1, 3].set_title("$L2$ error for LSTN2", fontsize=30)
     m = cm.ScalarMappable(cmap="plasma")

@@ -46,6 +46,9 @@ random_state:
 num_epochs:
   80
 
+model:
+  "unet"
+
 no_skips:
   False
 
