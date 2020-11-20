@@ -3,14 +3,6 @@ from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
 
 # https://github.com/qubvel/segmentation_models.pytorch/
 
-class SegmentationHead(nn.Sequential):
-
-    def __init__(self, n_channels, n_classes, kernel_size=3, activation=None, upsampling=1):
-        conv2d = nn.Conv2d(n_channels, n_classes, kernel_size=kernel_size, padding=kernel_size // 2)
-        upsampling = nn.UpsamplingBilinear2d(scale_factor=upsampling) if upsampling > 1 else nn.Identity()
-        activation = Activation(activation)
-        super().__init__(conv2d, upsampling, activation)
-
 
 class FPNBlock(nn.Module):
     def __init__(self, pyramid_channels, skip_channels):
@@ -222,7 +214,7 @@ class FPN(nn.Module):
             merge_policy=decoder_merge_policy,
         )
 
-        self.outblock = SegmentationHead(
+        self.outblock = FPNOutBlock(
             n_channels=self.decoder.n_classes,
             n_classes=n_classes,
             kernel_size=1,
