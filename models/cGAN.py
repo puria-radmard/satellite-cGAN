@@ -1,6 +1,7 @@
 import torch
 from torch import nn
-from . import Unet, FPN
+from models.unet import UNet
+from models.fpn import FPN
 
 
 class Discriminator(nn.Module):

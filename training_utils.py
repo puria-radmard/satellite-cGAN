@@ -107,7 +107,7 @@ def prepare_training(config):
         gen_dropout=config.gen_dropout,
         no_discriminator=config.no_discriminator,
         sigmoid_channels=sigmoid_channels,
-        generator_class=config.model,
+        generator_class=models_dict[config.model],
         generator_params=config.model_parameters,
     )
 

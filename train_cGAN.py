@@ -38,15 +38,15 @@ def generate_config(args):
             config_dict = yaml.safe_load(stream)
             config_dict["task"] = args.task
             config_dict["wandb"] = args.wandb
-
+    
     loss_parameters = {
-        param: config_dict[param] for param in req_args_dict[args.comparison_loss_fn]
+        param: config_dict[param] for param in req_args_dict[config_dict["comparison_loss_fn"]]
     }
     test_parameters = {
-        param: config_dict[param] for param in req_args_dict[args.test_metric]
+        param: config_dict[param] for param in req_args_dict[config_dict["test_metric"]]
     }
     model_parameters = {
-        param: config_dict[param] for param in models_args_dict[args.model]
+        param: config_dict[param] for param in models_args_dict[config_dict["model"]]
     }
 
     config_dict["test_parameters"] = test_parameters
