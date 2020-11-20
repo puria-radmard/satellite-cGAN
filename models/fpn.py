@@ -5,8 +5,8 @@ from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
 
 class SegmentationHead(nn.Sequential):
 
-    def __init__(self, in_channels, out_channels, kernel_size=3, activation=None, upsampling=1):
-        conv2d = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, padding=kernel_size // 2)
+    def __init__(self, n_channels, n_classes, kernel_size=3, activation=None, upsampling=1):
+        conv2d = nn.Conv2d(n_channels, n_classes, kernel_size=kernel_size, padding=kernel_size // 2)
         upsampling = nn.UpsamplingBilinear2d(scale_factor=upsampling) if upsampling > 1 else nn.Identity()
         activation = Activation(activation)
         super().__init__(conv2d, upsampling, activation)
@@ -25,14 +25,14 @@ class FPNBlock(nn.Module):
 
 
 class SegmentationBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, n_upsamples=0):
+    def __init__(self, n_channels, n_classes, n_upsamples=0):
         super().__init__()
 
-        blocks = [Conv3x3GNReLU(in_channels, out_channels, upsample=bool(n_upsamples))]
+        blocks = [Conv3x3GNReLU(n_channels, n_classes, upsample=bool(n_upsamples))]
 
         if n_upsamples > 1:
             for _ in range(1, n_upsamples):
-                blocks.append(Conv3x3GNReLU(out_channels, out_channels, upsample=True))
+                blocks.append(Conv3x3GNReLU(n_classes, n_classes, upsample=True))
 
         self.block = nn.Sequential(*blocks)
 
@@ -62,14 +62,14 @@ class MergeBlock(nn.Module):
 
 
 class Conv3x3GNReLU(nn.Module):
-    def __init__(self, in_channels, out_channels, upsample=False):
+    def __init__(self, n_channels, n_classes, upsample=False):
         super().__init__()
         self.upsample = upsample
         self.block = nn.Sequential(
             nn.Conv2d(
-                in_channels, out_channels, (3, 3), stride=1, padding=1, bias=False
+                n_channels, n_classes, (3, 3), stride=1, padding=1, bias=False
             ),
-            nn.GroupNorm(32, out_channels),
+            nn.GroupNorm(32, n_classes),
             nn.ReLU(inplace=True),
         )
 
@@ -92,7 +92,7 @@ class FPNDecoder(nn.Module):
     ):
         super().__init__()
 
-        self.out_channels = segmentation_channels if merge_policy == "add" else segmentation_channels * 4
+        self.n_classes = segmentation_channels if merge_policy == "add" else segmentation_channels * 4
         if encoder_depth < 3:
             raise ValueError("Encoder depth for FPN decoder cannot be less than 3, got {}.".format(encoder_depth))
 
@@ -130,7 +130,7 @@ class ResNetEncoder(ResNet):
     def __init__(self, encoder_name, n_channels, depth, **kwargs):
 
         params = resnet_encoders[encoder_name]["params"]
-        self._out_channels = params["out_channels"]
+        self._n_classes = params["n_classes"]
         self._depth = depth
 
         super().__init__(block = params["block"], layers = params["layers"])
@@ -141,8 +141,8 @@ class ResNetEncoder(ResNet):
         if n_channels != 3:
 
             self.n_channels = n_channels
-            if self._out_channels[0] == 3:
-                self._out_channels = tuple([n_channels] + list(self._out_channels)[1:])
+            if self._n_classes[0] == 3:
+                self._n_classes = tuple([n_channels] + list(self._n_classes)[1:])
 
             utils.patch_first_conv(model=self, n_channels=n_channels)
 
@@ -169,12 +169,12 @@ class ResNetEncoder(ResNet):
 
 
 class FPNOutBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=3, upsampling=1):
+    def __init__(self, n_channels, n_classes, kernel_size=3, upsampling=1):
 
         super(FPNOutBlock, self).__init__()
 
         conv2d = nn.Conv2d(
-            in_channels, out_channels, kernel_size=kernel_size, padding=kernel_size // 2
+            n_channels, n_classes, kernel_size=kernel_size, padding=kernel_size // 2
         )
         upsampling = (
             nn.UpsamplingBilinear2d(scale_factor=upsampling)
@@ -214,7 +214,7 @@ class FPN(nn.Module):
         )
 
         self.decoder = FPNDecoder(
-            encoder_channels=self.encoder._out_channels,
+            encoder_channels=self.encoder._n_classes,
             encoder_depth=encoder_depth,
             pyramid_channels=decoder_pyramid_channels,
             segmentation_channels=decoder_segmentation_channels,
@@ -223,8 +223,8 @@ class FPN(nn.Module):
         )
 
         self.outblock = SegmentationHead(
-            n_channels=self.decoder.out_channels,
-            out_channels=n_classes,
+            n_channels=self.decoder.n_classes,
+            n_classes=n_classes,
             kernel_size=1,
             upsampling=upsampling,
         )
@@ -251,7 +251,7 @@ resnet_encoders = {
     "resnet18": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 64, 128, 256, 512),
+            "n_classes": (3, 64, 64, 128, 256, 512),
             "block": BasicBlock,
             "layers": [2, 2, 2, 2],
         },
@@ -259,7 +259,7 @@ resnet_encoders = {
     "resnet34": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 64, 128, 256, 512),
+            "n_classes": (3, 64, 64, 128, 256, 512),
             "block": BasicBlock,
             "layers": [3, 4, 6, 3],
         },
@@ -267,7 +267,7 @@ resnet_encoders = {
     "resnet50": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 6, 3],
         },
@@ -275,7 +275,7 @@ resnet_encoders = {
     "resnet101": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 23, 3],
         },
@@ -283,7 +283,7 @@ resnet_encoders = {
     "resnet152": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 8, 36, 3],
         },
@@ -291,7 +291,7 @@ resnet_encoders = {
     "resnext50_32x4d": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 6, 3],
             "groups": 32,
@@ -301,7 +301,7 @@ resnet_encoders = {
     "resnext101_32x4d": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 23, 3],
             "groups": 32,
@@ -311,7 +311,7 @@ resnet_encoders = {
     "resnext101_32x8d": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 23, 3],
             "groups": 32,
@@ -321,7 +321,7 @@ resnet_encoders = {
     "resnext101_32x16d": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 23, 3],
             "groups": 32,
@@ -331,7 +331,7 @@ resnet_encoders = {
     "resnext101_32x32d": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 23, 3],
             "groups": 32,
@@ -341,7 +341,7 @@ resnet_encoders = {
     "resnext101_32x48d": {
         "encoder": ResNetEncoder,
         "params": {
-            "out_channels": (3, 64, 256, 512, 1024, 2048),
+            "n_classes": (3, 64, 256, 512, 1024, 2048),
             "block": Bottleneck,
             "layers": [3, 4, 23, 3],
             "groups": 32,
