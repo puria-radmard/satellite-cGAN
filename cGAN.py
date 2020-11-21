@@ -49,6 +49,7 @@ def train_cGAN_epoch(
             preds.float(), labels.float().reshape(preds.shape)
         )
         comparison_loss.backward(retain_graph=True)
+        import pdb; pdb.set_trace()
 
         losses = [comparison_loss.item()]
 
@@ -138,6 +139,7 @@ def train_cGAN(config):
     cGAN, comparison_loss_fn, test_metric, adversarial_loss_fn, optimizer_D, optimizer_G, train_dataset, test_dataloader, train_num_steps, test_num_steps = prepare_training(
         config=config
     )
+    cGAN.load_state_dict(torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"])
     cGAN.float()
 
     if torch.cuda.is_available():
@@ -171,6 +173,7 @@ def train_cGAN(config):
         )
 
         epoch_metrics = {f"epoch_loss": epoch_loss, f"epoch_score": epoch_score}
+        print(epoch_loss)
 
         if config.wandb:
             wandb.log(epoch_metrics)
