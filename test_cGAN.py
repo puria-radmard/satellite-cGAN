@@ -1,13 +1,28 @@
-from train_cGAN import *
+
 from matplotlib import cm
-import matplotlib as mpl
-from train_cGAN import Config
-from pipelines.utils import *
+from tqdm import tqdm
+import numpy as np
+
+from models import ConditionalGAN
+from pipelines.utils import slice_middle, read_raster
+import matplotlib.pyplot as plt
+
 import torch
 from glob import glob
 
 model_weights = torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"]
-cGAN = ConditionalGAN(["LSTN"], ["NDVI", "NDBI", "NDWI"], 0, 0, True, False, [False])
+cGAN = ConditionalGAN(
+    classes=["LSTN"],
+    channels=["NDVI", "NDBI", "NDWI"],
+    dis_dropout=0,
+    gen_dropout=0,
+    no_discriminator=True,
+    sigmoid_channels=[False],
+    generator_class=None,               # Set in test time
+    generator_params=None               # Set in test time
+)
+cGAN.eval()
+cGAN.generator.eval()
 cGAN.load_state_dict(model_weights)
 
 image_ids = glob("../data_source/LONDON_DATASET/*NDVI.tif")

@@ -1,5 +1,5 @@
-from imports import *
-
+import torch
+from torch import nn
 
 def dice_coef(preds, labels):
     smooth = 1.0
@@ -113,9 +113,6 @@ class TargettedRegressionClassification(nn.Module):
 
         reg_labels = labels[:, :, :, self.reg_layer]
         cls_labels = labels[:, :, :, self.cls_layer]
-        import pdb
-
-        pdb.set_trace()  # check that cls_layer is binary
 
         reg_loss = self.reg_loss_func(mul_preds, reg_labels)
         cls_loss = self.cls_loss_func(cls_preds, cls_labels)

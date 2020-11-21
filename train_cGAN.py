@@ -1,16 +1,18 @@
+import sys
+import time
+
+import os
+
+import torch
+import yaml
 import wandb
 import argparse
-import yaml
+from torch.utils.data import DataLoader
 
 from training_utils import req_args_dict, TASK_CHANNELS, models_args_dict
-
-from imports import *
-from pprint import pprint
-from pipelines.utils import *
-from imports import *
-from utils import *
 from training_utils import metric_dict, prepare_training, normalise_loss_factor
-from models import ConditionalGAN, UNet, FPN
+from training_utils import generate_adversarial_loss
+from utils import write_loading_bar_string
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -59,17 +61,15 @@ def train_cGAN_epoch(
         losses = [comparison_loss.item()]
 
         if cGAN.has_discriminator:
-
-            generator_adversarial_loss_gene, discriminator_adversarial_loss = generate_adversarial_loss(
-                cGAN, preds, adversarial_loss_fn
-            )
+            generator_adversarial_loss_gene, discriminator_adversarial_loss = \
+                generate_adversarial_loss(cGAN, preds, labels, loss_mag, adversarial_loss_fn)
             generator_adversarial_loss_gene.backward()
             discriminator_adversarial_loss.backward()
             optimizer_D.step()
 
             losses.extend(
                 [
-                    generator_adversarial_loss.item(),
+                    generator_adversarial_loss_gene.item(),
                     discriminator_adversarial_loss.item(),
                 ]
             )
@@ -88,9 +88,8 @@ def train_cGAN_epoch(
         del comparison_loss
 
         if cGAN.has_discriminator:
-            del adversarial_loss
-            del adversarial_loss_real
-            del adversarial_loss_gene
+            del generator_adversarial_loss_gene
+            del discriminator_adversarial_loss
 
         if wandb_flag:
             wandb.log({"iteration_loss": sum(losses)})
@@ -141,7 +140,8 @@ def test_cGAN_epoch(cGAN, epoch, dataloader, num_steps, test_metric):
 
 def train_cGAN(config):
 
-    cGAN, comparison_loss_fn, test_metric, adversarial_loss_fn, optimizer_D, optimizer_G, train_dataset, test_dataloader, train_num_steps, test_num_steps = prepare_training(
+    cGAN, comparison_loss_fn, test_metric, adversarial_loss_fn, optimizer_D, optimizer_G, \
+    train_dataset, test_dataloader, train_num_steps, test_num_steps = prepare_training(
         config=config
     )
     cGAN.float()
@@ -187,7 +187,7 @@ def train_cGAN(config):
             torch.save(
                 state,
                 os.path.join(
-                    dir_path, f"saves/{config.task}_LSTN2_model.epoch{epoch}.t7"
+                    dir_path, f"saves/{config.task}_{config.model}.epoch{epoch}.t7"
                 ),
             )
 
@@ -204,9 +204,9 @@ class Config:
 
 def generate_config(args):
 
-    if args.arg_source == None:  # i.e. sweep or manual
+    if not args.arg_source:  # i.e. sweep or manual
 
-        if args.train_size == None:
+        if not args.train_size:
             train_size = 1 - args.test_size
 
         # Some leftover params here from the loss_parameters but no worries

@@ -1,8 +1,11 @@
+from typing import List
+
 import torch
 import numpy as np
-from torch import nn
-from imports import *
-from pipelines.utils import *
+from torch.utils.data import Dataset
+from torch.utils.data._utils.collate import default_collate
+
+from pipelines.utils import read_raster, get_property_path, slice_middle
 from datetime import datetime
 
 
@@ -122,7 +125,7 @@ class LandsatDataset(BaseCNNDatabase):
 class AutoEncoderDataset(BaseCNNDatabase):
     def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
 
-        super(LandsatDataset, self).__init__(
+        super(AutoEncoderDataset, self).__init__(
             groups=groups, channels=channels, classes=classes, transform=transform
         )
 
@@ -132,7 +135,7 @@ class AutoEncoderDataset(BaseCNNDatabase):
         split_image = []
         split_label = []
 
-        for j in range(256 / 32):
+        for j in range(int(256 / 32)):
             split_image.append(
                 sample["image"][j * 32 : (j + 1) * 32, j * 32 : (j + 1) * 32, :]
             )
