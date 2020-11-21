@@ -90,8 +90,8 @@ class BaseCNNDatabase(Dataset):
 
         for input_channel in self.channels:
             image = read_raster(group[input_channel])[0]
-            image -= np.nanmin(image)
-            image = 2 * (image / np.nanmax(image)) - 1
+            # image -= np.nanmin(image)
+            # image = 2 * (image / np.nanmax(image)) - 1
             image = np.expand_dims(image, -1)
             image = slice_middle(image)
             if isinstance(image, type(None)):
@@ -100,8 +100,8 @@ class BaseCNNDatabase(Dataset):
 
         for label_channel in self.classes:
             image = read_raster(group[label_channel])[0]
-            image -= np.nanmin(image)
-            image = 2 * (image / np.nanmax(image)) - 1
+            # image -= np.nanmin(image)
+            # image = 2 * (image / np.nanmax(image)) - 1
             image = np.expand_dims(image, -1)
             image = slice_middle(image)
             label_images.append(image)
