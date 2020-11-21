@@ -1,4 +1,3 @@
-
 from matplotlib import cm
 from tqdm import tqdm
 import numpy as np
@@ -18,8 +17,8 @@ cGAN = ConditionalGAN(
     gen_dropout=0,
     no_discriminator=True,
     sigmoid_channels=[False],
-    generator_class=None,               # Set in test time
-    generator_params=None               # Set in test time
+    generator_class=None,  # Set in test time
+    generator_params=None,  # Set in test time
 )
 cGAN.eval()
 cGAN.generator.eval()

@@ -16,6 +16,7 @@ from utils import write_loading_bar_string
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 def train_cGAN_epoch(
     cGAN,
     epoch,
@@ -61,8 +62,12 @@ def train_cGAN_epoch(
         losses = [comparison_loss.item()]
 
         if cGAN.has_discriminator:
-            generator_adversarial_loss_gene, discriminator_adversarial_loss = \
-                generate_adversarial_loss(cGAN, preds, labels, loss_mag, adversarial_loss_fn)
+            (
+                generator_adversarial_loss_gene,
+                discriminator_adversarial_loss,
+            ) = generate_adversarial_loss(
+                cGAN, preds, labels, loss_mag, adversarial_loss_fn
+            )
             generator_adversarial_loss_gene.backward()
             discriminator_adversarial_loss.backward()
             optimizer_D.step()
@@ -140,10 +145,18 @@ def test_cGAN_epoch(cGAN, epoch, dataloader, num_steps, test_metric):
 
 def train_cGAN(config):
 
-    cGAN, comparison_loss_fn, test_metric, adversarial_loss_fn, optimizer_D, optimizer_G, \
-    train_dataset, test_dataloader, train_num_steps, test_num_steps = prepare_training(
-        config=config
-    )
+    (
+        cGAN,
+        comparison_loss_fn,
+        test_metric,
+        adversarial_loss_fn,
+        optimizer_D,
+        optimizer_G,
+        train_dataset,
+        test_dataloader,
+        train_num_steps,
+        test_num_steps,
+    ) = prepare_training(config=config)
     cGAN.float()
 
     if torch.cuda.is_available():
@@ -192,8 +205,6 @@ def train_cGAN(config):
             )
 
 
-
-
 class Config:
     def __init__(self, conf):
         self.__dict__.update(conf)
@@ -220,9 +231,10 @@ def generate_config(args):
             config_dict = yaml.safe_load(stream)
             config_dict["task"] = args.task
             config_dict["wandb"] = args.wandb
-    
+
     loss_parameters = {
-        param: config_dict[param] for param in req_args_dict[config_dict["comparison_loss_fn"]]
+        param: config_dict[param]
+        for param in req_args_dict[config_dict["comparison_loss_fn"]]
     }
     test_parameters = {
         param: config_dict[param] for param in req_args_dict[config_dict["test_metric"]]

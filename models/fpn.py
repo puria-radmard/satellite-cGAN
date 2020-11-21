@@ -32,25 +32,26 @@ class SegmentationBlock(nn.Module):
     def forward(self, x):
         return self.block(x)
 
+
 class MergeBlock(nn.Module):
     def __init__(self, policy):
         super().__init__()
         if policy not in ["add", "cat"]:
             raise ValueError(
-                "`merge_policy` must be one of: ['add', 'cat'], got {}".format(
-                    policy
-                )
+                "`merge_policy` must be one of: ['add', 'cat'], got {}".format(policy)
             )
         self.policy = policy
 
     def forward(self, x):
-        if self.policy == 'add':
+        if self.policy == "add":
             return sum(x)
-        elif self.policy == 'cat':
+        elif self.policy == "cat":
             return torch.cat(x, dim=1)
         else:
             raise ValueError(
-                "`merge_policy` must be one of: ['add', 'cat'], got {}".format(self.policy)
+                "`merge_policy` must be one of: ['add', 'cat'], got {}".format(
+                    self.policy
+                )
             )
 
 
@@ -59,9 +60,7 @@ class Conv3x3GNReLU(nn.Module):
         super().__init__()
         self.upsample = upsample
         self.block = nn.Sequential(
-            nn.Conv2d(
-                n_channels, n_classes, (3, 3), stride=1, padding=1, bias=False
-            ),
+            nn.Conv2d(n_channels, n_classes, (3, 3), stride=1, padding=1, bias=False),
             nn.GroupNorm(32, n_classes),
             nn.ReLU(inplace=True),
         )
@@ -75,32 +74,44 @@ class Conv3x3GNReLU(nn.Module):
 
 class FPNDecoder(nn.Module):
     def __init__(
-            self,
-            encoder_channels,
-            encoder_depth=5,
-            pyramid_channels=256,
-            segmentation_channels=128,
-            dropout=0.2,
-            merge_policy="add",
+        self,
+        encoder_channels,
+        encoder_depth=5,
+        pyramid_channels=256,
+        segmentation_channels=128,
+        dropout=0.2,
+        merge_policy="add",
     ):
         super().__init__()
 
-        self.n_classes = segmentation_channels if merge_policy == "add" else segmentation_channels * 4
+        self.n_classes = (
+            segmentation_channels
+            if merge_policy == "add"
+            else segmentation_channels * 4
+        )
         if encoder_depth < 3:
-            raise ValueError("Encoder depth for FPN decoder cannot be less than 3, got {}.".format(encoder_depth))
+            raise ValueError(
+                "Encoder depth for FPN decoder cannot be less than 3, got {}.".format(
+                    encoder_depth
+                )
+            )
 
         encoder_channels = encoder_channels[::-1]
-        encoder_channels = encoder_channels[:encoder_depth + 1]
+        encoder_channels = encoder_channels[: encoder_depth + 1]
 
         self.p5 = nn.Conv2d(encoder_channels[0], pyramid_channels, kernel_size=1)
         self.p4 = FPNBlock(pyramid_channels, encoder_channels[1])
         self.p3 = FPNBlock(pyramid_channels, encoder_channels[2])
         self.p2 = FPNBlock(pyramid_channels, encoder_channels[3])
 
-        self.seg_blocks = nn.ModuleList([
-            SegmentationBlock(pyramid_channels, segmentation_channels, n_upsamples=n_upsamples)
-            for n_upsamples in [3, 2, 1, 0]
-        ])
+        self.seg_blocks = nn.ModuleList(
+            [
+                SegmentationBlock(
+                    pyramid_channels, segmentation_channels, n_upsamples=n_upsamples
+                )
+                for n_upsamples in [3, 2, 1, 0]
+            ]
+        )
 
         self.merge = MergeBlock(merge_policy)
         self.dropout = nn.Dropout2d(p=dropout, inplace=True)
@@ -113,11 +124,14 @@ class FPNDecoder(nn.Module):
         p3 = self.p3(p4, c3)
         p2 = self.p2(p3, c2)
 
-        feature_pyramid = [seg_block(p) for seg_block, p in zip(self.seg_blocks, [p5, p4, p3, p2])]
+        feature_pyramid = [
+            seg_block(p) for seg_block, p in zip(self.seg_blocks, [p5, p4, p3, p2])
+        ]
         x = self.merge(feature_pyramid)
         x = self.dropout(x)
 
         return x
+
 
 class ResNetEncoder(ResNet):
     def __init__(self, encoder_name, n_channels, depth, **kwargs):
@@ -126,7 +140,7 @@ class ResNetEncoder(ResNet):
         self._n_classes = params["n_classes"]
         self._depth = depth
 
-        super().__init__(block = params["block"], layers = params["layers"])
+        super().__init__(block=params["block"], layers=params["layers"])
 
         del self.fc
         del self.avgpool
@@ -224,7 +238,7 @@ class FPN(nn.Module):
 
         # removed self.initialize()
 
-    def forward(self, x, reorder = True):
+    def forward(self, x, reorder=True):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
 
         if reorder:

@@ -171,7 +171,9 @@ def generate_adversarial_loss(cGAN, preds, labels, loss_mag, adversarial_loss_fn
     generator_adversarial_loss_gene = adversarial_loss_fn(dis_probs_gene, gene_targets)
     generator_adversarial_loss_gene /= loss_mag
 
-    reshaped_detached_preds = reshape_for_discriminator(preds.detach(), len(cGAN.classes))
+    reshaped_detached_preds = reshape_for_discriminator(
+        preds.detach(), len(cGAN.classes)
+    )
     dis_probs_gene = cGAN.discriminator.forward(reshaped_detached_preds, reorder=False)
     adversarial_loss_gene = adversarial_loss_fn(dis_probs_gene, gene_targets)
 
@@ -180,6 +182,8 @@ def generate_adversarial_loss(cGAN, preds, labels, loss_mag, adversarial_loss_fn
     dis_probs_real = cGAN.discriminator.forward(reshaped_labels, reorder=False)
     adversarial_loss_real = adversarial_loss_fn(dis_probs_real, dis_targets_real)
 
-    discriminator_adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / (2 * loss_mag)
+    discriminator_adversarial_loss = (adversarial_loss_real + adversarial_loss_gene) / (
+        2 * loss_mag
+    )
 
     return generator_adversarial_loss_gene, discriminator_adversarial_loss
