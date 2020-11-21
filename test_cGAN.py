@@ -1,4 +1,4 @@
-from cGAN import *
+from train_cGAN import *
 from matplotlib import cm
 import matplotlib as mpl
 from train_cGAN import Config
