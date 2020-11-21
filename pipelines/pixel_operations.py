@@ -24,8 +24,9 @@ class LSTN2Operation(Operation):
     bands_required = ["LST"]
 
     def operation(self, rasters):
-        mu = np.nanmean(rasters["LST"][0].astype(float))
-        sigma = np.nanstd(rasters["LST"][0].astype(float))
+        mid_img = slice_middle(rasters["LST"][0][:,:,np.newaxis]).astype(float)[:,:,0]
+        mu = np.nanmean(mid_img)
+        sigma = np.nanstd(mid_img)
 
         return [(rasters["LST"][0] - mu) / sigma], None
 
@@ -139,10 +140,10 @@ class LSTOperation(Operation):
 if __name__ == "__main__":
     landsat_operation_pipeline = OperationPipeline(
         sequence=[
-            NDVIOperation(),
-            NDBIOperation(),
-            NDWIOperation(),
-            LSTOperation(),
+#            NDVIOperation(),
+#            NDBIOperation(),
+#            NDWIOperation(),
+#            LSTOperation(),
             LSTN2Operation(),
         ]
     )

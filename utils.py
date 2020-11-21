@@ -1,6 +1,7 @@
 from typing import List
 
 import torch
+from torch import nn
 import numpy as np
 from torch.utils.data import Dataset
 from torch.utils.data._utils.collate import default_collate
