@@ -1,4 +1,5 @@
 from imports import *
+import torch.nn.functional as F
 from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
 
 # https://github.com/qubvel/segmentation_models.pytorch/
@@ -174,7 +175,7 @@ class FPNOutBlock(nn.Module):
             else nn.Identity()
         )
 
-        self.model = nn.Sequential([conv2d, upsampling])
+        self.model = nn.Sequential(conv2d, upsampling)
 
     def forward(self, X):
 
@@ -223,12 +224,15 @@ class FPN(nn.Module):
 
         # removed self.initialize()
 
-    def forward(self, x):
+    def forward(self, x, reorder = True):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
+
+        if reorder:
+            x = x.permute(0, 3, 1, 2)
         features = self.encoder(x)
         decoder_output = self.decoder(*features)
 
-        masks = self.outblock(decoder_output)
+        logits = self.outblock(decoder_output)
 
         if len(self.sigmoid_channels) != 1:
             raise NotImplementedError("Haven't figured out mixed result yet")

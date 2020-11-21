@@ -31,22 +31,20 @@ def train_cGAN_epoch(
     comparison_loss_factor, loss_mag = normalise_loss_factor(
         cGAN, comparison_loss_factor
     )
-    dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     for step, batch in enumerate(dataloader):
 
-        images = batch["image"]
+        images = batch["image"].float()
+        labels = batch["label"].float()
 
         optimizer_G.zero_grad()
         if optimizer_D:
             optimizer_D.zero_grad()
 
         preds = cGAN.generator.forward(images)
-        labels = batch["label"].type_as(preds)
 
         # Train generator
-        # cGAN.float()
-
         comparison_loss = comparison_loss_factor * comparison_loss_fn(
             preds.float(), labels.float().reshape(preds.shape)
         )
@@ -83,7 +81,7 @@ def train_cGAN_epoch(
         del labels
         del comparison_loss
 
-        if cGAN.discriminator:
+        if cGAN.has_discriminator:
             del adversarial_loss
             del adversarial_loss_real
             del adversarial_loss_gene
@@ -107,8 +105,8 @@ def test_cGAN_epoch(cGAN, epoch, dataloader, num_steps, test_metric):
 
     for step, batch in enumerate(dataloader):
 
-        images = batch["image"]
-        labels = batch["label"]
+        images = batch["image"].float()
+        labels = batch["label"].float()
 
         preds = cGAN.generator.forward(images)
         labels = labels.type_as(preds)
@@ -140,6 +138,7 @@ def train_cGAN(config):
     cGAN, comparison_loss_fn, test_metric, adversarial_loss_fn, optimizer_D, optimizer_G, train_dataset, test_dataloader, train_num_steps, test_num_steps = prepare_training(
         config=config
     )
+    cGAN.float()
 
     if torch.cuda.is_available():
         torch.set_default_tensor_type("torch.cuda.FloatTensor")

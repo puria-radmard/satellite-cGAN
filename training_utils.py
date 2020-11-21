@@ -1,6 +1,8 @@
 from imports import *
 from metrics import *
 from models import *
+from pipelines.utils import group_bands
+from utils import *
 
 models_dict = {"unet": UNet, "fpn": FPN}
 
@@ -38,7 +40,7 @@ TASK_CHANNELS = {
 
 def normalise_loss_factor(model, comparison_loss_factor):
 
-    if model.discriminator:
+    if model.has_discriminator:
         loss_mag = (1 + comparison_loss_factor ** 2) ** 0.5
     else:
         loss_mag, comparison_loss_factor = 1, 1
@@ -139,8 +141,7 @@ def prepare_training(config):
     test_dataloader = DataLoader(
         test_dataset, batch_size=config.batch_size  # collate_fn=skip_tris
     )  # Change to own batch size?
-
-    train_num_steps = len(train_dataloader)
+    train_num_steps = len(DataLoader(train_dataset, batch_size=config.batch_size))
     test_num_steps = len(test_dataloader)
     print(
         "Starting training for {} epochs of {} training steps and {} evaluation steps".format(
