@@ -18,7 +18,7 @@ metric_dict = {
 
 req_args_dict = {
     "bce_loss": [],
-    "mse_loss": [],
+    "mse_loss": ["size_average"],
     "ternaus_loss": ["beta", "l"],
     "targetted_ternaus_and_MSE": [
         "cls_layer",

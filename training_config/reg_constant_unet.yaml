@@ -28,6 +28,9 @@ test_size:
 train_size:
   null
 
+size_average:
+  False
+
 batch_size:
   4
 
