@@ -14,22 +14,28 @@ def save_results_images(groups, cGAN, destination_dir, normalise_indices):
 
     for group in groups:
         image_id = ".".join(list(group.values())[0].split(".")[:-2])
-        generate_results_image(image_id, cGAN, destination_dir, normalise_indices)    
+        generate_results_image(image_id, cGAN, destination_dir, normalise_indices)
 
 
 def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):
 
-    imV = slice_middle(read_raster(f"{image_id}.NDVI.tif")[0][:, :, np.newaxis], remove_nan=False)
-    imB = slice_middle(read_raster(f"{image_id}.NDBI.tif")[0][:, :, np.newaxis], remove_nan=False)
-    imW = slice_middle(read_raster(f"{image_id}.NDWI.tif")[0][:, :, np.newaxis], remove_nan=False)
+    imV = slice_middle(
+        read_raster(f"{image_id}.NDVI.tif")[0][:, :, np.newaxis], remove_nan=False
+    )
+    imB = slice_middle(
+        read_raster(f"{image_id}.NDBI.tif")[0][:, :, np.newaxis], remove_nan=False
+    )
+    imW = slice_middle(
+        read_raster(f"{image_id}.NDWI.tif")[0][:, :, np.newaxis], remove_nan=False
+    )
 
     if isinstance(imW, type(None)):
         continue
 
     if normalise_indices:
-        imV = (imV-np.nanmean(imV))/np.nanstd(imV)
-        imB = (imB-np.nanmean(imB))/np.nanstd(imB)
-        imW = (imW-np.nanmean(imW))/np.nanstd(imW)
+        imV = (imV - np.nanmean(imV)) / np.nanstd(imV)
+        imB = (imB - np.nanmean(imB)) / np.nanstd(imB)
+        imW = (imW - np.nanmean(imW)) / np.nanstd(imW)
 
     imV[imV != imV] = 0
     imB[imB != imB] = 0

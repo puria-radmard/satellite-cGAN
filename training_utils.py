@@ -39,6 +39,7 @@ TASK_CHANNELS = {
     "mix": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LSTN", "UHI"]},
 }
 
+
 def make_root_dir(config):
 
     ts = "-".join((str(datetime.now()).split()))
@@ -47,7 +48,7 @@ def make_root_dir(config):
 
     with open(os.path.join(root_dir, "config.txt"), "w") as f:
         for k, v in config.__dict__.items():
-            f.write(f"{k}\t{}\n")
+            f.write(f"{k}\t{v}\n")
 
     return root_dir
 
@@ -67,11 +68,11 @@ def landsat_train_test_dataset(
     data_dir,
     channels: List[str],
     classes: List[str],
-    test_size=0.3,
+    test_size,
     train_size,
     random_state,
     purge_data,
-    normalise_indices
+    normalise_indices,
 ):
 
     if train_size == None:
@@ -95,10 +96,16 @@ def landsat_train_test_dataset(
     )
 
     train_dataset = LandsatDataset(
-        groups=train_groups, channels=channels, classes=classes, normalise_input=normalise_indices
+        groups=train_groups,
+        channels=channels,
+        classes=classes,
+        normalise_input=normalise_indices,
     )
     test_dataset = LandsatDataset(
-        groups=test_groups, channels=channels, classes=classes, normalise_input=normalise_indices
+        groups=test_groups,
+        channels=channels,
+        classes=classes,
+        normalise_input=normalise_indices,
     )
 
     return train_dataset, test_dataset
@@ -151,14 +158,14 @@ def prepare_training(config):
         train_size=config.train_size,
         random_state=config.random_state,
         purge_data=config.purge_data,
-        normalise_indices=config.normalise_indices
+        normalise_indices=config.normalise_indices,
     )
 
     root_dir = make_root_dir(config)
     record_groups(
         train_groups=train_dataset.groups,
         test_groups=test_dataset.groups,
-        root_dir=root_dir
+        root_dir=root_dir,
     )
     test_dataloader = DataLoader(
         test_dataset, batch_size=config.batch_size  # collate_fn=skip_tris
@@ -182,7 +189,7 @@ def prepare_training(config):
         test_dataset,
         train_num_steps,
         test_num_steps,
-        root_dir
+        root_dir,
     )
 
 

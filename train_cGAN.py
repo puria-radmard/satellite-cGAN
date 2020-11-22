@@ -30,7 +30,7 @@ def train_cGAN_epoch(
     num_steps,
     comparison_loss_factor,
     wandb_flag,
-    log_file
+    log_file,
 ):
 
     # Might need to fix this
@@ -162,7 +162,7 @@ def train_cGAN(config):
         test_dataset,
         train_num_steps,
         test_num_steps,
-        root_dir
+        root_dir,
     ) = prepare_training(config=config)
     cGAN.float()
     # cGAN.load_state_dict(torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"])
@@ -172,7 +172,7 @@ def train_cGAN(config):
         cGAN.cuda()
 
     for epoch in range(config.num_epochs):
-        
+
         epoch_root_dir = os.mkdir(os.path.join(root_dir, f"epoch-{epoch}"))
         log_file = open(os.path.join(epoch_root_dir, f"trainin_log.txt"), "w")
         epoch_loss = train_cGAN_epoch(
@@ -187,7 +187,7 @@ def train_cGAN(config):
             num_steps=train_num_steps,
             comparison_loss_factor=config.comparison_loss_factor,
             wandb_flag=config.wandb,
-            log_file=log_file
+            log_file=log_file,
         )
         log_file.close()
 
@@ -199,7 +199,7 @@ def train_cGAN(config):
             dataset=test_dataset,
             num_steps=test_num_steps,
             test_metric=test_metric,
-            root_dir=root_dir
+            root_dir=root_dir,
         )
 
         epoch_metrics = {f"epoch_loss": epoch_loss, f"epoch_score": epoch_score}
@@ -220,17 +220,18 @@ def train_cGAN(config):
             example_train_groups = random.sample(train_dataset.groups, 20)
             save_results_images(
                 groups=example_train_groups,
-                cGAN=cGAN, 
+                cGAN=cGAN,
                 destination_dir=epoch_root_dir,
-                normalise_indices=config.normalise_indices
+                normalise_indices=config.normalise_indices,
             )
             example_test_groups = random.sample(test_dataset.groups, 20)
             save_results_images(
                 groups=example_test_groups,
-                cGAN=cGAN, 
+                cGAN=cGAN,
                 destination_dir=epoch_root_dir,
-                normalise_indices=config.normalise_indices
+                normalise_indices=config.normalise_indices,
             )
+
 
 class Config:
     def __init__(self, conf):
@@ -349,7 +350,11 @@ def parse_args():
         type=bool,
         help="Set true for no adversarial loss, i.e. 'vanilla' FCN case",
     )
-    set_up_params.add_argument("--normalise_indices", type=bool, help="Normalise inputs (NDVI etc.) to zero mean, 1 std")
+    set_up_params.add_argument(
+        "--normalise_indices",
+        type=bool,
+        help="Normalise inputs (NDVI etc.) to zero mean, 1 std",
+    )
     set_up_params.add_argument("--purge_data", type=bool, help="Largely unused now")
 
     universal_hyperparameters = parser.add_argument_group("Universal hyperparameters")
