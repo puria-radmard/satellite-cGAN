@@ -29,7 +29,7 @@ parameters:
     value: 0.1
   data_dir:
     distribution: constant
-    value: "../data_source/LONDON_DATASET"
+    value: "../data_source/NEW_EUROPE_DATASET"
   no_discriminator:
     distribution: constant
     value: True

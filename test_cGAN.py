@@ -12,6 +12,9 @@ from glob import glob
 
 def save_results_images(groups, cGAN, destination_dir, normalise_indices):
 
+    for group in groups:
+        image_id = ".".join(list(group.values())[0].split(".")[:-2])
+        generate_results_image(image_id, cGAN, destination_dir, normalise_indices)    
 
 
 def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):

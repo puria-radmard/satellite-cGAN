@@ -26,7 +26,7 @@ lr:
   0.000123276
 
 data_dir:
-  "../data_source/LONDON_DATASET"
+  "../data_source/NEW_EUROPE_DATASET"
 
 test_size:
   0.05
