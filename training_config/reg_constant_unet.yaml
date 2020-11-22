@@ -63,3 +63,6 @@ comparison_loss_factor:
 
 purge_data:
   False
+
+normalise_indices:
+  False

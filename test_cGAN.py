@@ -9,32 +9,24 @@ import matplotlib.pyplot as plt
 import torch
 from glob import glob
 
-model_weights = torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"]
-cGAN = ConditionalGAN(
-    classes=["LSTN"],
-    channels=["NDVI", "NDBI", "NDWI"],
-    dis_dropout=0,
-    gen_dropout=0,
-    no_discriminator=True,
-    sigmoid_channels=[False],
-    generator_class=None,  # Set in test time
-    generator_params=None,  # Set in test time
-)
-cGAN.eval()
-cGAN.generator.eval()
-cGAN.load_state_dict(model_weights)
 
-image_ids = glob("../data_source/LONDON_DATASET/*NDVI.tif")
-image_ids = [".".join(a.split(".")[:-2]) for a in image_ids]
+def save_results_images(groups, cGAN, destination_dir, normalise_indices):
 
-for image_id in tqdm(image_ids):
 
-    imV = slice_middle(read_raster(f"{image_id}.NDVI.tif")[0][:, :, np.newaxis])
-    imB = slice_middle(read_raster(f"{image_id}.NDBI.tif")[0][:, :, np.newaxis])
-    imW = slice_middle(read_raster(f"{image_id}.NDWI.tif")[0][:, :, np.newaxis])
+
+def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):
+
+    imV = slice_middle(read_raster(f"{image_id}.NDVI.tif")[0][:, :, np.newaxis], remove_nan=False)
+    imB = slice_middle(read_raster(f"{image_id}.NDBI.tif")[0][:, :, np.newaxis], remove_nan=False)
+    imW = slice_middle(read_raster(f"{image_id}.NDWI.tif")[0][:, :, np.newaxis], remove_nan=False)
 
     if isinstance(imW, type(None)):
         continue
+
+    if normalise_indices:
+        imV = (imV-np.nanmean(imV))/np.nanstd(imV)
+        imB = (imB-np.nanmean(imB))/np.nanstd(imB)
+        imW = (imW-np.nanmean(imW))/np.nanstd(imW)
 
     imV[imV != imV] = 0
     imB[imB != imB] = 0
@@ -104,5 +96,26 @@ for image_id in tqdm(image_ids):
     m.set_clim(np.amin(diff2), np.amax(diff2))
     fig.colorbar(m, ax=axs[1, 3])
 
-    fig.savefig(f"results/REG/LSTN2_EUROPE_WRITEUP/{image_name}.RESULTS.png")
+    fig.savefig(os.path.join(destination_dir, f"{image_name}.RESULTS.png"))
     fig.clf()
+
+
+if __name__ == "__main__":
+
+    model_weights = torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"]
+    cGAN = ConditionalGAN(
+        classes=["LSTN"],
+        channels=["NDVI", "NDBI", "NDWI"],
+        dis_dropout=0,
+        gen_dropout=0,
+        no_discriminator=True,
+        sigmoid_channels=[False],
+        generator_class=None,  # Set in test time
+        generator_params=None,  # Set in test time
+    )
+    cGAN.eval()
+    cGAN.generator.eval()
+    cGAN.load_state_dict(model_weights)
+
+    image_ids = glob("../data_source/LONDON_DATASET/*NDVI.tif")
+    image_ids = [".".join(a.split(".")[:-2]) for a in image_ids]

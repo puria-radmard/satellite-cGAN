@@ -6,7 +6,9 @@ metric:
   goal: minimize
 
 parameters:
-
+  normalise_indices:
+    distribution: contant
+    value: False
   task:
     distribution: constant
     value: reg

@@ -3,6 +3,8 @@ from metrics import *
 from models import *
 from pipelines.utils import group_bands
 from utils import *
+import os
+from datetime import datetime
 
 models_dict = {"unet": UNet, "fpn": FPN}
 
@@ -37,6 +39,18 @@ TASK_CHANNELS = {
     "mix": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LSTN", "UHI"]},
 }
 
+def make_root_dir(config):
+
+    ts = "-".join((str(datetime.now()).split()))
+    root_dir = f"run-{ts}"
+    os.mkdir(root_dir)
+
+    with open(os.path.join(root_dir, "config.txt"), "w") as f:
+        for k, v in config.__dict__.items():
+            f.write(f"{k}\t{}\n")
+
+    return root_dir
+
 
 def normalise_loss_factor(model, comparison_loss_factor):
 
@@ -54,9 +68,10 @@ def landsat_train_test_dataset(
     channels: List[str],
     classes: List[str],
     test_size=0.3,
-    train_size=None,
-    random_state=None,
-    purge_data=False,
+    train_size,
+    random_state,
+    purge_data,
+    normalise_indices
 ):
 
     if train_size == None:
@@ -80,10 +95,10 @@ def landsat_train_test_dataset(
     )
 
     train_dataset = LandsatDataset(
-        groups=train_groups, channels=channels, classes=classes
+        groups=train_groups, channels=channels, classes=classes, normalise_input=normalise_indices
     )
     test_dataset = LandsatDataset(
-        groups=test_groups, channels=channels, classes=classes
+        groups=test_groups, channels=channels, classes=classes, normalise_input=normalise_indices
     )
 
     return train_dataset, test_dataset
@@ -136,8 +151,15 @@ def prepare_training(config):
         train_size=config.train_size,
         random_state=config.random_state,
         purge_data=config.purge_data,
+        normalise_indices=config.normalise_indices
     )
 
+    root_dir = make_root_dir(config)
+    record_groups(
+        train_groups=train_dataset.groups,
+        test_groups=test_dataset.groups,
+        root_dir=root_dir
+    )
     test_dataloader = DataLoader(
         test_dataset, batch_size=config.batch_size  # collate_fn=skip_tris
     )  # Change to own batch size?
@@ -157,9 +179,10 @@ def prepare_training(config):
         optimizer_D,
         optimizer_G,
         train_dataset,
-        test_dataloader,
+        test_dataset,
         train_num_steps,
         test_num_steps,
+        root_dir
     )
 
 

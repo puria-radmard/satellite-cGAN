@@ -25,10 +25,9 @@ def skip_tris(batch):
     return default_collate(batch)
 
 
-def record_groups(train_groups, test_groups):
-    ts = "-".join((str(datetime.now()).split()))
-
-    with open(f"groups_{ts}.txt", "w") as fout:
+def record_groups(train_groups, test_groups, root_dir):
+    
+    with open(os.path.join(root_dir, "groups.txt"), "w") as fout:
 
         fout.write("TRAIN_GROUPS")
         fout.write("\n")
@@ -64,7 +63,7 @@ class LambdaLayer(nn.Module):
 
 
 class BaseCNNDatabase(Dataset):
-    def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
+    def __init__(self, groups, channels: List[str], classes: List[str], normalise_input, transform):
         """
         TODO: Ask about transformation viability
         """
@@ -96,6 +95,10 @@ class BaseCNNDatabase(Dataset):
             image = slice_middle(image)
             if isinstance(image, type(None)):
                 return {"image": [None], "label": [None]}
+            if self.normalise_input:
+                mean = np.nanmean(image)
+                std = np.nanstd(image)
+                image = (image - mean)/std
             input_images.append(image)
 
         for label_channel in self.classes:
@@ -112,10 +115,10 @@ class BaseCNNDatabase(Dataset):
 
 
 class LandsatDataset(BaseCNNDatabase):
-    def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
+    def __init__(self, groups, channels: List[str], classes: List[str], normalise_input=False, transform=None):
 
         super(LandsatDataset, self).__init__(
-            groups=groups, channels=channels, classes=classes, transform=transform
+            groups=groups, channels=channels, classes=classes, normalise_input=normalise_input, transform=transform
         )
 
     def __getitem__(self, idx):
