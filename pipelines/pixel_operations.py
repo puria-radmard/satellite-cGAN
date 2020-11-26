@@ -150,4 +150,4 @@ if __name__ == "__main__":
         ]
     )
 
-    landsat_operation_pipeline(root="../../data_source/NEW_EUROPE_DATASET/")
+    landsat_operation_pipeline(root="../../data_source/SUMMER_LONDON_DATASET/")

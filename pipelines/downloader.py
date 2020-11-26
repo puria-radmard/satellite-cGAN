@@ -1,6 +1,7 @@
 from utils import *
 from root_classes import *
 from imports import *
+import shutil
 
 
 class EarthEngineDownloader:
@@ -15,12 +16,13 @@ class EarthEngineDownloader:
     """
 
     def __init__(self):
-
-        try:
-            ee.Initialize()
-        except ee.EEException:
-            ee.Authenticate()
-            ee.Initialize()
+        
+        pass
+        #try:
+        #    ee.Initialize()
+        #except ee.EEException:
+        #    ee.Authenticate()
+        #    ee.Initialize()
 
     @staticmethod
     def read_dataset_geojson(geojson_addr: str) -> dict:
@@ -179,3 +181,112 @@ class EarthEngineDownloader:
         for geom_id, geom in tqdm(geometry.items()):
             print(f"Downloading from {geom_id}")
             download_operation(geom_id, geom)
+
+    def find_top_left_coord(self, image, window_size=256):
+        for i in range(len(image)):
+            row = image[i]
+            non_nan_elements = row[row==row]
+            if len(non_nan_elements) >= window_size:
+              y_max = i
+              break
+        x_min = np.where(~np.isnan(image[y_max]))[0].min()
+        x_max = np.where(~np.isnan(image[y_max]))[0].max()
+        return x_min, x_max, y_max
+
+
+    def find_bottom_right_coord(self, image, window_size=256):
+        Y, X = tuple(a-1 for a in image.shape)
+        for i in range(len(image)):
+          row = image[Y-i]
+          non_nan_elements = row[row==row]
+          if len(non_nan_elements) >= window_size:
+            y_min = i
+            break
+        x_min = np.where(~np.isnan(image[y_min]))[0].min()
+        x_max = np.where(~np.isnan(image[y_min]))[0].max()
+        return x_min, x_max, y_min
+
+
+    def roll_window_horizontally(self, image, y_max, stride=128, window_size=256):
+      if image.shape[0] < 256 or image.shape[0] < 256:
+        return []
+      x_min_bottom, x_max_bottom, _ = self.find_top_left_coord(image[y_max:y_max+window_size,:], window_size=window_size)
+      x_min_top, x_max_top, _ = self.find_bottom_right_coord(image[y_max:y_max+window_size,:], window_size=256)
+      x_max = min([x_max_bottom, x_max_top]) # ; print([x_max_bottom, x_max_top])
+      x_min = max([x_min_bottom, x_min_top]) # ; print([x_min_bottom, x_min_top])
+      x_mins = [x_min+x*stride for x in range((x_max-x_min)//stride-1)]
+      return x_mins
+
+    
+    def roll_window_vertically(self, image, stride=128, window_size=256):
+      aug_image = image.copy()
+      if image.shape[0] < 256 or image.shape[0] < 256:
+        return []
+      _, _, y_top = self.find_top_left_coord(image, window_size=window_size) 
+      windows = []
+      while y_top <= image.shape[0]-window_size:
+        xmins = self.roll_window_horizontally(aug_image, y_top, stride=stride, window_size=window_size)
+        windows.extend([y_top, x_min, window_size] for x_min in xmins)
+        y_top += stride
+      return windows
+
+    def purge_windows(self, image, windows):
+      purged_windows = []
+      for j, (y_max, x_min, window_size) in enumerate(windows):
+        window = image[y_max:y_max+window_size,x_min:x_min+window_size]
+        aug_image = image.copy()
+        aug_image[y_max:y_max+window_size,x_min:x_min+window_size] = 0
+        if np.isnan(window.sum()):
+          continue
+        else:
+          purged_windows.append((y_max, x_min, window_size))
+      return purged_windows
+
+    def split_image(self, image, stride, window_size):
+      windows = self.roll_window_vertically(image, stride, window_size)
+      return self.purge_windows(image, windows)
+
+    def split_directory_images(self, earch_dir, destination_dir, window_size, stride):
+
+        if "*" not in search_dir:
+          raise ValueError("Need '*' in search_dir!")
+
+        tif_list = glob(f"{search_dir}*.tif")
+
+        for tif_path in tqdm(tif_list):
+          raster, metadata = read_raster(
+              tif_path, remove_zero=True)
+          # destination_path = os.path.join(destination_dir, tif_path.split("/")[-1])
+          base_image_name = tif_path.split("/")[-1]
+          windows = self.split_image(raster, stride, window_size)
+          for y_max, x_min, window_size in windows:
+
+            try:
+
+              destination_path = os.path.join(destination_dir, f"{y_max}-{x_min}-{window_size}--{base_image_name}")
+              # new_image = raster[np.newaxis,y_max:y_max+window_size,x_min:x_min+window_size]
+              # metadata["height"] = window_size
+              metadata["width"] = window_size
+              # save_calculated_raster(metadata, destination_path, new_image)
+
+              original_json_name = ".".join(tif_path.split(".")[:-2]) + ".METADATA.json"
+              destination_json_name = ".".join(destination_path.split(".")[:-2]) + ".METADATA.json"
+              shutil.copy(original_json_name, destination_json_name)
+
+            except:
+
+              print("skipping", tif_path)
+              pass
+
+
+if __name__ == '__main__':
+
+    city = "LONDON"# ["MANCHESTER", "BIRMINGHAM", "LEEDS", "PARIS", "LYON"]
+    months = ['-03-','-04-', '-05-', '-06-', '-07-', '-08-']
+    destination_dir = "../../data_source/SUMMER_LONDON_DATASET"
+    dl = EarthEngineDownloader()
+
+    for month in months:
+      print("CONVERTING FROM", month) 
+      search_dir = f"../../data_source/WHOLE_LONDON_DATASET/*{city}*--201*{month}*--*-*-*.*"
+      dl.split_directory_images(search_dir, destination_dir, 256, 128)

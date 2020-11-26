@@ -17,13 +17,13 @@ test_parameters:
   null
 
 lr:
-  0.000123276
+  0.00012
 
 data_dir:
-  "../data_source/NEW_EUROPE_DATASET"
+  "../data_source/SUMMER_LONDON_DATASET"
 
 test_size:
-  0.05
+  0.1
 
 train_size:
   null
