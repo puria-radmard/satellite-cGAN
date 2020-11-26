@@ -1,5 +1,6 @@
 from typing import List
-
+import os
+import time
 import torch
 from torch import nn
 import numpy as np
@@ -81,6 +82,7 @@ class BaseCNNDatabase(Dataset):
         # Channel names must be in the right order
         self.channels = channels
         self.classes = classes
+        self.normalise_input = normalise_input
 
     def __len__(self):
         return len(self.groups)

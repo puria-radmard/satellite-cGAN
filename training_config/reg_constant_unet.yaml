@@ -29,7 +29,7 @@ train_size:
   null
 
 size_average:
-  False
+  True
 
 batch_size:
   4

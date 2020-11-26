@@ -172,8 +172,10 @@ def train_cGAN(config):
         cGAN.cuda()
 
     for epoch in range(config.num_epochs):
+        
+        epoch_root_dir = os.path.join(root_dir, f"epoch-{epoch}")
+        os.mkdir(os.path.join(root_dir, f"epoch-{epoch}"))
 
-        epoch_root_dir = os.mkdir(os.path.join(root_dir, f"epoch-{epoch}"))
         log_file = open(os.path.join(epoch_root_dir, f"trainin_log.txt"), "w")
         epoch_loss = train_cGAN_epoch(
             cGAN=cGAN,
