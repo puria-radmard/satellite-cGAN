@@ -109,7 +109,7 @@ def train_cGAN_epoch(
     return epoch_loss_tot / num_steps
 
 
-def test_cGAN_epoch(cGAN, epoch, dataset, num_steps, test_metric):
+def test_cGAN_epoch(cGAN, epoch, dataset, num_steps, test_metric, log_file):
 
     # Again might need to fix this
     cGAN.eval()
@@ -137,6 +137,9 @@ def test_cGAN_epoch(cGAN, epoch, dataset, num_steps, test_metric):
 
         sys.stdout.write("\r" + loading_bar_string)
         time.sleep(0.1)
+
+        log_file.write(loading_bar_string)
+        log_file.write("\n")
 
         del images
         del labels
@@ -172,7 +175,7 @@ def train_cGAN(config):
         cGAN.cuda()
 
     for epoch in range(config.num_epochs):
-        
+
         epoch_root_dir = os.path.join(root_dir, f"epoch-{epoch}")
         os.mkdir(os.path.join(root_dir, f"epoch-{epoch}"))
 
@@ -195,14 +198,16 @@ def train_cGAN(config):
 
         print(f"\nTraining epoch {epoch} done")
 
+        test_log_file = open(os.path.join(epoch_root_dir, f"trainin_log.txt"), "w")
         epoch_score = test_cGAN_epoch(
             cGAN=cGAN,
             epoch=epoch,
             dataset=test_dataset,
             num_steps=test_num_steps,
             test_metric=test_metric,
-            root_dir=root_dir,
+            log_file=test_log_file,
         )
+        test_log_file.close()
 
         epoch_metrics = {f"epoch_loss": epoch_loss, f"epoch_score": epoch_score}
 
