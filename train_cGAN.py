@@ -35,6 +35,7 @@ def train_cGAN_epoch(
     )
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
+    # pdb.set_trace()
     for step, batch in enumerate(dataloader):
 
         images = batch["image"].float()
@@ -133,12 +134,12 @@ def test_cGAN_epoch(cGAN, epoch, dataset, num_steps, test_metric, log_file):
         log_file.write(loading_bar_string)
         log_file.write("\n")
 
-        del images
-        del labels
-        del score
+        # del images
+        # del labels
+        # del score
 
-        if step == num_steps:
-            break
+        # if step == num_steps:
+        #     break
 
     print(f"Epoch: {epoch}, test metric: {epoch_score_tot}")
     return epoch_score_tot / num_steps
@@ -158,9 +159,8 @@ def train_cGAN(config):
         test_num_steps,
         root_dir,
     ) = prepare_training(config=config)
-    pdb.set_trace()
+    # pdb.set_trace()
 
-    # TODO: why we need this?
     cGAN.float()
     # cGAN.load_state_dict(torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"])
 
