@@ -1,8 +1,7 @@
 
 import torch.nn as nn, numpy as np
-from unet import UNetDownBlock,
-from models.unet import UNet
-from models.fpn import FPN
+from unet import UNetDownBlock
+from utils import LambdaLayer, construct_debug_model
 
 
 class Discriminator(nn.Module):
