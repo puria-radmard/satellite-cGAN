@@ -1,15 +1,19 @@
-from imports import *
-from metrics import *
-from models import *
-from pipelines.p_utils import group_bands
-from utils import *
-import os
+#  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
+import os, wandb, torch, torch.nn as nn
+from metrics import TernausLossFunc, TargettedTernausAndMSE, DiceCoefficient
+from utils import LandsatDataset, record_groups, \
+    reshape_for_discriminator2, reshape_for_discriminator
+from pipelines.p_utils import group_bands, purge_groups
+from sklearn.model_selection import train_test_split
+from models import UNet, FPN, ConditionalGAN
+from torch.utils.data import DataLoader
 from datetime import datetime
+from typing import List
 
+
+""" == see yaml files in train_config/ =="""
 models_dict = {"unet": UNet, "fpn": FPN}
-
 models_args_dict = {"unet": ["no_skips"], "fpn": ["resnet_encoder"]}
-
 metric_dict = {
     "bce_loss": nn.BCELoss,
     "mse_loss": nn.MSELoss,
@@ -34,7 +38,6 @@ req_args_dict = {
 }
 
 TASK_CHANNELS = {
-    # "reg": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LSTN2"]},
     "reg": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LST"]},
     "cls": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["UHI"]},
     "mix": {"channels": ["NDVI", "NDBI", "NDWI"], "classes": ["LSTN", "UHI"]},
@@ -42,7 +45,7 @@ TASK_CHANNELS = {
 
 
 def make_root_dir(config):
-
+    """experiment log"""
     ts = "-".join((str(datetime.now()).split()))
     root_dir = f"run-{ts}"
     os.mkdir(root_dir)
@@ -169,7 +172,7 @@ def prepare_training(config):
     )
     test_dataloader = DataLoader(
         test_dataset, batch_size=config.batch_size  # collate_fn=skip_tris
-    )  # Change to own batch size?
+    )  # Change to own batch size? Answer: almost no effects
     train_num_steps = len(DataLoader(train_dataset, batch_size=config.batch_size))
     test_num_steps = len(test_dataloader)
     print(

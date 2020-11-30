@@ -1,5 +1,5 @@
 #  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
-import os, sys, yaml, time, torch, wandb, random, argparse
+import os, sys, pdb, yaml, time, torch, wandb, random, argparse
 from torch.utils.data import DataLoader
 from test_cGAN import save_results_images
 from training_utils import req_args_dict, TASK_CHANNELS, models_args_dict, \
@@ -10,20 +10,19 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def train_cGAN_epoch(
-    cGAN,
-    epoch,
-    optimizer_G,
-    optimizer_D,
-    dataset,
-    batch_size,
-    comparison_loss_fn,
-    adversarial_loss_fn,
-    num_steps,
-    comparison_loss_factor,
-    wandb_flag,
-    log_file,
+        cGAN,
+        epoch,
+        optimizer_G,
+        optimizer_D,
+        dataset,
+        batch_size,
+        comparison_loss_fn,
+        adversarial_loss_fn,
+        num_steps,
+        comparison_loss_factor,
+        wandb_flag,
+        log_file,
 ):
-
     # Might need to fix this
     cGAN.train()
 
@@ -101,7 +100,6 @@ def train_cGAN_epoch(
 
 
 def test_cGAN_epoch(cGAN, epoch, dataset, num_steps, test_metric, log_file):
-
     # Again might need to fix this
     cGAN.eval()
 
@@ -144,7 +142,6 @@ def test_cGAN_epoch(cGAN, epoch, dataset, num_steps, test_metric, log_file):
 
 
 def train_cGAN(config):
-
     (
         cGAN,
         comparison_loss_fn,
@@ -158,6 +155,7 @@ def train_cGAN(config):
         test_num_steps,
         root_dir,
     ) = prepare_training(config=config)
+    pdb.set_trace()
     cGAN.float()
     # cGAN.load_state_dict(torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"])
 
@@ -206,7 +204,6 @@ def train_cGAN(config):
             wandb.log(epoch_metrics)
 
         if (epoch + 1) % config.save_rate == 0:
-
             state = {"config": config, "epoch": epoch, "state": cGAN.state_dict()}
             torch.save(
                 state,
@@ -240,7 +237,6 @@ class Config:
 
 
 def generate_config(args):
-
     if not args.arg_source:  # i.e. sweep or manual
 
         if not args.train_size:
@@ -284,7 +280,6 @@ def generate_config(args):
 
 
 def parse_args():
-
     parser = argparse.ArgumentParser(
         description="""
         Give loss function, evaluation metric, and hyper-parameters
@@ -300,80 +295,42 @@ def parse_args():
 
     task_config = parser.add_argument_group("Task configuration")
     task_config.add_argument("--task", type=str)  # reg, cls, mix
-    task_config.add_argument(
-        "--arg_source", type=str, default=None
-    )  # args yaml path, None for sweeps
+    task_config.add_argument("--arg_source", type=str, default=None)  # args yaml path, None for sweeps
     task_config.add_argument("--wandb", type=int, default=1)  # 1 to include wandb
 
     # Set up parameters
     set_up_params = parser.add_argument_group("General setup parameters")
-    set_up_params.add_argument(
-        "--model",
-        type=str,
-        help="Name of the model, used by config.model_dict to intialise the mode",
-    )
-    set_up_params.add_argument(
-        "--save_rate",
-        type=int,
-        help="How many epochs between saving the model. Model saves are not overwritten, and their file names are set by --task",
-    )
-    set_up_params.add_argument(
-        "--random_state", type=int, default=1, help="Set a random state for numpy"
-    )
-    set_up_params.add_argument(
-        "--num_epochs", type=int, default=20, help="Number of epochs to train for"
-    )
-    set_up_params.add_argument(
-        "--test_size", type=float, help="Proportion of dataset to use for testing"
-    )
-    set_up_params.add_argument(
-        "--train_size",
-        type=float,
-        default=None,
-        help="Proportion of dataset to use for testing. <= 1-test_size",
-    )
-    set_up_params.add_argument(
-        "--data_dir", type=str, help="Directory where the data images are stored"
-    )
+    set_up_params.add_argument("--model", type=str, help="model, see config.model_dict")
+    set_up_params.add_argument("--save_rate", type=int, help="number of epochs to save the model.")
+    set_up_params.add_argument("--random_state", type=int, default=1, help="Set a random state for numpy")
+    set_up_params.add_argument("--num_epochs", type=int, default=20, help="Number of epochs to train for")
+    set_up_params.add_argument("--test_size", type=float, help="Proportion of dataset to use for testing")
+    set_up_params.add_argument("--train_size", type=float, default=None,
+                               help="Proportion of dataset to use for training. <= 1-test_size", )
+    set_up_params.add_argument("--data_dir", type=str, help="Data directory")
     set_up_params.add_argument(
         "--comparison_loss_fn",
         type=str,
         help="The function used for loss compared to training targets (only loss if there is no discriminator)",
     )
-    set_up_params.add_argument(
-        "--test_metric", type=str, help="Metric used for testing"
-    )
-    set_up_params.add_argument(
-        "--no_discriminator",
-        type=bool,
-        help="Set true for no adversarial loss, i.e. 'vanilla' FCN case",
-    )
-    set_up_params.add_argument(
-        "--normalise_indices",
-        type=bool,
-        help="Normalise inputs (NDVI etc.) to zero mean, 1 std",
-    )
+    set_up_params.add_argument("--test_metric", type=str, help="Metric used for testing")
+    set_up_params.add_argument("--no_discriminator", type=bool,
+                               help="True for no adversarial loss, i.e. 'vanilla' UNet")
+    set_up_params.add_argument("--normalise_indices", type=bool, help="Normalise inputs (NDVI etc.) to 0 mean, 1 std")
     set_up_params.add_argument("--purge_data", type=bool, help="Largely unused now")
 
     universal_hyperparameters = parser.add_argument_group("Universal hyperparameters")
-    universal_hyperparameters.add_argument(
-        "--lr", type=float, help="Learning rate for generator and discriminator"
-    )
-    universal_hyperparameters.add_argument(
-        "--batch_size", type=int, help="Batch size for training and testing"
-    )
-    universal_hyperparameters.add_argument(
-        "--dis_dropout", type=float, help="Training dropout rate for discriminator"
-    )
-    universal_hyperparameters.add_argument(
-        "--gen_dropout", type=float, help="Training dropout rate for generator"
-    )
+    universal_hyperparameters.add_argument("--lr", type=float, help="Learning rate for generator and discriminator")
+    universal_hyperparameters.add_argument("--batch_size", type=int, help="Batch size for training and testing")
+    universal_hyperparameters.add_argument("--dis_dropout", type=float, help="Training dropout rate for discriminator")
+    universal_hyperparameters.add_argument("--gen_dropout", type=float, help="Training dropout rate for generator")
     universal_hyperparameters.add_argument(
         "--comparison_loss_factor",
         type=float,
-        help="Final loss = adversarial loss + comparison_loss_factor * comparison loss. Automatically normalised in script",
+        help="Final loss = adversarial loss + comparison_loss_factor * comparison loss. Automatically normalised",
     )
 
+    # TODO: do we need this?
     loss_arguments = parser.add_argument_group(
         "Specialised (loss/score) parameters, picked up using config.req_args_dict"
     )
@@ -394,12 +351,8 @@ def parse_args():
         "--l", type=float
     )  # For ternaus (weight of Jaccard part)
 
-    model_arguments = parser.add_argument_group(
-        "Specialised (model) parameters, picked up by config.model_args_dict"
-    )
-    model_arguments.add_argument(
-        "--no_skips", type=bool
-    )  # Used by unet. True for no skips
+    model_arguments = parser.add_argument_group("Specialised (model) parameters, picked up by config.model_args_dict")
+    model_arguments.add_argument("--no_skips", type=bool)  # Used by unet. True for no skip connections
 
     args = parser.parse_args()
     config = generate_config(args)
@@ -409,7 +362,6 @@ def parse_args():
 
 
 if __name__ == "__main__":
-
     config = parse_args()
 
     with torch.autograd.set_detect_anomaly(True):

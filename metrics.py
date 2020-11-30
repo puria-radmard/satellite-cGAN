@@ -1,5 +1,5 @@
-import torch
-from torch import nn
+#  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
+import torch, torch.nn as nn
 
 
 def dice_coef(preds, labels):
@@ -29,7 +29,7 @@ class DiceCoefficient(nn.Module):
 
 def cross_entropy(output, target, beta):
 
-    # TODO: Fix bug below due to inplace operation, implemeting weighting
+    # TODO: Fix bug below due to inplace operation, implementing weighting
     weights = [beta, 1]
     weights = torch.tensor(weights).float()
     weights = weights / torch.norm(weights, dim=0)
@@ -124,7 +124,7 @@ class TargettedRegressionClassification(nn.Module):
 
 
 class TargettedTernausAndMSE(TargettedRegressionClassification):
-    # A targetted loss that uses Ternaus for cls and MSE for reg
+    # A targeted loss that uses Ternaus for cls and MSE for reg
 
     def __init__(self, **kwargs):
 
