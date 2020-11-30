@@ -1,5 +1,6 @@
-import torch
-from torch import nn
+
+import torch.nn as nn, numpy as np
+from unet import UNetDownBlock,
 from models.unet import UNet
 from models.fpn import FPN
 
@@ -7,7 +8,7 @@ from models.fpn import FPN
 class Discriminator(nn.Module):
     def __init__(self, num_classes, dropout=0.4):
         """
-        TODO: parameterise architecture?
+        TODO: parameterised architecture?
         """
         super(Discriminator, self).__init__()
 

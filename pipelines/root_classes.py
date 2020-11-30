@@ -1,4 +1,5 @@
-from utils import *
+
+from utils import get_metadata
 
 
 class Operation:

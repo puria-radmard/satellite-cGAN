@@ -3,7 +3,7 @@ from tqdm import tqdm
 import numpy as np
 
 from models import ConditionalGAN
-from pipelines.utils import slice_middle, read_raster
+from pipelines.p_utils import slice_middle, read_raster
 import matplotlib.pyplot as plt
 
 import torch

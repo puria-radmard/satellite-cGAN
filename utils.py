@@ -1,14 +1,9 @@
 from typing import List
-import os
-import time
-import torch
-from torch import nn
-import numpy as np
+import os, time, torch, torch.nn as nn, numpy as np
 from torch.utils.data import Dataset
 from torch.utils.data._utils.collate import default_collate
-
-from pipelines.utils import read_raster, get_property_path, slice_middle
-from datetime import datetime
+from pipelines.p_utils import read_raster, get_property_path, slice_middle
+# from datetime import datetime
 
 
 def reshape_for_discriminator(a, num_classes):
@@ -197,7 +192,7 @@ class DummyDataset(Dataset):
 
 
 def write_loading_bar_string(
-    metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training=True
+        metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training=True
 ):
 
     if training:
@@ -209,10 +204,10 @@ def write_loading_bar_string(
 
     metric = sum(metrics)
     epoch_metric_tot += metric
-    epoch_metric = epoch_metric_tot / ((step + 1))
+    epoch_metric = epoch_metric_tot / (step + 1)
     steps_left = num_steps - step
     time_passed = time.time() - start_time
-    ETA = (time_passed / (step + 1)) * (steps_left)
+    ETA = (time_passed / (step + 1)) * steps_left
     ETA = "{} m  {} s".format(np.floor(ETA / 60), int(ETA % 60))
 
     string = "{}poch: {}   Step: {}   Batch {}: {:.4f}   Epoch {}: {:.4f}   Epoch ETA: {}".format(

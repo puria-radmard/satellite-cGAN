@@ -1,3 +1,6 @@
+import torch, torch.nn as nn
+
+
 def patch_first_conv(model, n_channels):
     """Change first convolution layer input channels.
     In case:

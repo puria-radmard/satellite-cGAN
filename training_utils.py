@@ -1,7 +1,7 @@
 from imports import *
 from metrics import *
 from models import *
-from pipelines.utils import group_bands
+from pipelines.p_utils import group_bands
 from utils import *
 import os
 from datetime import datetime

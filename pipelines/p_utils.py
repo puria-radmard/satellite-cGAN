@@ -84,7 +84,7 @@ def purge_groups(groups, target_band="B3"):
         )
         if type(image) == type(None):
             continue
-        elif any(image[0] != image[0]):  #  Any NaNs
+        elif any(image[0] != image[0]):  # Any NaNs
             continue
         else:
             outgroups.append(group)

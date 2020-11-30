@@ -1,7 +1,7 @@
 import wandb
 import torch
 from torch import nn
-from pipelines.utils import *
+from pipelines.p_utils import *
 from typing import List, Dict
 from cGAN import ConditionalGAN
 
