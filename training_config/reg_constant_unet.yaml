@@ -2,7 +2,7 @@ channels:
   ["NDVI", "NDBI", "NDWI"]
 
 classes: 
-  ["LSTN2"]
+  ["LST"]
 
 comparison_loss_fn:
   "mse_loss"
@@ -32,7 +32,7 @@ size_average:
   True
 
 batch_size:
-  4
+  8
 
 dis_dropout:
   0.4772206496773703

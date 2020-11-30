@@ -1,24 +1,19 @@
-from matplotlib import cm
-from tqdm import tqdm
-import numpy as np
-
-from models import ConditionalGAN
+#  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
+import os, torch, numpy as np, matplotlib.pyplot as plt
 from pipelines.p_utils import slice_middle, read_raster
-import matplotlib.pyplot as plt
-
-import torch
+from models import ConditionalGAN
+from matplotlib import cm
 from glob import glob
 
 
 def save_results_images(groups, cGAN, destination_dir, normalise_indices):
-
     for group in groups:
         image_id = ".".join(list(group.values())[0].split(".")[:-2])
         generate_results_image(image_id, cGAN, destination_dir, normalise_indices)
 
 
 def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):
-
+    """Visualisation"""
     imV = slice_middle(
         read_raster(f"{image_id}.NDVI.tif")[0][:, :, np.newaxis], remove_nan=False
     )
@@ -30,7 +25,7 @@ def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):
     )
 
     if isinstance(imW, type(None)):
-        continue
+        return None
 
     if normalise_indices:
         imV = (imV - np.nanmean(imV)) / np.nanstd(imV)
@@ -40,9 +35,14 @@ def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):
     imV[imV != imV] = 0
     imB[imB != imB] = 0
     imW[imW != imW] = 0
-    image = np.dstack([imV, imB, imW])
+    image = np.dstack([imV, imB, imW])[np.newaxis, :, :, :]
 
-    LSTN2_real = read_raster(f"{image_id}.LSTN2.tif")[0][:, :, np.newaxis]
+    # LSTN2_real = read_raster(f"{image_id}.LSTN2.tif")[0][:, :, np.newaxis]
+    try:
+        LSTN2_real = read_raster(f"{image_id}.LSTN2.tif")[0][:, :, np.newaxis]
+    except Exception as e:
+        print(e)
+        return None
     LSTN2_real = slice_middle(LSTN2_real).reshape(256, 256)
 
     LST_real = read_raster(f"{image_id}.LST.tif")[0][:, :, np.newaxis]
@@ -91,9 +91,11 @@ def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):
     m.set_clim(np.amin(LSTN_pred), np.amax(LSTN_pred))
     fig.colorbar(m, ax=axs[1, 1])
 
-    diff = LSTN_pred - LSTN2_real
+    # diff = LSTN_pred - LSTN2_real
+    diff = LSTN_pred - LST_real
     axs[1, 2].imshow(diff, cmap="plasma")
-    axs[1, 2].set_title("Predicted LSTN2 -\n real LSTN2", fontsize=30)
+    # axs[1, 2].set_title("Predicted LSTN2 -\n real LSTN2", fontsize=30)
+    axs[1, 2].set_title("Predicted LST -\n real LST", fontsize=30)
     m = cm.ScalarMappable(cmap="plasma")
     m.set_clim(np.amin(diff), np.amax(diff))
     fig.colorbar(m, ax=axs[1, 2])
@@ -110,7 +112,6 @@ def generate_results_image(image_id, cGAN, destination_dir, normalise_indices):
 
 
 if __name__ == "__main__":
-
     model_weights = torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"]
     cGAN = ConditionalGAN(
         classes=["LSTN"],

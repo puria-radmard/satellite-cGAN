@@ -1,18 +1,9 @@
-import sys
-import time
-
-import os
-
-import torch
-import yaml
-import wandb
-import argparse
+#  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
+import os, sys, yaml, time, torch, wandb, random, argparse
 from torch.utils.data import DataLoader
-import random
-
-from training_utils import req_args_dict, TASK_CHANNELS, models_args_dict
-from training_utils import metric_dict, prepare_training, normalise_loss_factor
-from training_utils import generate_adversarial_loss
+from test_cGAN import save_results_images
+from training_utils import req_args_dict, TASK_CHANNELS, models_args_dict, \
+    prepare_training, normalise_loss_factor, generate_adversarial_loss
 from utils import write_loading_bar_string
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -117,7 +108,7 @@ def test_cGAN_epoch(cGAN, epoch, dataset, num_steps, test_metric, log_file):
     epoch_score_tot = 0
     start_time = time.time()
 
-    dataloader = DataLoader(test_dataset, batch_size=config.batch_size)
+    dataloader = DataLoader(dataset, batch_size=config.batch_size)
 
     for step, batch in enumerate(dataloader):
 
@@ -179,7 +170,7 @@ def train_cGAN(config):
         epoch_root_dir = os.path.join(root_dir, f"epoch-{epoch}")
         os.mkdir(os.path.join(root_dir, f"epoch-{epoch}"))
 
-        log_file = open(os.path.join(epoch_root_dir, f"trainin_log.txt"), "w")
+        log_file = open(os.path.join(epoch_root_dir, f"training_log.txt"), "w")
         epoch_loss = train_cGAN_epoch(
             cGAN=cGAN,
             epoch=epoch,
@@ -198,7 +189,7 @@ def train_cGAN(config):
 
         print(f"\nTraining epoch {epoch} done")
 
-        test_log_file = open(os.path.join(epoch_root_dir, f"trainin_log.txt"), "w")
+        test_log_file = open(os.path.join(epoch_root_dir, f"testing_log.txt"), "w")
         epoch_score = test_cGAN_epoch(
             cGAN=cGAN,
             epoch=epoch,
@@ -296,7 +287,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser(
         description="""
-        Give loss function, evaluation metric, and hyperparameters
+        Give loss function, evaluation metric, and hyper-parameters
         There are three ways to launch the training script:
             1: running `python train_cGAN.py --model unet ...`, i.e. manual argument entry
             2: running `python train_cGAN.py --task reg --arg_source training_config/reg_constant_unet.yaml --wandb 0`

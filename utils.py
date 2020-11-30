@@ -1,9 +1,9 @@
-from typing import List
+#  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
 import os, time, torch, torch.nn as nn, numpy as np
+from typing import List
 from torch.utils.data import Dataset
 from torch.utils.data._utils.collate import default_collate
 from pipelines.p_utils import read_raster, get_property_path, slice_middle
-# from datetime import datetime
 
 
 def reshape_for_discriminator(a, num_classes):
@@ -22,22 +22,15 @@ def skip_tris(batch):
 
 
 def record_groups(train_groups, test_groups, root_dir):
-
     with open(os.path.join(root_dir, "groups.txt"), "w") as fout:
 
-        fout.write("TRAIN_GROUPS")
-        fout.write("\n")
+        fout.write("TRAIN_GROUPS\n")
         for group in train_groups:
-            fout.write(get_property_path(group, "XXX"))
-            fout.write("\n")
+            fout.write(get_property_path(group, "XXX") + "\n")
 
-        fout.write("\n")
-
-        fout.write("TEST_GROUPS")
-        fout.write("\n")
-        for group in train_groups:
-            fout.write(get_property_path(group, "XXX"))
-            fout.write("\n")
+        fout.write("\nTEST_GROUPS\n")
+        for group in test_groups:
+            fout.write(get_property_path(group, "XXX") + "\n")
 
 
 class PrintLayer(nn.Module):
@@ -60,12 +53,12 @@ class LambdaLayer(nn.Module):
 
 class BaseCNNDatabase(Dataset):
     def __init__(
-        self,
-        groups,
-        channels: List[str],
-        classes: List[str],
-        normalise_input,
-        transform,
+            self,
+            groups,
+            channels: List[str],
+            classes: List[str],
+            normalise_input,
+            transform,
     ):
         """
         TODO: Ask about transformation viability
@@ -120,14 +113,13 @@ class BaseCNNDatabase(Dataset):
 
 class LandsatDataset(BaseCNNDatabase):
     def __init__(
-        self,
-        groups,
-        channels: List[str],
-        classes: List[str],
-        normalise_input=False,
-        transform=None,
+            self,
+            groups,
+            channels: List[str],
+            classes: List[str],
+            normalise_input=False,
+            transform=None,
     ):
-
         super(LandsatDataset, self).__init__(
             groups=groups,
             channels=channels,
@@ -137,29 +129,26 @@ class LandsatDataset(BaseCNNDatabase):
         )
 
     def __getitem__(self, idx):
-
         return self.base_getitem(idx)
 
 
 class AutoEncoderDataset(BaseCNNDatabase):
     def __init__(self, groups, channels: List[str], classes: List[str], transform=None):
-
         super(AutoEncoderDataset, self).__init__(
             groups=groups, channels=channels, classes=classes, transform=transform
         )
 
     def __getitem__(self, idx):
-
         sample = self.base_getitem(idx)
         split_image = []
         split_label = []
 
         for j in range(int(256 / 32)):
             split_image.append(
-                sample["image"][j * 32 : (j + 1) * 32, j * 32 : (j + 1) * 32, :]
+                sample["image"][j * 32: (j + 1) * 32, j * 32: (j + 1) * 32, :]
             )
             split_label.append(
-                sample["label"][j * 32 : (j + 1) * 32, j * 32 : (j + 1) * 32, :]
+                sample["label"][j * 32: (j + 1) * 32, j * 32: (j + 1) * 32, :]
             )
 
         sample = {
@@ -194,7 +183,6 @@ class DummyDataset(Dataset):
 def write_loading_bar_string(
         metrics, step, epoch_metric_tot, num_steps, start_time, epoch, training=True
 ):
-
     if training:
         metric_name = "Loss"
         title = "E"
