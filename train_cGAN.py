@@ -1,5 +1,6 @@
 #  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
 import os, sys, pdb, yaml, time, torch, wandb, random, argparse
+sys.path.append('models/')
 from torch.utils.data import DataLoader
 from test_cGAN import save_results_images
 from training_utils import req_args_dict, TASK_CHANNELS, models_args_dict, \
@@ -82,19 +83,21 @@ def train_cGAN_epoch(
         sys.stdout.write("\r" + loading_bar_string)
         time.sleep(0.1)
 
-        del images
-        del labels
-        del comparison_loss
-
-        if cGAN.has_discriminator:
-            del generator_adversarial_loss_gene
-            del discriminator_adversarial_loss
+        # after executing the function, this variable will be erased
+        # del images
+        # del labels
+        # del comparison_loss
+        #
+        # if cGAN.has_discriminator:
+        #     del generator_adversarial_loss_gene
+        #     del discriminator_adversarial_loss
 
         if wandb_flag:
             wandb.log({"iteration_loss": sum(losses)})
 
-        if step == num_steps:
-            break
+        # it will automatically ends after a looping
+        # if step == num_steps:
+        #     break
 
     return epoch_loss_tot / num_steps
 
@@ -156,6 +159,8 @@ def train_cGAN(config):
         root_dir,
     ) = prepare_training(config=config)
     pdb.set_trace()
+
+    # TODO: why we need this?
     cGAN.float()
     # cGAN.load_state_dict(torch.load("saves/reg_LSTN2_model.epoch79.t7")["state"])
 
@@ -239,6 +244,7 @@ class Config:
 def generate_config(args):
     if not args.arg_source:  # i.e. sweep or manual
 
+        # TODO: settings are too complicated
         if not args.train_size:
             train_size = 1 - args.test_size
 

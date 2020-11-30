@@ -1,5 +1,5 @@
-# from imports import *
-import torch, torch.nn as nn
+#  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
+import sys, time, wandb, torch, numpy as np, torch.nn as nn
 
 
 class UNetDownBlock(nn.Module):
@@ -168,11 +168,11 @@ def trainEpoch(model, epoch, optimizer, dataloader, num_steps, loss_fn):
         optimizer.step()
 
         epoch_loss_tot += loss.mean()
-        epoch_loss = epoch_loss_tot / ((step + 1))
+        epoch_loss = epoch_loss_tot / (step + 1)
         steps_left = num_steps - step
         time_passed = time.time() - start_time
 
-        ETA = (time_passed / (step + 1)) * (steps_left)
+        ETA = (time_passed / (step + 1)) * steps_left
         ETA = "{} m  {} s".format(np.floor(ETA / 60), int(ETA % 60))
 
         string = "Epoch: {}   Step: {}   Batch Loss: {:.4f}   Epoch Loss: {:.4f}   Epoch ETA: {}".format(
@@ -209,11 +209,11 @@ def testModel(model, epoch, dataloader, num_steps, test_metric):
         score = test_metric(preds, labels)
 
         epoch_score_tot += score.mean()
-        epoch_score = epoch_score_tot / ((step + 1))
+        epoch_score = epoch_score_tot / (step + 1)
         steps_left = num_steps - step
         time_passed = time.time() - start_time
 
-        ETA = (time_passed / (step + 1)) * (steps_left)
+        ETA = (time_passed / (step + 1)) * steps_left
         ETA = "{} m  {} s".format(np.floor(ETA / 60), int(ETA % 60))
 
         string = "Evaluating epoch: {}   Step: {}   Batch score: {:.4f}   Epoch score: {:.4f}   Epoch ETA: {}".format(
@@ -223,12 +223,13 @@ def testModel(model, epoch, dataloader, num_steps, test_metric):
         sys.stdout.write("\r" + string)
         time.sleep(0.5)
 
-        del preds
-        del labels
-        del images
-
-        if step == num_steps:
-            break
+        # such vairables will be erased after function execution
+        # del preds
+        # del labels
+        # del images
+        #
+        # if step == num_steps:
+        #     break
 
     print(f"Epoch: {epoch}, test metric: {epoch_score}")
     return epoch_score
