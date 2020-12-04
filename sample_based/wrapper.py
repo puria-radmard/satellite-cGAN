@@ -1,5 +1,5 @@
 from tqdm import tqdm
-
+import sys
 from stats_operations import LinearLSTRegression, LogisticUHIRegression
 from sampler import WholeImageAggregationSampler
 from s_utils import group_cities_by_time
@@ -45,3 +45,4 @@ if __name__ == '__main__':
         operation_type="linreg",
         sampler_type="aggregation"
     )
+    sample_operation(sys.argv[1])

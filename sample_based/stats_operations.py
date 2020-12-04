@@ -1,4 +1,6 @@
-from utils import read_raster
+import sys, os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from pipelines.p_utils import read_raster
 from tqdm import tqdm
 import rasterio.features
 import rasterio.mask
