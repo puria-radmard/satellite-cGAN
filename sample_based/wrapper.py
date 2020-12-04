@@ -29,14 +29,13 @@ class SampleOperationWrapper:
     def __call__(self, root):
 
         city_time_mapping = group_cities_by_time(root, self.operator.output_band)
-        self.results = pd.DataFrame(columns=self.operator.core_col_names + self.operator.stats_col_names)
-
+        self.operator.results = pd.DataFrame(columns=self.operator.core_col_names + self.operator.stats_col_names)
         print(f"Found {len(city_time_mapping)} cities in {root}")
 
         for city_name, city_variable_dict in city_time_mapping.items():
             self.mapping_operation(city_variable_dict)
 
-        return self.results
+        return self.operator.results
 
 
 if __name__ == '__main__':
@@ -45,4 +44,5 @@ if __name__ == '__main__':
         operation_type="linreg",
         sampler_type="aggregation"
     )
-    sample_operation(sys.argv[1])
+    results = sample_operation(sys.argv[1])
+    results.to_csv("aasdfasdf")

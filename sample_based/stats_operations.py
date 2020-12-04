@@ -58,17 +58,15 @@ class StatisticalAnalysisOperation:
 
         for path, sample_dict in path_dict.items():
 
-            for sample_name, sample in path_dict.items():
-                try:
+            for sample_name, sample in sample_dict.items():
+                
                     dep, ind = sample["dep"], sample["ind"]
                     result = self.stats_op(ind, dep)
                     row = self.construct_result_row(path, sample_name, result)
                     row.update(result)
                     self.results = self.results.append(pd.DataFrame(row), ignore_index=True)
-                except ValueError as e:
-                    print(e)
-
-
+                #except ValueError as e:
+                #    print(e)
 
 
 class RegressionOperation(StatisticalAnalysisOperation):
@@ -104,32 +102,33 @@ class RegressionOperation(StatisticalAnalysisOperation):
             out_dict[f"m_{inpb}_only"] = [reg.coef_[0][0]]
             out_dict[f"c_{inpb}_only"] = [reg.intercept_[0]]
 
-
         # Stack all input and output
-        regression_array = np.dstack([ind[inpb].copy() for inpb in self.input_bands] + [dep.copy()]).reshape(-1, 3)
+        regression_array = np.dstack(
+            [ind[inpb].copy() for inpb in self.input_bands] + [dep.copy()]
+        ).reshape(-1, len(self.input_bands)+1)
         # Remove any pixels which have nan on ANY of the images (input or output)
         regression_array = regression_array[~np.isnan(regression_array[:, 0])]
         regression_array = regression_array[~np.isnan(regression_array[:, 1])]
         regression_array = regression_array[~np.isnan(regression_array[:, 2])]
-        reg = self.RegressionClass().fit(regression_array[:, :-1].reshape(-1, 2),regression_array[:, -1].reshape(-1, 1))
+        reg = self.RegressionClass().fit(
+            regression_array[:, :-1].reshape(-1, len(self.input_bands)), regression_array[:, -1].reshape(-1, 1)
+        )
 
         for j, inpb in enumerate(self.input_bands):
-            out_dict[f"m_{inpb}_join"] = [reg.coef_[j][0]]
+            out_dict[f"m_{inpb}_join"] = [reg.coef_[0][j]]
         out_dict["c_join"] = [reg.intercept_[0]]
 
         return out_dict
 
 
-
 class LinearLSTRegression(RegressionOperation):
 
-    RegressionClass = LinearRegression()
+    RegressionClass = LinearRegression
 
 
 class LogisticUHIRegression(RegressionOperation):
 
-    RegressionClass = LogisticRegression()
-
+    RegressionClass = LogisticRegression
 
 
 class ScatterIndex(StatisticalAnalysisOperation):
