@@ -153,6 +153,7 @@ def train_cGAN(config):
         adversarial_loss_fn,
         optimizer_D,
         optimizer_G,
+        scheduler_G,
         train_dataset,
         test_dataset,
         train_num_steps,
@@ -169,6 +170,8 @@ def train_cGAN(config):
         cGAN.cuda()
 
     for epoch in range(config.num_epochs):
+
+        scheduler_G.step()
 
         epoch_root_dir = os.path.join(root_dir, f"epoch-{epoch}")
         os.mkdir(os.path.join(root_dir, f"epoch-{epoch}"))
@@ -251,6 +254,9 @@ def generate_config(args):
         # Some leftover params here from the loss_parameters but no worries
         config_dict = vars(args)
         config_dict.update({"train_size": train_size})
+        # Since lists are not allowed in sweeps (or manuals?)
+        config_dict["channels"] = TASK_CHANNELS[args.task]["channels"]
+        config_dict["classes"] = TASK_CHANNELS[args.task]["classes"]
 
     else:  # i.e. constant run, no sweep, with config file
 
@@ -274,8 +280,6 @@ def generate_config(args):
     config_dict["test_parameters"] = test_parameters
     config_dict["loss_parameters"] = loss_parameters
     config_dict["model_parameters"] = model_parameters
-    config_dict["channels"] = TASK_CHANNELS[args.task]["channels"]
-    config_dict["classes"] = TASK_CHANNELS[args.task]["classes"]
 
     if args.wandb:
         wandb.init(project="satellite-cGAN", config=config_dict)
@@ -301,6 +305,7 @@ def parse_args():
 
     task_config = parser.add_argument_group("Task configuration")
     task_config.add_argument("--task", type=str)  # reg, cls, mix
+    task_config.add_argument("--discretize", type=str) # none, lin, log
     task_config.add_argument("--arg_source", type=str, default=None)  # args yaml path, None for sweeps
     task_config.add_argument("--wandb", type=int, default=1)  # 1 to include wandb
 
@@ -330,6 +335,8 @@ def parse_args():
     universal_hyperparameters.add_argument("--batch_size", type=int, help="Batch size for training and testing")
     universal_hyperparameters.add_argument("--dis_dropout", type=float, help="Training dropout rate for discriminator")
     universal_hyperparameters.add_argument("--gen_dropout", type=float, help="Training dropout rate for generator")
+    universal_hyperparameters.add_argument("--scheduler_epoch", type=int, help="scheduler epochs")
+    universal_hyperparameters.add_argument("--scheduler_gamma", type=float, help="scheduler gamma")
     universal_hyperparameters.add_argument(
         "--comparison_loss_factor",
         type=float,

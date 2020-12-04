@@ -1,6 +1,7 @@
 #  Copyright (c) 2020. Puria and Hanchen, Email: {pr450, hw501}@cam.ac.uk
 import os, time, torch, torch.nn as nn, numpy as np
 from typing import List
+from tqdm import tqdm
 from torch.utils.data import Dataset
 from torch.utils.data._utils.collate import default_collate
 from pipelines.p_utils import read_raster, get_property_path, slice_middle
@@ -59,6 +60,8 @@ class BaseCNNDatabase(Dataset):
             classes: List[str],
             normalise_input,
             transform,
+            # discretize=discretize,
+            # data_range=data_range,
     ):
         """
         TODO: Ask about transformation viability
@@ -71,9 +74,15 @@ class BaseCNNDatabase(Dataset):
         self.channels = channels
         self.classes = classes
         self.normalise_input = normalise_input
+        # self.discretize=discretize
+        # self.data_range=data_range
 
     def __len__(self):
         return len(self.groups)
+
+    # def self.discretization_function(self, LST_map):
+    #     if self.discretize == 'none' or not self.discretize:
+    #         return LST_map
 
     def base_getitem(self, idx):
 
@@ -104,6 +113,7 @@ class BaseCNNDatabase(Dataset):
             # image = 2 * (image / np.nanmax(image)) - 1
             image = np.expand_dims(image, -1)
             image = slice_middle(image)
+            # image = self.discretization_function(image)
             label_images.append(image)
 
         sample = {"image": np.dstack(input_images), "label": np.dstack(label_images)}
@@ -117,6 +127,8 @@ class LandsatDataset(BaseCNNDatabase):
             groups,
             channels: List[str],
             classes: List[str],
+            # discretize,
+            # data_range,
             normalise_input=False,
             transform=None,
     ):
@@ -213,3 +225,16 @@ def construct_debug_model(layers, debug=False):
             modules.append(PrintLayer())
     model = nn.Sequential(*modules)
     return model
+
+
+def get_dataset_LST_range(dataset_route):
+    mi = float('inf'); ma = float('-inf')
+    for LST_path in tqdm(glob(os.path.join(dataset_route, "*.LST.tif"))):
+        LST_image = read_raster(LST_path)[0]
+        if np.nanmax(LST_image) > ma:
+            ma = np.nanmax(LST_image)
+        if np.nanmin(LST_image) < mi:
+            mi = np.nanmin(LST_image)
+    return mi, ma
+
+# get_dataset_LST_range("../data_source/SUMMER_LONDON_DATASET")

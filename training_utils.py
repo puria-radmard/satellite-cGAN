@@ -77,6 +77,8 @@ def landsat_train_test_dataset(
     random_state,
     purge_data,
     normalise_indices,
+    # discretization_thresholds,
+    # data_range
 ):
 
     if train_size == None:
@@ -103,12 +105,14 @@ def landsat_train_test_dataset(
         channels=channels,
         classes=classes,
         normalise_input=normalise_indices,
+        # discretization_thresholds=discretization_thresholds,
     )
     test_dataset = LandsatDataset(
         groups=test_groups,
         channels=channels,
         classes=classes,
         normalise_input=normalise_indices,
+        # discretization_thresholds=discretization_thresholds,
     )
 
     return train_dataset, test_dataset
@@ -148,6 +152,7 @@ def prepare_training(config):
         wandb.watch(cGAN)
 
     optimizer_G = torch.optim.Adam(cGAN.generator.parameters(), lr=config.lr)
+    scheduler_G = optim.lr_scheduler.StepLR(optimizer_G, step_size=config.scheduler_epoch, gamma=config.scheduler_gamma)
     if config.no_discriminator:
         optimizer_D = None
     else:
@@ -162,6 +167,7 @@ def prepare_training(config):
         random_state=config.random_state,
         purge_data=config.purge_data,
         normalise_indices=config.normalise_indices,
+        # discretization_thresholds=config.discretization_thresholds,
     )
 
     root_dir = make_root_dir(config)
@@ -188,6 +194,7 @@ def prepare_training(config):
         adversarial_loss_fn,
         optimizer_D,
         optimizer_G,
+        scheduler_G,
         train_dataset,
         test_dataset,
         train_num_steps,

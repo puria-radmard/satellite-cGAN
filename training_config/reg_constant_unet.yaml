@@ -38,7 +38,7 @@ dis_dropout:
     0.4772206496773703
 
 gen_dropout:
-    0.2966
+    0 # 0.2966
 
 save_rate:
     20
@@ -66,3 +66,9 @@ purge_data:
 
 normalise_indices:
     False
+
+scheduler_epoch:
+    8
+
+scheduler_gamma:
+    0.1

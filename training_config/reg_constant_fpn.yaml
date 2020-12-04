@@ -69,3 +69,9 @@ normalise_indices:
 
 size_average:
     True
+
+scheduler_epoch:
+    8
+
+scheduler_gamma:
+    0.1
