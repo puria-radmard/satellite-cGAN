@@ -305,7 +305,7 @@ def parse_args():
 
     task_config = parser.add_argument_group("Task configuration")
     task_config.add_argument("--task", type=str)  # reg, cls, mix
-    task_config.add_argument("--discretize", type=str) # none, lin, log
+    # task_config.add_argument("--discretize", type=str) # none, lin, log
     task_config.add_argument("--arg_source", type=str, default=None)  # args yaml path, None for sweeps
     task_config.add_argument("--wandb", type=int, default=1)  # 1 to include wandb
 
