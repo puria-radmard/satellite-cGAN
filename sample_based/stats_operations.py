@@ -12,9 +12,6 @@ import numpy as np
 class StatisticalAnalysisOperation:
     def __init__(self):
         self.core_col_names = ["city", "hash", "datetime", "sample_name"]
-        self.stats_col_names = None
-        self.output_band = None
-        self.input_bands = None
 
     @staticmethod
     def replace_band_name(path, target_band):

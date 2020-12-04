@@ -22,7 +22,7 @@ class SampleOperationWrapper:
         # print(time_mapping)
         for time, path_list in tqdm(time_mapping.items()):
             try:
-                self.operator.operation(path_list)
+                self.operator.operation(path_list, self.sampler)
             except rasterio.RasterioIOError as e:
                 print(e)
 
