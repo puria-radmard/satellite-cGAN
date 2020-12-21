@@ -47,6 +47,19 @@ class NDBIOperation(Operation):
         )
 
 
+class UIOperation(Operation):
+    band_name = "UI"
+    bands_required = ["B7", "B5"]
+
+    def operation(self, rasters):
+        return (
+            [
+                (rasters["B7"][0].astype(float) - rasters["B5"][0].astype(float))
+                / (rasters["B7"][0].astype(float) + rasters["B5"][0].astype(float))
+            ],
+            None,
+        )
+
 class NDWIOperation(Operation):
     band_name = "NDWI"
     bands_required = ["B3", "B5"]
